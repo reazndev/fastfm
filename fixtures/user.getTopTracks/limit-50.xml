@@ -1,0 +1,855 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lfm status="ok">
+  <toptracks user="Syntiiix" page="1" perPage="50" totalPages="310" total="15477">
+    <track rank="1">
+      <name>Doom</name>
+      <duration>0</duration>
+      <playcount>7462</playcount>
+      <mbid>296db8ce-490b-49d5-83e5-228462287253</mbid>
+      <url>https://www.last.fm/music/Juice+WRLD/_/Doom</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Juice WRLD</name>
+        <mbid>4e4ebde4-0c56-4dec-844b-6c73adcdd92d</mbid>
+        <url>https://www.last.fm/music/Juice+WRLD</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="2">
+      <name>The Bridge</name>
+      <duration>181</duration>
+      <playcount>3555</playcount>
+      <mbid>fb1b0469-06ac-4596-86d0-0b0f1f7f232b</mbid>
+      <url>https://www.last.fm/music/d4vd/_/The+Bridge</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>d4vd</name>
+        <mbid>d8e07579-ff5a-41f2-b7a7-c71880b8287a</mbid>
+        <url>https://www.last.fm/music/d4vd</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="3">
+      <name>Worthless</name>
+      <duration>164</duration>
+      <playcount>3119</playcount>
+      <mbid>4e9b4f29-14f9-45ef-8f30-295993166013</mbid>
+      <url>https://www.last.fm/music/d4vd/_/Worthless</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>d4vd</name>
+        <mbid>d8e07579-ff5a-41f2-b7a7-c71880b8287a</mbid>
+        <url>https://www.last.fm/music/d4vd</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="4">
+      <name>Don&apos;t Forget About Me</name>
+      <duration>149</duration>
+      <playcount>2492</playcount>
+      <mbid>cf7a2eb6-d5a1-4e1c-a794-11585afd0603</mbid>
+      <url>https://www.last.fm/music/d4vd/_/Don%27t+Forget+About+Me</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>d4vd</name>
+        <mbid>d8e07579-ff5a-41f2-b7a7-c71880b8287a</mbid>
+        <url>https://www.last.fm/music/d4vd</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="5">
+      <name>DTN</name>
+      <duration>119</duration>
+      <playcount>2021</playcount>
+      <mbid></mbid>
+      <url>https://www.last.fm/music/d4vd/_/DTN</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>d4vd</name>
+        <mbid>d8e07579-ff5a-41f2-b7a7-c71880b8287a</mbid>
+        <url>https://www.last.fm/music/d4vd</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="6">
+      <name>Leave Her</name>
+      <duration>164</duration>
+      <playcount>1922</playcount>
+      <mbid>b4664f3b-e4fb-4948-bbc2-1b0f97d7dd7e</mbid>
+      <url>https://www.last.fm/music/d4vd/_/Leave+Her</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>d4vd</name>
+        <mbid>d8e07579-ff5a-41f2-b7a7-c71880b8287a</mbid>
+        <url>https://www.last.fm/music/d4vd</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="7">
+      <name>Californication</name>
+      <duration>154</duration>
+      <playcount>1434</playcount>
+      <mbid>5763379f-11cb-4a75-8e58-95eab8e68871</mbid>
+      <url>https://www.last.fm/music/Juice+WRLD/_/Californication</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Juice WRLD</name>
+        <mbid>4e4ebde4-0c56-4dec-844b-6c73adcdd92d</mbid>
+        <url>https://www.last.fm/music/Juice+WRLD</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="8">
+      <name>Already Dead</name>
+      <duration>231</duration>
+      <playcount>1198</playcount>
+      <mbid>10ac9068-0433-49fa-b171-d233c368e021</mbid>
+      <url>https://www.last.fm/music/Juice+WRLD/_/Already+Dead</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Juice WRLD</name>
+        <mbid>4e4ebde4-0c56-4dec-844b-6c73adcdd92d</mbid>
+        <url>https://www.last.fm/music/Juice+WRLD</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="9">
+      <name>Biscotti In The Air</name>
+      <duration>0</duration>
+      <playcount>1128</playcount>
+      <mbid>2e55fe4e-4043-4b2b-ab30-4fb891870548</mbid>
+      <url>https://www.last.fm/music/Juice+WRLD/_/Biscotti+In+The+Air</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Juice WRLD</name>
+        <mbid>4e4ebde4-0c56-4dec-844b-6c73adcdd92d</mbid>
+        <url>https://www.last.fm/music/Juice+WRLD</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="10">
+      <name>Invisible String Theory (Interlude)</name>
+      <duration>99</duration>
+      <playcount>1010</playcount>
+      <mbid>8c11260a-fc98-4916-bf7e-d194bca6dc7a</mbid>
+      <url>https://www.last.fm/music/d4vd/_/Invisible+String+Theory+(Interlude)</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>d4vd</name>
+        <mbid>d8e07579-ff5a-41f2-b7a7-c71880b8287a</mbid>
+        <url>https://www.last.fm/music/d4vd</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="11">
+      <name>lace it (with eminem &amp; benny blanco)</name>
+      <duration>217</duration>
+      <playcount>995</playcount>
+      <mbid>8f1fd6cb-1eb1-4911-be96-c004cd0b0c24</mbid>
+      <url>https://www.last.fm/music/Juice+WRLD/_/lace+it+(with+eminem+&amp;+benny+blanco)</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Juice WRLD</name>
+        <mbid>4e4ebde4-0c56-4dec-844b-6c73adcdd92d</mbid>
+        <url>https://www.last.fm/music/Juice+WRLD</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="12">
+      <name>Dirty Secrets</name>
+      <duration>0</duration>
+      <playcount>779</playcount>
+      <mbid></mbid>
+      <url>https://www.last.fm/music/d4vd/_/Dirty+Secrets</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>d4vd</name>
+        <mbid>d8e07579-ff5a-41f2-b7a7-c71880b8287a</mbid>
+        <url>https://www.last.fm/music/d4vd</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="13">
+      <name>How Does It Feel</name>
+      <duration>129</duration>
+      <playcount>720</playcount>
+      <mbid></mbid>
+      <url>https://www.last.fm/music/zzz./_/How+Does+It+Feel</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>zzz.</name>
+        <mbid>9febd6f9-2c9e-4e37-86ef-d8fbe7715bea</mbid>
+        <url>https://www.last.fm/music/zzz.</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="14">
+      <name>All I Never Wanted</name>
+      <duration>125</duration>
+      <playcount>583</playcount>
+      <mbid></mbid>
+      <url>https://www.last.fm/music/zzz./_/All+I+Never+Wanted</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>zzz.</name>
+        <mbid>9febd6f9-2c9e-4e37-86ef-d8fbe7715bea</mbid>
+        <url>https://www.last.fm/music/zzz.</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="15">
+      <name>TOMORROW</name>
+      <duration>182</duration>
+      <playcount>562</playcount>
+      <mbid>e7ccc7a2-574a-4778-b446-127c10386ac7</mbid>
+      <url>https://www.last.fm/music/Tyler,+The+Creator/_/TOMORROW</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Tyler, The Creator</name>
+        <mbid>f6beac20-5dfe-4d1f-ae02-0b0a740aafd6</mbid>
+        <url>https://www.last.fm/music/Tyler,+The+Creator</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="16">
+      <name>Righteous</name>
+      <duration>242</duration>
+      <playcount>522</playcount>
+      <mbid>0a198d19-63ad-4114-93a4-f7a06317d710</mbid>
+      <url>https://www.last.fm/music/Juice+WRLD/_/Righteous</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Juice WRLD</name>
+        <mbid>4e4ebde4-0c56-4dec-844b-6c73adcdd92d</mbid>
+        <url>https://www.last.fm/music/Juice+WRLD</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="17">
+      <name>Feel It - From The Original Series “Invincible”</name>
+      <duration>157</duration>
+      <playcount>517</playcount>
+      <mbid></mbid>
+      <url>https://www.last.fm/music/d4vd/_/Feel+It+-+From+The+Original+Series+%E2%80%9CInvincible%E2%80%9D</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>d4vd</name>
+        <mbid>d8e07579-ff5a-41f2-b7a7-c71880b8287a</mbid>
+        <url>https://www.last.fm/music/d4vd</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="18">
+      <name>Sky</name>
+      <duration>212</duration>
+      <playcount>451</playcount>
+      <mbid>461f9bb3-1493-4264-86b2-3f4c8464ba2c</mbid>
+      <url>https://www.last.fm/music/d4vd/_/Sky</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>d4vd</name>
+        <mbid>d8e07579-ff5a-41f2-b7a7-c71880b8287a</mbid>
+        <url>https://www.last.fm/music/d4vd</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="19">
+      <name>What Are You Waiting For</name>
+      <duration>146</duration>
+      <playcount>446</playcount>
+      <mbid>706cc466-f5c8-4a8a-92a0-379ac189beda</mbid>
+      <url>https://www.last.fm/music/d4vd/_/What+Are+You+Waiting+For</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>d4vd</name>
+        <mbid>d8e07579-ff5a-41f2-b7a7-c71880b8287a</mbid>
+        <url>https://www.last.fm/music/d4vd</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="20">
+      <name>Cigarettes</name>
+      <duration>227</duration>
+      <playcount>417</playcount>
+      <mbid>09d266d9-fab5-4e6e-9860-e111a6a898d0</mbid>
+      <url>https://www.last.fm/music/Juice+WRLD/_/Cigarettes</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Juice WRLD</name>
+        <mbid>4e4ebde4-0c56-4dec-844b-6c73adcdd92d</mbid>
+        <url>https://www.last.fm/music/Juice+WRLD</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="21">
+      <name>Bye Bye</name>
+      <duration>109</duration>
+      <playcount>416</playcount>
+      <mbid></mbid>
+      <url>https://www.last.fm/music/Marshmello/_/Bye+Bye</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Marshmello</name>
+        <mbid>301b45a4-b8b9-410e-8344-4b4eaf96691a</mbid>
+        <url>https://www.last.fm/music/Marshmello</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="22">
+      <name>All Girls Are the Same</name>
+      <duration>165</duration>
+      <playcount>404</playcount>
+      <mbid>2e89e8fe-0b9b-4381-afcf-a156d4ccf0fc</mbid>
+      <url>https://www.last.fm/music/Juice+WRLD/_/All+Girls+Are+the+Same</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Juice WRLD</name>
+        <mbid>4e4ebde4-0c56-4dec-844b-6c73adcdd92d</mbid>
+        <url>https://www.last.fm/music/Juice+WRLD</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="23">
+      <name>Hide (feat. Seezyn)</name>
+      <duration>205</duration>
+      <playcount>398</playcount>
+      <mbid></mbid>
+      <url>https://www.last.fm/music/Juice+WRLD/_/Hide+(feat.+Seezyn)</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Juice WRLD</name>
+        <mbid>4e4ebde4-0c56-4dec-844b-6c73adcdd92d</mbid>
+        <url>https://www.last.fm/music/Juice+WRLD</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="24">
+      <name>We Made it</name>
+      <duration>211</duration>
+      <playcount>397</playcount>
+      <mbid></mbid>
+      <url>https://www.last.fm/music/T-Low/_/We+Made+it</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>T-Low</name>
+        <mbid>2a84c169-7bcf-406c-b7bc-a079d648812f</mbid>
+        <url>https://www.last.fm/music/T-Low</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="25">
+      <name>2016</name>
+      <duration>138</duration>
+      <playcount>376</playcount>
+      <mbid>97ae1b7a-0fbe-4062-b67b-0211cdce1e6b</mbid>
+      <url>https://www.last.fm/music/d4vd/_/2016</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>d4vd</name>
+        <mbid>d8e07579-ff5a-41f2-b7a7-c71880b8287a</mbid>
+        <url>https://www.last.fm/music/d4vd</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="26">
+      <name>Burn</name>
+      <duration>217</duration>
+      <playcount>369</playcount>
+      <mbid>1fcc53e9-1ea4-4ab1-af50-1a227cd44f81</mbid>
+      <url>https://www.last.fm/music/Juice+WRLD/_/Burn</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Juice WRLD</name>
+        <mbid>4e4ebde4-0c56-4dec-844b-6c73adcdd92d</mbid>
+        <url>https://www.last.fm/music/Juice+WRLD</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="27">
+      <name>Vanish</name>
+      <duration>130</duration>
+      <playcount>357</playcount>
+      <mbid>ab7525b7-3c39-4898-b460-dbb27ace9033</mbid>
+      <url>https://www.last.fm/music/Dro+Kenji/_/Vanish</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Dro Kenji</name>
+        <mbid></mbid>
+        <url>https://www.last.fm/music/Dro+Kenji</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="28">
+      <name>Up Up and Away</name>
+      <duration>147</duration>
+      <playcount>352</playcount>
+      <mbid>001898a9-ec64-458c-8b95-02c3419db9e2</mbid>
+      <url>https://www.last.fm/music/Juice+WRLD/_/Up+Up+and+Away</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Juice WRLD</name>
+        <mbid>4e4ebde4-0c56-4dec-844b-6c73adcdd92d</mbid>
+        <url>https://www.last.fm/music/Juice+WRLD</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="29">
+      <name>PTSD</name>
+      <duration>232</duration>
+      <playcount>348</playcount>
+      <mbid></mbid>
+      <url>https://www.last.fm/music/G+Herbo/_/PTSD</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>G Herbo</name>
+        <mbid>1b1f50d1-4746-468b-a6a2-7db7200d3dfc</mbid>
+        <url>https://www.last.fm/music/G+Herbo</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="30">
+      <name>&apos;70s</name>
+      <duration>0</duration>
+      <playcount>348</playcount>
+      <mbid></mbid>
+      <url>https://www.last.fm/music/Juice+WRLD/_/%2770s</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Juice WRLD</name>
+        <mbid></mbid>
+        <url>https://www.last.fm/music/Juice+WRLD</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="31">
+      <name>Stay High</name>
+      <duration>168</duration>
+      <playcount>342</playcount>
+      <mbid>1b7d778b-7e48-4758-9845-745e495c71bf</mbid>
+      <url>https://www.last.fm/music/Juice+WRLD/_/Stay+High</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Juice WRLD</name>
+        <mbid>4e4ebde4-0c56-4dec-844b-6c73adcdd92d</mbid>
+        <url>https://www.last.fm/music/Juice+WRLD</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="32">
+      <name>Wandered to LA (with Justin Bieber)</name>
+      <duration>189</duration>
+      <playcount>327</playcount>
+      <mbid></mbid>
+      <url>https://www.last.fm/music/Juice+WRLD/_/Wandered+to+LA+(with+Justin+Bieber)</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Juice WRLD</name>
+        <mbid>4e4ebde4-0c56-4dec-844b-6c73adcdd92d</mbid>
+        <url>https://www.last.fm/music/Juice+WRLD</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="33">
+      <name>Huh</name>
+      <duration>107</duration>
+      <playcount>325</playcount>
+      <mbid>4c529dbd-fd44-460a-bce1-617c507bdcfb</mbid>
+      <url>https://www.last.fm/music/glaive/_/Huh</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>glaive</name>
+        <mbid>fd36f43e-5bd1-488e-b844-0e059250ef78</mbid>
+        <url>https://www.last.fm/music/glaive</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="34">
+      <name>Wasted (feat. Lil Uzi Vert)</name>
+      <duration>258</duration>
+      <playcount>319</playcount>
+      <mbid></mbid>
+      <url>https://www.last.fm/music/Juice+WRLD/_/Wasted+(feat.+Lil+Uzi+Vert)</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Juice WRLD</name>
+        <mbid>4e4ebde4-0c56-4dec-844b-6c73adcdd92d</mbid>
+        <url>https://www.last.fm/music/Juice+WRLD</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="35">
+      <name>Lean Wit Me</name>
+      <duration>175</duration>
+      <playcount>315</playcount>
+      <mbid>28c52a3a-02b7-4ce7-993c-18df8848d803</mbid>
+      <url>https://www.last.fm/music/Juice+WRLD/_/Lean+Wit+Me</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Juice WRLD</name>
+        <mbid>4e4ebde4-0c56-4dec-844b-6c73adcdd92d</mbid>
+        <url>https://www.last.fm/music/Juice+WRLD</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="36">
+      <name>One More Dance</name>
+      <duration>188</duration>
+      <playcount>307</playcount>
+      <mbid>99302879-c387-4b10-93cc-a9e6c289df94</mbid>
+      <url>https://www.last.fm/music/d4vd/_/One+More+Dance</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>d4vd</name>
+        <mbid>d8e07579-ff5a-41f2-b7a7-c71880b8287a</mbid>
+        <url>https://www.last.fm/music/d4vd</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="37">
+      <name>Armed and Dangerous</name>
+      <duration>169</duration>
+      <playcount>304</playcount>
+      <mbid>3f40f625-6908-43e3-b7ff-87300a92f666</mbid>
+      <url>https://www.last.fm/music/Juice+WRLD/_/Armed+and+Dangerous</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Juice WRLD</name>
+        <mbid>4e4ebde4-0c56-4dec-844b-6c73adcdd92d</mbid>
+        <url>https://www.last.fm/music/Juice+WRLD</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="38">
+      <name>Black &amp; White</name>
+      <duration>186</duration>
+      <playcount>302</playcount>
+      <mbid>44728e4a-621f-48fb-9ef5-81746f051d96</mbid>
+      <url>https://www.last.fm/music/Juice+WRLD/_/Black+&amp;+White</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Juice WRLD</name>
+        <mbid>4e4ebde4-0c56-4dec-844b-6c73adcdd92d</mbid>
+        <url>https://www.last.fm/music/Juice+WRLD</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="39">
+      <name>You and I</name>
+      <duration>152</duration>
+      <playcount>297</playcount>
+      <mbid>b5c7540d-41fe-4d90-9a48-7400ff491950</mbid>
+      <url>https://www.last.fm/music/d4vd/_/You+and+I</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>d4vd</name>
+        <mbid>d8e07579-ff5a-41f2-b7a7-c71880b8287a</mbid>
+        <url>https://www.last.fm/music/d4vd</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="40">
+      <name>Fast</name>
+      <duration>208</duration>
+      <playcount>293</playcount>
+      <mbid>13c2bcd0-04e4-4eef-805e-472e6ac8b5f0</mbid>
+      <url>https://www.last.fm/music/Juice+WRLD/_/Fast</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Juice WRLD</name>
+        <mbid>4e4ebde4-0c56-4dec-844b-6c73adcdd92d</mbid>
+        <url>https://www.last.fm/music/Juice+WRLD</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="41">
+      <name>Blastoff</name>
+      <duration>174</duration>
+      <playcount>287</playcount>
+      <mbid></mbid>
+      <url>https://www.last.fm/music/Internet+Money/_/Blastoff</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Internet Money</name>
+        <mbid>72f8d4f4-a167-4b66-8b65-46fe0a07f63b</mbid>
+        <url>https://www.last.fm/music/Internet+Money</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="42">
+      <name>Wishing Well</name>
+      <duration>194</duration>
+      <playcount>284</playcount>
+      <mbid>04a9e66b-44f3-4cc7-8339-dff8f764caa6</mbid>
+      <url>https://www.last.fm/music/Juice+WRLD/_/Wishing+Well</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Juice WRLD</name>
+        <mbid>4e4ebde4-0c56-4dec-844b-6c73adcdd92d</mbid>
+        <url>https://www.last.fm/music/Juice+WRLD</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="43">
+      <name>Lucid Dreams</name>
+      <duration>239</duration>
+      <playcount>282</playcount>
+      <mbid>19c232bc-1960-4df2-bbc9-7742b7180a7f</mbid>
+      <url>https://www.last.fm/music/Juice+WRLD/_/Lucid+Dreams</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Juice WRLD</name>
+        <mbid>4e4ebde4-0c56-4dec-844b-6c73adcdd92d</mbid>
+        <url>https://www.last.fm/music/Juice+WRLD</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="44">
+      <name>Man of the Year</name>
+      <duration>136</duration>
+      <playcount>277</playcount>
+      <mbid>10d63f84-cf83-4d3e-a0c8-71072ddf2b8f</mbid>
+      <url>https://www.last.fm/music/Juice+WRLD/_/Man+of+the+Year</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Juice WRLD</name>
+        <mbid>4e4ebde4-0c56-4dec-844b-6c73adcdd92d</mbid>
+        <url>https://www.last.fm/music/Juice+WRLD</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="45">
+      <name>Here With Me</name>
+      <duration>242</duration>
+      <playcount>276</playcount>
+      <mbid>0682117f-b0ce-426f-b77a-1e3ccde129b1</mbid>
+      <url>https://www.last.fm/music/d4vd/_/Here+With+Me</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>d4vd</name>
+        <mbid>d8e07579-ff5a-41f2-b7a7-c71880b8287a</mbid>
+        <url>https://www.last.fm/music/d4vd</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="46">
+      <name>Romantic Homicide</name>
+      <duration>127</duration>
+      <playcount>264</playcount>
+      <mbid>18247ec2-f952-42ac-b7af-bb6b10c7000d</mbid>
+      <url>https://www.last.fm/music/d4vd/_/Romantic+Homicide</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>d4vd</name>
+        <mbid>d8e07579-ff5a-41f2-b7a7-c71880b8287a</mbid>
+        <url>https://www.last.fm/music/d4vd</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="47">
+      <name>Irgendwie, Irgendwo, Irgendwann</name>
+      <duration>250</duration>
+      <playcount>258</playcount>
+      <mbid></mbid>
+      <url>https://www.last.fm/music/Nena/_/Irgendwie,+Irgendwo,+Irgendwann</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Nena</name>
+        <mbid>38bfaa7f-ee98-48cb-acd0-946d7aeecd76</mbid>
+        <url>https://www.last.fm/music/Nena</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="48">
+      <name>Hurt Me</name>
+      <duration>126</duration>
+      <playcount>257</playcount>
+      <mbid>078ce385-fcea-4b21-9f5b-5e417b68c0ac</mbid>
+      <url>https://www.last.fm/music/Juice+WRLD/_/Hurt+Me</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Juice WRLD</name>
+        <mbid>4e4ebde4-0c56-4dec-844b-6c73adcdd92d</mbid>
+        <url>https://www.last.fm/music/Juice+WRLD</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="49">
+      <name>Feline (with Polo G &amp; Trippie Redd)</name>
+      <duration>0</duration>
+      <playcount>253</playcount>
+      <mbid></mbid>
+      <url>https://www.last.fm/music/Juice+WRLD/_/Feline+(with+Polo+G+&amp;+Trippie+Redd)</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Juice WRLD</name>
+        <mbid></mbid>
+        <url>https://www.last.fm/music/Juice+WRLD</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+    <track rank="50">
+      <name>Empty</name>
+      <duration>248</duration>
+      <playcount>248</playcount>
+      <mbid>24ac7fa4-8033-4291-ae75-1408086c9bb0</mbid>
+      <url>https://www.last.fm/music/Juice+WRLD/_/Empty</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>Juice WRLD</name>
+        <mbid>4e4ebde4-0c56-4dec-844b-6c73adcdd92d</mbid>
+        <url>https://www.last.fm/music/Juice+WRLD</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+  </toptracks>
+</lfm>

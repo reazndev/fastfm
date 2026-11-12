@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lfm status="ok">
+  <lovedtracks user="Syntiiix" page="1" perPage="1" totalPages="34" total="34">
+    <track>
+      <name>Love is suicidal ft. d4vd &amp; SSJ Twiin</name>
+      <mbid></mbid>
+      <url>https://www.last.fm/music/iluvmsj/_/Love+is+suicidal+ft.+d4vd+&amp;+SSJ+Twiin</url>
+      <date uts="1751828106">06 Jul 2025, 18:55</date>
+      <artist>
+        <name>iluvmsj</name>
+        <mbid></mbid>
+        <url>https://www.last.fm/music/iluvmsj</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <streamable fulltrack="0">0</streamable>
+    </track>
+  </lovedtracks>
+</lfm>

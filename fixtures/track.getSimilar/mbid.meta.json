@@ -1,0 +1,70 @@
+{
+  "method": "track.getSimilar",
+  "variant": "mbid",
+  "http_method": "GET",
+  "recorded_at": 1794518948,
+  "responses": {
+    "json": {
+      "params": [
+        [
+          "method",
+          "track.getSimilar"
+        ],
+        [
+          "mbid",
+          "296db8ce-490b-49d5-83e5-228462287253"
+        ],
+        [
+          "api_key",
+          "REDACTED"
+        ],
+        [
+          "format",
+          "json"
+        ]
+      ],
+      "status": 200,
+      "content_type": "application/json",
+      "headers": {
+        "server": "openresty",
+        "date": "Thu, 12 Nov 2026 21:28:47 GMT",
+        "content-type": "application/json",
+        "content-length": "77",
+        "access-control-allow-methods": "POST, GET, OPTIONS",
+        "access-control-allow-origin": "*",
+        "access-control-max-age": "86400",
+        "via": "1.1 google",
+        "alt-svc": "h3=\":443\"; ma=2592000"
+      }
+    },
+    "xml": {
+      "params": [
+        [
+          "method",
+          "track.getSimilar"
+        ],
+        [
+          "mbid",
+          "296db8ce-490b-49d5-83e5-228462287253"
+        ],
+        [
+          "api_key",
+          "REDACTED"
+        ]
+      ],
+      "status": 200,
+      "content_type": "text/xml; charset=UTF-8",
+      "headers": {
+        "server": "openresty",
+        "date": "Thu, 12 Nov 2026 21:28:47 GMT",
+        "content-type": "text/xml; charset=UTF-8",
+        "content-length": "129",
+        "access-control-allow-methods": "POST, GET, OPTIONS",
+        "access-control-allow-origin": "*",
+        "access-control-max-age": "86400",
+        "via": "1.1 google",
+        "alt-svc": "h3=\":443\"; ma=2592000"
+      }
+    }
+  }
+}

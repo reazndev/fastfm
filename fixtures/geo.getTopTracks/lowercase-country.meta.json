@@ -1,0 +1,70 @@
+{
+  "method": "geo.getTopTracks",
+  "variant": "lowercase-country",
+  "http_method": "GET",
+  "recorded_at": 1794518981,
+  "responses": {
+    "json": {
+      "params": [
+        [
+          "method",
+          "geo.getTopTracks"
+        ],
+        [
+          "country",
+          "germany"
+        ],
+        [
+          "api_key",
+          "REDACTED"
+        ],
+        [
+          "format",
+          "json"
+        ]
+      ],
+      "status": 200,
+      "content_type": "application/json",
+      "headers": {
+        "server": "openresty",
+        "date": "Thu, 12 Nov 2026 21:29:20 GMT",
+        "content-type": "application/json",
+        "content-length": "40856",
+        "access-control-allow-methods": "POST, GET, OPTIONS",
+        "access-control-allow-origin": "*",
+        "access-control-max-age": "86400",
+        "via": "1.1 google",
+        "alt-svc": "h3=\":443\"; ma=2592000"
+      }
+    },
+    "xml": {
+      "params": [
+        [
+          "method",
+          "geo.getTopTracks"
+        ],
+        [
+          "country",
+          "germany"
+        ],
+        [
+          "api_key",
+          "REDACTED"
+        ]
+      ],
+      "status": 200,
+      "content_type": "text/xml; charset=UTF-8",
+      "headers": {
+        "server": "openresty",
+        "date": "Thu, 12 Nov 2026 21:29:20 GMT",
+        "content-type": "text/xml; charset=UTF-8",
+        "content-length": "42908",
+        "access-control-allow-methods": "POST, GET, OPTIONS",
+        "access-control-allow-origin": "*",
+        "access-control-max-age": "86400",
+        "via": "1.1 google",
+        "alt-svc": "h3=\":443\"; ma=2592000"
+      }
+    }
+  }
+}

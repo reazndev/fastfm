@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lfm status="ok">
+  <toptracks user="Syntiiix" page="1" perPage="1" totalPages="344" total="344">
+    <track rank="1">
+      <name>Bigmouth Strikes Again - 2011 Remaster</name>
+      <duration>193</duration>
+      <playcount>5</playcount>
+      <mbid>247879b3-a347-483b-8bd0-b0d46cea0152</mbid>
+      <url>https://www.last.fm/music/The+Smiths/_/Bigmouth+Strikes+Again+-+2011+Remaster</url>
+      <streamable fulltrack="0">0</streamable>
+      <artist>
+        <name>The Smiths</name>
+        <mbid>40f5d9e4-2de7-4f2d-ad41-e31a9a9fea27</mbid>
+        <url>https://www.last.fm/music/The+Smiths</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+    </track>
+  </toptracks>
+</lfm>

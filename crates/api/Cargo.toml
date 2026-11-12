@@ -1,0 +1,23 @@
+[package]
+name = "lfm-api"
+version = "0.1.0"
+description = "Method registry, dispatcher, auth and response cache for the Last.fm mirror"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+async-trait = "0.1.92"
+bytes = "1.12.1"
+form_urlencoded = "1.2.2"
+lfm-core = { path = "../core", version = "0.1.0" }
+moka = { version = "0.12.16", features = ["sync"] }
+thiserror = "2.0.17"
+tracing = "0.1.44"
+
+[dev-dependencies]
+tokio = { version = "1.54.1", features = ["macros", "rt"] }
+
+[lints]
+workspace = true

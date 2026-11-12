@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lfm status="ok">
+  <album>
+    <name>Petals to Thorns</name>
+    <artist>d4vd</artist>
+    <mbid>9012eb5b-8fb7-461a-834b-33ebe2901e6a</mbid>
+    <url>https://www.last.fm/music/d4vd/Petals+to+Thorns</url>
+    <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/5e7ec351c2147b9b4f06e106acc58ef3.jpg</image>
+    <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/5e7ec351c2147b9b4f06e106acc58ef3.jpg</image>
+    <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/5e7ec351c2147b9b4f06e106acc58ef3.jpg</image>
+    <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/5e7ec351c2147b9b4f06e106acc58ef3.jpg</image>
+    <image size="mega">https://lastfm-img.freetls.fastly.net/i/u/300x300/5e7ec351c2147b9b4f06e106acc58ef3.jpg</image>
+    <image size="">https://lastfm-img.freetls.fastly.net/i/u/300x300/5e7ec351c2147b9b4f06e106acc58ef3.jpg</image>
+    <listeners>1336110</listeners>
+    <playcount>26276750</playcount>
+    <tracks>
+      <track rank="1">
+        <name>Sleep Well</name>
+        <url>https://www.last.fm/music/d4vd/Petals+to+Thorns/Sleep+Well</url>
+        <duration>175</duration>
+        <streamable fulltrack="0">0</streamable>
+        <artist>
+          <name>d4vd</name>
+          <mbid>d8e07579-ff5a-41f2-b7a7-c71880b8287a</mbid>
+          <url>https://www.last.fm/music/d4vd</url>
+        </artist>
+      </track>
+      <track rank="2">
+        <name>Here With Me</name>
+        <url>https://www.last.fm/music/d4vd/Petals+to+Thorns/Here+With+Me</url>
+        <duration>242</duration>
+        <streamable fulltrack="0">0</streamable>
+        <artist>
+          <name>d4vd</name>
+          <mbid>d8e07579-ff5a-41f2-b7a7-c71880b8287a</mbid>
+          <url>https://www.last.fm/music/d4vd</url>
+        </artist>
+      </track>
+      <track rank="3">
+        <name>This Is How It Feels (with Laufey)</name>
+        <url>https://www.last.fm/music/d4vd/Petals+to+Thorns/This+Is+How+It+Feels+(with+Laufey)</url>
+        <duration>284</duration>
+        <streamable fulltrack="0">0</streamable>
+        <artist>
+          <name>d4vd</name>
+          <mbid>d8e07579-ff5a-41f2-b7a7-c71880b8287a</mbid>
+          <url>https://www.last.fm/music/d4vd</url>
+        </artist>
+      </track>
+      <track rank="4">
+        <name>Don&apos;t Forget About Me</name>
+        <url>https://www.last.fm/music/d4vd/Petals+to+Thorns/Don%27t+Forget+About+Me</url>
+        <duration>149</duration>
+        <streamable fulltrack="0">0</streamable>
+        <artist>
+          <name>d4vd</name>
+          <mbid>d8e07579-ff5a-41f2-b7a7-c71880b8287a</mbid>
+          <url>https://www.last.fm/music/d4vd</url>
+        </artist>
+      </track>
+      <track rank="5">
+        <name>Worthless</name>
+        <url>https://www.last.fm/music/d4vd/Petals+to+Thorns/Worthless</url>
+        <duration>164</duration>
+        <streamable fulltrack="0">0</streamable>
+        <artist>
+          <name>d4vd</name>
+          <mbid>d8e07579-ff5a-41f2-b7a7-c71880b8287a</mbid>
+          <url>https://www.last.fm/music/d4vd</url>
+        </artist>
+      </track>
+      <track rank="6">
+        <name>Backstreet Girl</name>
+        <url>https://www.last.fm/music/d4vd/Petals+to+Thorns/Backstreet+Girl</url>
+        <duration>250</duration>
+        <streamable fulltrack="0">0</streamable>
+        <artist>
+          <name>d4vd</name>
+          <mbid>d8e07579-ff5a-41f2-b7a7-c71880b8287a</mbid>
+          <url>https://www.last.fm/music/d4vd</url>
+        </artist>
+      </track>
+      <track rank="7">
+        <name>You and I</name>
+        <url>https://www.last.fm/music/d4vd/Petals+to+Thorns/You+and+I</url>
+        <duration>152</duration>
+        <streamable fulltrack="0">0</streamable>
+        <artist>
+          <name>d4vd</name>
+          <mbid>d8e07579-ff5a-41f2-b7a7-c71880b8287a</mbid>
+          <url>https://www.last.fm/music/d4vd</url>
+        </artist>
+      </track>
+      <track rank="8">
+        <name>Romantic Homicide</name>
+        <url>https://www.last.fm/music/d4vd/Petals+to+Thorns/Romantic+Homicide</url>
+        <duration>127</duration>
+        <streamable fulltrack="0">0</streamable>
+        <artist>
+          <name>d4vd</name>
+          <mbid>d8e07579-ff5a-41f2-b7a7-c71880b8287a</mbid>
+          <url>https://www.last.fm/music/d4vd</url>
+        </artist>
+      </track>
+      <track rank="9">
+        <name>The Bridge</name>
+        <url>https://www.last.fm/music/d4vd/Petals+to+Thorns/The+Bridge</url>
+        <duration>181</duration>
+        <streamable fulltrack="0">0</streamable>
+        <artist>
+          <name>d4vd</name>
+          <mbid>d8e07579-ff5a-41f2-b7a7-c71880b8287a</mbid>
+          <url>https://www.last.fm/music/d4vd</url>
+        </artist>
+      </track>
+    </tracks>
+    <tags>
+      <tag>
+        <name>indie pop</name>
+        <url>https://www.last.fm/tag/indie+pop</url>
+      </tag>
+      <tag>
+        <name>indie rock</name>
+        <url>https://www.last.fm/tag/indie+rock</url>
+      </tag>
+      <tag>
+        <name>rock</name>
+        <url>https://www.last.fm/tag/rock</url>
+      </tag>
+      <tag>
+        <name>indie</name>
+        <url>https://www.last.fm/tag/indie</url>
+      </tag>
+      <tag>
+        <name>pop</name>
+        <url>https://www.last.fm/tag/pop</url>
+      </tag>
+    </tags>
+  </album>
+</lfm>

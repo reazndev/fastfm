@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lfm status="ok">
+  <topalbums user="Syntiiix" page="1" perPage="1" totalPages="6198" total="6198">
+    <album rank="1">
+      <name>Petals to Thorns</name>
+      <playcount>9264</playcount>
+      <mbid>9012eb5b-8fb7-461a-834b-33ebe2901e6a</mbid>
+      <url>https://www.last.fm/music/d4vd/Petals+to+Thorns</url>
+      <artist>
+        <name>d4vd</name>
+        <mbid>d8e07579-ff5a-41f2-b7a7-c71880b8287a</mbid>
+        <url>https://www.last.fm/music/d4vd</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/5e7ec351c2147b9b4f06e106acc58ef3.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/5e7ec351c2147b9b4f06e106acc58ef3.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/5e7ec351c2147b9b4f06e106acc58ef3.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/5e7ec351c2147b9b4f06e106acc58ef3.jpg</image>
+    </album>
+  </topalbums>
+</lfm>

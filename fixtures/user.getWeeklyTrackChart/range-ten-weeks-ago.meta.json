@@ -1,0 +1,86 @@
+{
+  "method": "user.getWeeklyTrackChart",
+  "variant": "range-ten-weeks-ago",
+  "http_method": "GET",
+  "recorded_at": 1794518882,
+  "responses": {
+    "json": {
+      "params": [
+        [
+          "method",
+          "user.getWeeklyTrackChart"
+        ],
+        [
+          "user",
+          "syntiiix"
+        ],
+        [
+          "from",
+          "1788091200"
+        ],
+        [
+          "to",
+          "1788696000"
+        ],
+        [
+          "api_key",
+          "REDACTED"
+        ],
+        [
+          "format",
+          "json"
+        ]
+      ],
+      "status": 200,
+      "content_type": "application/json",
+      "headers": {
+        "server": "openresty",
+        "date": "Thu, 12 Nov 2026 21:27:40 GMT",
+        "content-type": "application/json",
+        "content-length": "161153",
+        "access-control-allow-methods": "POST, GET, OPTIONS",
+        "access-control-allow-origin": "*",
+        "access-control-max-age": "86400",
+        "via": "1.1 google",
+        "alt-svc": "h3=\":443\"; ma=2592000"
+      }
+    },
+    "xml": {
+      "params": [
+        [
+          "method",
+          "user.getWeeklyTrackChart"
+        ],
+        [
+          "user",
+          "syntiiix"
+        ],
+        [
+          "from",
+          "1788091200"
+        ],
+        [
+          "to",
+          "1788696000"
+        ],
+        [
+          "api_key",
+          "REDACTED"
+        ]
+      ],
+      "status": 200,
+      "content_type": "text/xml; charset=UTF-8",
+      "headers": {
+        "server": "openresty",
+        "date": "Thu, 12 Nov 2026 21:27:41 GMT",
+        "content-type": "text/xml; charset=UTF-8",
+        "content-length": "172550",
+        "access-control-allow-methods": "POST, GET, OPTIONS",
+        "access-control-allow-origin": "*",
+        "access-control-max-age": "86400",
+        "via": "1.1 google",
+        "alt-svc": "h3=\":443\"; ma=2592000"
+      }
+    }
+  }
+}

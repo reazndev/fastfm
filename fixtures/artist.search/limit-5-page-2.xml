@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<lfm status="ok"><results for="Juice WRLD"><opensearch:Query role="request" searchTerms="Juice WRLD" startPage="2"></opensearch:Query>
+<opensearch:totalResults>7434</opensearch:totalResults>
+<opensearch:startIndex>5</opensearch:startIndex>
+<opensearch:itemsPerPage>5</opensearch:itemsPerPage>
+<artistmatches><artist><name>Juıce WRŁÐ</name>
+<listeners>12</listeners>
+<mbid></mbid>
+<url>https://www.last.fm/music/Ju%C4%B1ce+WR%C5%81%C3%90</url>
+<streamable>0</streamable>
+<image size="small"></image>
+<image size="medium"></image>
+<image size="large"></image>
+<image size="extralarge"></image>
+</artist>
+<artist><name>Juice WRLD &amp; Marshmello</name>
+<listeners>16998</listeners>
+<mbid></mbid>
+<url>https://www.last.fm/music/Juice+WRLD+&amp;+Marshmello</url>
+<streamable>0</streamable>
+<image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+<image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+<image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+<image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+</artist>
+<artist><name>Future, Juice WRLD</name>
+<listeners>12637</listeners>
+<mbid></mbid>
+<url>https://www.last.fm/music/Future,+Juice+WRLD</url>
+<streamable>0</streamable>
+<image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+<image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+<image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+<image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+</artist>
+<artist><name>Juice Wrld, Seezyn</name>
+<listeners>9223</listeners>
+<mbid></mbid>
+<url>https://www.last.fm/music/Juice+Wrld,+Seezyn</url>
+<streamable>0</streamable>
+<image size="small"></image>
+<image size="medium"></image>
+<image size="large"></image>
+<image size="extralarge"></image>
+</artist>
+<artist><name>Juice WRLD &amp; Halsey</name>
+<listeners>12527</listeners>
+<mbid></mbid>
+<url>https://www.last.fm/music/Juice+WRLD+&amp;+Halsey</url>
+<streamable>0</streamable>
+<image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+<image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+<image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+<image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+</artist>
+</artistmatches>
+</results>
+</lfm>

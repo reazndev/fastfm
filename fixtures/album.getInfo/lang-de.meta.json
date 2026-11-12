@@ -1,0 +1,86 @@
+{
+  "method": "album.getInfo",
+  "variant": "lang-de",
+  "http_method": "GET",
+  "recorded_at": 1794518936,
+  "responses": {
+    "json": {
+      "params": [
+        [
+          "method",
+          "album.getInfo"
+        ],
+        [
+          "artist",
+          "d4vd"
+        ],
+        [
+          "album",
+          "Petals to Thorns"
+        ],
+        [
+          "lang",
+          "de"
+        ],
+        [
+          "api_key",
+          "REDACTED"
+        ],
+        [
+          "format",
+          "json"
+        ]
+      ],
+      "status": 200,
+      "content_type": "application/json",
+      "headers": {
+        "server": "openresty",
+        "date": "Thu, 12 Nov 2026 21:28:35 GMT",
+        "content-type": "application/json",
+        "content-length": "3939",
+        "access-control-allow-methods": "POST, GET, OPTIONS",
+        "access-control-allow-origin": "*",
+        "access-control-max-age": "86400",
+        "via": "1.1 google",
+        "alt-svc": "h3=\":443\"; ma=2592000"
+      }
+    },
+    "xml": {
+      "params": [
+        [
+          "method",
+          "album.getInfo"
+        ],
+        [
+          "artist",
+          "d4vd"
+        ],
+        [
+          "album",
+          "Petals to Thorns"
+        ],
+        [
+          "lang",
+          "de"
+        ],
+        [
+          "api_key",
+          "REDACTED"
+        ]
+      ],
+      "status": 200,
+      "content_type": "text/xml; charset=UTF-8",
+      "headers": {
+        "server": "openresty",
+        "date": "Thu, 12 Nov 2026 21:28:35 GMT",
+        "content-type": "text/xml; charset=UTF-8",
+        "content-length": "5349",
+        "access-control-allow-methods": "POST, GET, OPTIONS",
+        "access-control-allow-origin": "*",
+        "access-control-max-age": "86400",
+        "via": "1.1 google",
+        "alt-svc": "h3=\":443\"; ma=2592000"
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lfm status="ok">
+  <weeklyalbumchart user="Syntiiix" from="1793793600" to="1794398400">
+    <album rank="1">
+      <artist mbid="3552a866-9362-4835-883a-c9e6890fbb89">Small Forward</artist>
+      <name>Small Forward</name>
+      <mbid></mbid>
+      <playcount>17</playcount>
+      <url>https://www.last.fm/music/Small+Forward/Small+Forward</url>
+    </album>
+  </weeklyalbumchart>
+</lfm>

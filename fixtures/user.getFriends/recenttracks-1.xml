@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lfm status="ok">
+  <friends user="Syntiiix" page="1" perPage="50" totalPages="1" total="28">
+    <user>
+      <name>RJ</name>
+      <realname>Richard Jones </realname>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/b26d6fd11de240a1c045dfb5c5d9fe65.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/b26d6fd11de240a1c045dfb5c5d9fe65.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/b26d6fd11de240a1c045dfb5c5d9fe65.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/b26d6fd11de240a1c045dfb5c5d9fe65.png</image>
+      <url>https://www.last.fm/user/RJ</url>
+      <country>United Kingdom</country>
+      <subscriber>1</subscriber>
+      <playcount>0</playcount>
+      <playlists>0</playlists>
+      <bootstrap>0</bootstrap>
+      <registered unixtime="1037793040">2002-11-20 11:50</registered>
+      <type>alum</type>
+    </user>
+    <user>
+      <name>heroine2730</name>
+      <realname></realname>
+      <image size="small"></image>
+      <image size="medium"></image>
+      <image size="large"></image>
+      <image size="extralarge"></image>
+      <url>https://www.last.fm/user/heroine2730</url>
+      <country>None</country>
+      <subscriber>0</subscriber>
+      <playcount>0</playcount>
+      <playlists>0</playlists>
+      <bootstrap>0</bootstrap>
+      <registered unixtime="1749989654">2025-06-15 12:14</registered>
+      <type>user</type>
+    </user>
+    <user>
+      <name>PianoNic</name>
+      <realname>PianoNic</realname>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/660329b41926a8fbd2c7b6c0e96780e6.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/660329b41926a8fbd2c7b6c0e96780e6.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/660329b41926a8fbd2c7b6c0e96780e6.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/660329b41926a8fbd2c7b6c0e96780e6.png</image>
+      <url>https://www.last.fm/user/PianoNic</url>
+      <country>Switzerland</country>
+      <subscriber>0</subscriber>
+      <playcount>0</playcount>
+      <playlists>0</playlists>
+      <bootstrap>0</bootstrap>
+      <registered unixtime="1715673706">2024-05-14 08:01</registered>
+      <type>user</type>
+    </user>
+    <user>
+      <name>Sildrave</name>
+      <realname>Sildrave</realname>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/f8a206c7febb75f183ec9c6b83f6adfc.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/f8a206c7febb75f183ec9c6b83f6adfc.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/f8a206c7febb75f183ec9c6b83f6adfc.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/f8a206c7febb75f183ec9c6b83f6adfc.png</image>
+      <url>https://www.last.fm/user/Sildrave</url>
+      <country>None</country>
+      <subscriber>0</subscriber>
+      <playcount>0</playcount>
+      <playlists>0</playlists>
+      <bootstrap>0</bootstrap>
+      <registered unixtime="1661554834">2022-08-26 23:00</registered>
+      <type>user</type>
+    </user>
+    <user>
+      <name>wenomechichi</name>
+      <realname></realname>
+      <image size="small"></image>
+      <image size="medium"></image>
+      <image size="large"></image>
+      <image size="extralarge"></image>
+      <url>https://www.last.fm/user/wenomechichi</url>
+      <country>None</country>
+      <subscriber>0</subscriber>
+      <playcount>0</playcount>
+      <playlists>0</playlists>
+      <bootstrap>0</bootstrap>
+      <registered unixtime="1734487898">2024-12-18 02:11</registered>
+      <type>user</type>
+    </user>
+    <user>
+      <name>lc349</name>
+      <realname></realname>
+      <image size="small"></image>
+      <image size="medium"></image>
+      <image size="large"></image>
+      <image size="extralarge"></image>
+      <url>https://www.last.fm/user/lc349</url>
+      <country>None</country>
+      <subscriber>0</subscriber>
+      <playcount>0</playcount>
+      <playlists>0</playlists>
+      <bootstrap>0</bootstrap>
+      <registered unixtime="1733604000">2024-12-07 20:40</registered>
+      <type>user</type>
+    </user>
+    <user>
+      <name>nathon123123</name>
+      <realname></realname>
+      <image size="small"></image>
+      <image size="medium"></image>
+      <image size="large"></image>
+      <image size="extralarge"></image>
+      <url>https://www.last.fm/user/nathon123123</url>
+      <country>None</country>
+      <subscriber>0</subscriber>
+      <playcount>0</playcount>
+      <playlists>0</playlists>
+      <bootstrap>0</bootstrap>
+      <registered unixtime="1744151104">2025-04-08 22:25</registered>
+      <type>user</type>
+    </user>
+    <user>
+      <name>Jaquaviontevion</name>
+      <realname></realname>
+      <image size="small"></image>
+      <image size="medium"></image>
+      <image size="large"></image>
+      <image size="extralarge"></image>
+      <url>https://www.last.fm/user/Jaquaviontevion</url>
+      <country>None</country>
+      <subscriber>0</subscriber>
+      <playcount>0</playcount>
+      <playlists>0</playlists>
+      <bootstrap>0</bootstrap>
+      <registered unixtime="1729252399">2024-10-18 11:53</registered>
+      <type>user</type>
+    </user>
+    <user>
+      <name>Billybobthe3rd</name>
+      <realname></realname>
+      <image size="small"></image>
+      <image size="medium"></image>
+      <image size="large"></image>
+      <image size="extralarge"></image>
+      <url>https://www.last.fm/user/Billybobthe3rd</url>
+      <country>None</country>
+      <subscriber>0</subscriber>
+      <playcount>0</playcount>
+      <playlists>0</playlists>
+      <bootstrap>0</bootstrap>
+      <registered unixtime="1710355842">2024-03-13 18:50</registered>
+      <type>user</type>
+    </user>
+    <user>
+      <name>ghostyvr</name>
+      <realname>Ghosty</realname>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/7da87c35ef175b61ae619dc323f4b0d6.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/7da87c35ef175b61ae619dc323f4b0d6.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/7da87c35ef175b61ae619dc323f4b0d6.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/7da87c35ef175b61ae619dc323f4b0d6.png</image>
+      <url>https://www.last.fm/user/ghostyvr</url>
+      <country>United Kingdom</country>
+      <subscriber>0</subscriber>
+      <playcount>0</playcount>
+      <playlists>0</playlists>
+      <bootstrap>0</bootstrap>
+      <registered unixtime="1704512155">2024-01-06 03:35</registered>
+      <type>user</type>
+    </user>
+    <user>
+      <name>KuroinHeroin</name>
+      <realname>discord @kuroinheroin</realname>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/f6e6591e8be34de728486faf3de7cd8f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/f6e6591e8be34de728486faf3de7cd8f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/f6e6591e8be34de728486faf3de7cd8f.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/f6e6591e8be34de728486faf3de7cd8f.png</image>
+      <url>https://www.last.fm/user/KuroinHeroin</url>
+      <country>Switzerland</country>
+      <subscriber>0</subscriber>
+      <playcount>0</playcount>
+      <playlists>0</playlists>
+      <bootstrap>0</bootstrap>
+      <registered unixtime="1641041712">2022-01-01 12:55</registered>
+      <type>user</type>
+    </user>
+    <user>
+      <name>Lexusexu</name>
+      <realname>lexu</realname>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/680702462da54e4ddee9290cdc844da1.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/680702462da54e4ddee9290cdc844da1.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/680702462da54e4ddee9290cdc844da1.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/680702462da54e4ddee9290cdc844da1.png</image>
+      <url>https://www.last.fm/user/Lexusexu</url>
+      <country>Switzerland</country>
+      <subscriber>0</subscriber>
+      <playcount>0</playcount>
+      <playlists>0</playlists>
+      <bootstrap>0</bootstrap>
+      <registered unixtime="1607376696">2020-12-07 21:31</registered>
+      <type>user</type>
+    </user>
+    <user>
+      <name>mewpew10</name>
+      <realname>Nat</realname>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/88fae93a9f3ffbe8c162009333366f6b.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/88fae93a9f3ffbe8c162009333366f6b.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/88fae93a9f3ffbe8c162009333366f6b.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/88fae93a9f3ffbe8c162009333366f6b.png</image>
+      <url>https://www.last.fm/user/mewpew10</url>
+      <country>None</country>
+      <subscriber>0</subscriber>
+      <playcount>0</playcount>
+      <playlists>0</playlists>
+      <bootstrap>0</bootstrap>
+      <registered unixtime="1733609887">2024-12-07 22:18</registered>
+      <type>user</type>
+    </user>
+    <user>
+      <name>laersli</name>
+      <realname></realname>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/74824f9fc4ba03974dc9b324bc5d0b23.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/74824f9fc4ba03974dc9b324bc5d0b23.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/74824f9fc4ba03974dc9b324bc5d0b23.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/74824f9fc4ba03974dc9b324bc5d0b23.png</image>
+      <url>https://www.last.fm/user/laersli</url>
+      <country>None</country>
+      <subscriber>1</subscriber>
+      <playcount>0</playcount>
+      <playlists>0</playlists>
+      <bootstrap>0</bootstrap>
+      <registered unixtime="1608116503">2020-12-16 11:01</registered>
+      <type>subscriber</type>
+    </user>
+    <user>
+      <name>patrik1221</name>
+      <realname>patrik</realname>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/0e743ac3214a16b840f8b2a694e18801.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/0e743ac3214a16b840f8b2a694e18801.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/0e743ac3214a16b840f8b2a694e18801.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/0e743ac3214a16b840f8b2a694e18801.png</image>
+      <url>https://www.last.fm/user/patrik1221</url>
+      <country>Croatia</country>
+      <subscriber>0</subscriber>
+      <playcount>0</playcount>
+      <playlists>0</playlists>
+      <bootstrap>0</bootstrap>
+      <registered unixtime="1570467386">2019-10-07 16:56</registered>
+      <type>user</type>
+    </user>
+    <user>
+      <name>AMJoel</name>
+      <realname></realname>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/afe20b0a3d423f3e8e563764d62894ed.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/afe20b0a3d423f3e8e563764d62894ed.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/afe20b0a3d423f3e8e563764d62894ed.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/afe20b0a3d423f3e8e563764d62894ed.png</image>
+      <url>https://www.last.fm/user/AMJoel</url>
+      <country>Switzerland</country>
+      <subscriber>0</subscriber>
+      <playcount>0</playcount>
+      <playlists>0</playlists>
+      <bootstrap>0</bootstrap>
+      <registered unixtime="1635412236">2021-10-28 09:10</registered>
+      <type>user</type>
+    </user>
+    <user>
+      <name>KwipMbee</name>
+      <realname>Kwip</realname>
+      <image size="small"></image>
+      <image size="medium"></image>
+      <image size="large"></image>
+      <image size="extralarge"></image>
+      <url>https://www.last.fm/user/KwipMbee</url>
+      <country>None</country>
+      <subscriber>0</subscriber>
+      <playcount>0</playcount>
+      <playlists>0</playlists>
+      <bootstrap>0</bootstrap>
+      <registered unixtime="1695069652">2023-09-18 20:40</registered>
+      <type>user</type>
+    </user>
+    <user>
+      <name>PivexBatman</name>
+      <realname>pivex</realname>
+      <image size="small"></image>
+      <image size="medium"></image>
+      <image size="large"></image>
+      <image size="extralarge"></image>
+      <url>https://www.last.fm/user/PivexBatman</url>
+      <country>Croatia</country>
+      <subscriber>0</subscriber>
+      <playcount>0</playcount>
+      <playlists>0</playlists>
+      <bootstrap>0</bootstrap>
+      <registered unixtime="1731770760">2024-11-16 15:26</registered>
+      <type>user</type>
+    </user>
+    <user>
+      <name>Onet0rnado</name>
+      <realname>Onetornado</realname>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/56170011924d096a55767c956320b540.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/56170011924d096a55767c956320b540.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/56170011924d096a55767c956320b540.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/56170011924d096a55767c956320b540.png</image>
+      <url>https://www.last.fm/user/Onet0rnado</url>
+      <country>United States</country>
+      <subscriber>0</subscriber>
+      <playcount>0</playcount>
+      <playlists>0</playlists>
+      <bootstrap>0</bootstrap>
+      <registered unixtime="1691395951">2023-08-07 08:12</registered>
+      <type>user</type>
+    </user>
+    <user>
+      <name>ewejrf</name>
+      <realname>ewan</realname>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/0bb7ff050d467a82d02ce2a1961aad1c.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/0bb7ff050d467a82d02ce2a1961aad1c.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/0bb7ff050d467a82d02ce2a1961aad1c.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/0bb7ff050d467a82d02ce2a1961aad1c.png</image>
+      <url>https://www.last.fm/user/ewejrf</url>
+      <country>None</country>
+      <subscriber>0</subscriber>
+      <playcount>0</playcount>
+      <playlists>0</playlists>
+      <bootstrap>0</bootstrap>
+      <registered unixtime="1698770187">2023-10-31 16:36</registered>
+      <type>user</type>
+    </user>
+    <user>
+      <name>elijah0705</name>
+      <realname>JennCarterGotThatWap</realname>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/d3c2cacb985de93cad4562532eb7ffec.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/d3c2cacb985de93cad4562532eb7ffec.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/d3c2cacb985de93cad4562532eb7ffec.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/d3c2cacb985de93cad4562532eb7ffec.png</image>
+      <url>https://www.last.fm/user/elijah0705</url>
+      <country>None</country>
+      <subscriber>0</subscriber>
+      <playcount>0</playcount>
+      <playlists>0</playlists>
+      <bootstrap>0</bootstrap>
+      <registered unixtime="1661213128">2022-08-23 00:05</registered>
+      <type>user</type>
+    </user>
+    <user>
+      <name>pookiesim</name>
+      <realname></realname>
+      <image size="small"></image>
+      <image size="medium"></image>
+      <image size="large"></image>
+      <image size="extralarge"></image>
+      <url>https://www.last.fm/user/pookiesim</url>
+      <country>None</country>
+      <subscriber>0</subscriber>
+      <playcount>0</playcount>
+      <playlists>0</playlists>
+      <bootstrap>0</bootstrap>
+      <registered unixtime="1680976403">2023-04-08 17:53</registered>
+      <type>user</type>
+    </user>
+    <user>
+      <name>Saichiii</name>
+      <realname></realname>
+      <image size="small"></image>
+      <image size="medium"></image>
+      <image size="large"></image>
+      <image size="extralarge"></image>
+      <url>https://www.last.fm/user/Saichiii</url>
+      <country>None</country>
+      <subscriber>0</subscriber>
+      <playcount>0</playcount>
+      <playlists>0</playlists>
+      <bootstrap>0</bootstrap>
+      <registered unixtime="1688280966">2023-07-02 06:56</registered>
+      <type>user</type>
+    </user>
+    <user>
+      <name>JAYJAY069</name>
+      <realname></realname>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/d8b237776f93d094b7dd5fcb67a8cf9e.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/d8b237776f93d094b7dd5fcb67a8cf9e.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/d8b237776f93d094b7dd5fcb67a8cf9e.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/d8b237776f93d094b7dd5fcb67a8cf9e.png</image>
+      <url>https://www.last.fm/user/JAYJAY069</url>
+      <country>None</country>
+      <subscriber>0</subscriber>
+      <playcount>0</playcount>
+      <playlists>0</playlists>
+      <bootstrap>0</bootstrap>
+      <registered unixtime="1683123091">2023-05-03 14:11</registered>
+      <type>user</type>
+    </user>
+    <user>
+      <name>kendaluvspeep</name>
+      <realname>kendal</realname>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/bc73c686c8272f14fa70bac7cc807653.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/bc73c686c8272f14fa70bac7cc807653.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/bc73c686c8272f14fa70bac7cc807653.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/bc73c686c8272f14fa70bac7cc807653.png</image>
+      <url>https://www.last.fm/user/kendaluvspeep</url>
+      <country>United States</country>
+      <subscriber>0</subscriber>
+      <playcount>0</playcount>
+      <playlists>0</playlists>
+      <bootstrap>0</bootstrap>
+      <registered unixtime="1663739316">2022-09-21 05:48</registered>
+      <type>user</type>
+    </user>
+    <user>
+      <name>SteinDAV</name>
+      <realname>stein</realname>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/30dc9e3a61a302903088487703dec8e8.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/30dc9e3a61a302903088487703dec8e8.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/30dc9e3a61a302903088487703dec8e8.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/30dc9e3a61a302903088487703dec8e8.png</image>
+      <url>https://www.last.fm/user/SteinDAV</url>
+      <country>None</country>
+      <subscriber>0</subscriber>
+      <playcount>0</playcount>
+      <playlists>0</playlists>
+      <bootstrap>0</bootstrap>
+      <registered unixtime="1700139974">2023-11-16 13:06</registered>
+      <type>user</type>
+    </user>
+    <user>
+      <name>kxshii</name>
+      <realname></realname>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/cd76e65d64577780e95ab7955df405b4.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/cd76e65d64577780e95ab7955df405b4.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/cd76e65d64577780e95ab7955df405b4.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/cd76e65d64577780e95ab7955df405b4.png</image>
+      <url>https://www.last.fm/user/kxshii</url>
+      <country>None</country>
+      <subscriber>0</subscriber>
+      <playcount>0</playcount>
+      <playlists>0</playlists>
+      <bootstrap>0</bootstrap>
+      <registered unixtime="1718122666">2024-06-11 16:17</registered>
+      <type>user</type>
+    </user>
+    <user>
+      <name>gullysl</name>
+      <realname></realname>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/dd7b032a973f6e940e66f55f9411d889.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/dd7b032a973f6e940e66f55f9411d889.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/dd7b032a973f6e940e66f55f9411d889.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/dd7b032a973f6e940e66f55f9411d889.png</image>
+      <url>https://www.last.fm/user/gullysl</url>
+      <country>None</country>
+      <subscriber>0</subscriber>
+      <playcount>0</playcount>
+      <playlists>0</playlists>
+      <bootstrap>0</bootstrap>
+      <registered unixtime="1698537569">2023-10-28 23:59</registered>
+      <type>user</type>
+    </user>
+  </friends>
+</lfm>

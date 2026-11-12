@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lfm status="ok">
+  <recenttracks user="Syntiiix" page="1" perPage="50" totalPages="1" total="1">
+    <track>
+      <artist mbid="3552a866-9362-4835-883a-c9e6890fbb89">Small Forward</artist>
+      <name>Bound</name>
+      <streamable>0</streamable>
+      <mbid></mbid>
+      <album mbid="">Small Forward</album>
+      <url>https://www.last.fm/music/Small+Forward/_/Bound</url>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/6b7502e896f93f66329beee864182724.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/6b7502e896f93f66329beee864182724.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/6b7502e896f93f66329beee864182724.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/6b7502e896f93f66329beee864182724.jpg</image>
+      <date uts="1794233453">09 Nov 2026, 14:10</date>
+    </track>
+  </recenttracks>
+</lfm>

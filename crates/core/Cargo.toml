@@ -1,0 +1,16 @@
+[package]
+name = "lfm-core"
+version = "0.1.0"
+description = "Response tree, XML and JSON renderers, errors and shared helpers for the Last.fm mirror"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+form_urlencoded = "1.2.2"
+md-5 = "0.10.6"
+thiserror = "2.0.17"
+
+[lints]
+workspace = true

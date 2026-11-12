@@ -1,0 +1,66 @@
+{
+  "method": "tag.getTopTags",
+  "variant": "default",
+  "http_method": "GET",
+  "recorded_at": 1794518965,
+  "responses": {
+    "json": {
+      "params": [
+        [
+          "method",
+          "tag.getTopTags"
+        ],
+        [
+          "api_key",
+          "REDACTED"
+        ],
+        [
+          "format",
+          "json"
+        ]
+      ],
+      "status": 200,
+      "content_type": "application/json; charset=UTF-8",
+      "headers": {
+        "server": "openresty",
+        "date": "Thu, 12 Nov 2026 21:29:04 GMT",
+        "content-type": "application/json; charset=UTF-8",
+        "content-length": "2585",
+        "access-control-allow-headers": "Origin, X-Atmosphere-tracking-id, X-Atmosphere-Framework, X-Cache-Date, Content-Type, X-Atmosphere-Transport, *",
+        "access-control-allow-methods": "POST, GET, OPTIONS, PUT",
+        "access-control-allow-origin": "*",
+        "access-control-request-headers": "Origin, X-Atmosphere-tracking-id, X-Atmosphere-Framework, X-Cache-Date, Content-Type, X-Atmosphere-Transport, *",
+        "tsvc-time-spent": "0.000",
+        "via": "1.1 google",
+        "alt-svc": "h3=\":443\"; ma=2592000"
+      }
+    },
+    "xml": {
+      "params": [
+        [
+          "method",
+          "tag.getTopTags"
+        ],
+        [
+          "api_key",
+          "REDACTED"
+        ]
+      ],
+      "status": 200,
+      "content_type": "text/xml; charset=UTF-8",
+      "headers": {
+        "server": "openresty",
+        "date": "Thu, 12 Nov 2026 21:29:04 GMT",
+        "content-type": "text/xml; charset=UTF-8",
+        "content-length": "4038",
+        "access-control-allow-headers": "Origin, X-Atmosphere-tracking-id, X-Atmosphere-Framework, X-Cache-Date, Content-Type, X-Atmosphere-Transport, *",
+        "access-control-allow-methods": "POST, GET, OPTIONS, PUT",
+        "access-control-allow-origin": "*",
+        "access-control-request-headers": "Origin, X-Atmosphere-tracking-id, X-Atmosphere-Framework, X-Cache-Date, Content-Type, X-Atmosphere-Transport, *",
+        "tsvc-time-spent": "0.000",
+        "via": "1.1 google",
+        "alt-svc": "h3=\":443\"; ma=2592000"
+      }
+    }
+  }
+}

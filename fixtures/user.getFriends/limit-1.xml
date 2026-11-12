@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lfm status="ok">
+  <friends user="Syntiiix" page="1" perPage="1" totalPages="28" total="28">
+    <user>
+      <name>RJ</name>
+      <realname>Richard Jones </realname>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/b26d6fd11de240a1c045dfb5c5d9fe65.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/b26d6fd11de240a1c045dfb5c5d9fe65.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/b26d6fd11de240a1c045dfb5c5d9fe65.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/b26d6fd11de240a1c045dfb5c5d9fe65.png</image>
+      <url>https://www.last.fm/user/RJ</url>
+      <country>United Kingdom</country>
+      <subscriber>1</subscriber>
+      <playcount>0</playcount>
+      <playlists>0</playlists>
+      <bootstrap>0</bootstrap>
+      <registered unixtime="1037793040">2002-11-20 11:50</registered>
+      <type>alum</type>
+    </user>
+  </friends>
+</lfm>

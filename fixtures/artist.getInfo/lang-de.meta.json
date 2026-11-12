@@ -1,0 +1,78 @@
+{
+  "method": "artist.getInfo",
+  "variant": "lang-de",
+  "http_method": "GET",
+  "recorded_at": 1794518916,
+  "responses": {
+    "json": {
+      "params": [
+        [
+          "method",
+          "artist.getInfo"
+        ],
+        [
+          "artist",
+          "Juice WRLD"
+        ],
+        [
+          "lang",
+          "de"
+        ],
+        [
+          "api_key",
+          "REDACTED"
+        ],
+        [
+          "format",
+          "json"
+        ]
+      ],
+      "status": 200,
+      "content_type": "application/json",
+      "headers": {
+        "server": "openresty",
+        "date": "Thu, 12 Nov 2026 21:28:14 GMT",
+        "content-type": "application/json",
+        "content-length": "5245",
+        "access-control-allow-methods": "POST, GET, OPTIONS",
+        "access-control-allow-origin": "*",
+        "access-control-max-age": "86400",
+        "via": "1.1 google",
+        "alt-svc": "h3=\":443\"; ma=2592000"
+      }
+    },
+    "xml": {
+      "params": [
+        [
+          "method",
+          "artist.getInfo"
+        ],
+        [
+          "artist",
+          "Juice WRLD"
+        ],
+        [
+          "lang",
+          "de"
+        ],
+        [
+          "api_key",
+          "REDACTED"
+        ]
+      ],
+      "status": 200,
+      "content_type": "text/xml; charset=UTF-8",
+      "headers": {
+        "server": "openresty",
+        "date": "Thu, 12 Nov 2026 21:28:15 GMT",
+        "content-type": "text/xml; charset=UTF-8",
+        "content-length": "5587",
+        "access-control-allow-methods": "POST, GET, OPTIONS",
+        "access-control-allow-origin": "*",
+        "access-control-max-age": "86400",
+        "via": "1.1 google",
+        "alt-svc": "h3=\":443\"; ma=2592000"
+      }
+    }
+  }
+}

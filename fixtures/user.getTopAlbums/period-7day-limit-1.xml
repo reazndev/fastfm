@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lfm status="ok">
+  <topalbums user="Syntiiix" page="1" perPage="1" totalPages="252" total="252">
+    <album rank="1">
+      <name>Small Forward</name>
+      <playcount>17</playcount>
+      <mbid></mbid>
+      <url>https://www.last.fm/music/Small+Forward/Small+Forward</url>
+      <artist>
+        <name>Small Forward</name>
+        <mbid>3552a866-9362-4835-883a-c9e6890fbb89</mbid>
+        <url>https://www.last.fm/music/Small+Forward</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/6b7502e896f93f66329beee864182724.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/6b7502e896f93f66329beee864182724.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/6b7502e896f93f66329beee864182724.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/6b7502e896f93f66329beee864182724.jpg</image>
+    </album>
+  </topalbums>
+</lfm>

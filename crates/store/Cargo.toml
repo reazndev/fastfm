@@ -1,0 +1,23 @@
+[package]
+name = "lfm-store"
+version = "0.1.0"
+description = "SQLite storage for the Last.fm mirror: scrobbles, aggregates, accounts and caches"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+caseless = "0.2.2"
+crossbeam-channel = "0.5.17"
+rusqlite = { version = "0.42.0", features = ["bundled", "fallible_uint"] }
+thiserror = "2.0.21"
+tokio = { version = "1.47.1", features = ["sync"] }
+tracing = "0.1.44"
+
+[dev-dependencies]
+tempfile = "3.27.0"
+tokio = { version = "1.47.1", features = ["macros", "rt", "rt-multi-thread"] }
+
+[lints]
+workspace = true

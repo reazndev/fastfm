@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lfm status="ok">
+  <weeklyartistchart user="Syntiiix" from="1794182400" to="1794268799">
+    <artist rank="1">
+      <name>Small Forward</name>
+      <mbid>3552a866-9362-4835-883a-c9e6890fbb89</mbid>
+      <playcount>14</playcount>
+      <url>https://www.last.fm/music/Small+Forward</url>
+    </artist>
+    <artist rank="2">
+      <name>Magdalena Bay</name>
+      <mbid>68c261d5-48c8-4ea9-9466-9fc908dc79bb</mbid>
+      <playcount>6</playcount>
+      <url>https://www.last.fm/music/Magdalena+Bay</url>
+    </artist>
+    <artist rank="3">
+      <name>glaive</name>
+      <mbid>fd36f43e-5bd1-488e-b844-0e059250ef78</mbid>
+      <playcount>4</playcount>
+      <url>https://www.last.fm/music/glaive</url>
+    </artist>
+    <artist rank="4">
+      <name>swim school</name>
+      <mbid>7f1659c7-ddcb-4a95-8b09-121db6fb91b6</mbid>
+      <playcount>4</playcount>
+      <url>https://www.last.fm/music/swim+school</url>
+    </artist>
+    <artist rank="5">
+      <name>Blue Imagined</name>
+      <mbid>fe9ab496-0b2b-4747-b36f-22d6ab1f81b6</mbid>
+      <playcount>3</playcount>
+      <url>https://www.last.fm/music/Blue+Imagined</url>
+    </artist>
+    <artist rank="6">
+      <name>Frank Ocean</name>
+      <mbid>e520459c-dff4-491d-a6e4-c97be35e0044</mbid>
+      <playcount>3</playcount>
+      <url>https://www.last.fm/music/Frank+Ocean</url>
+    </artist>
+    <artist rank="7">
+      <name>Makeout City</name>
+      <mbid></mbid>
+      <playcount>3</playcount>
+      <url>https://www.last.fm/music/Makeout+City</url>
+    </artist>
+    <artist rank="8">
+      <name>Paris Texas</name>
+      <mbid>c2a41668-983f-4f73-af00-45000a252811</mbid>
+      <playcount>3</playcount>
+      <url>https://www.last.fm/music/Paris+Texas</url>
+    </artist>
+    <artist rank="9">
+      <name>Radiohead</name>
+      <mbid>a74b1b7f-71a5-4011-9441-d0b5e4122711</mbid>
+      <playcount>3</playcount>
+      <url>https://www.last.fm/music/Radiohead</url>
+    </artist>
+    <artist rank="10">
+      <name>The Smiths</name>
+      <mbid>40f5d9e4-2de7-4f2d-ad41-e31a9a9fea27</mbid>
+      <playcount>3</playcount>
+      <url>https://www.last.fm/music/The+Smiths</url>
+    </artist>
+    <artist rank="11">
+      <name>Wisp</name>
+      <mbid>4159ac30-ecce-43a6-b200-b48801968e30</mbid>
+      <playcount>3</playcount>
+      <url>https://www.last.fm/music/Wisp</url>
+    </artist>
+    <artist rank="12">
+      <name>ARVERNE</name>
+      <mbid></mbid>
+      <playcount>2</playcount>
+      <url>https://www.last.fm/music/ARVERNE</url>
+    </artist>
+    <artist rank="13">
+      <name>Beach Vacation</name>
+      <mbid>a89df1d6-b386-4141-878a-c778b8d5452e</mbid>
+      <playcount>2</playcount>
+      <url>https://www.last.fm/music/Beach+Vacation</url>
+    </artist>
+    <artist rank="14">
+      <name>Bixby</name>
+      <mbid></mbid>
+      <playcount>2</playcount>
+      <url>https://www.last.fm/music/Bixby</url>
+    </artist>
+    <artist rank="15">
+      <name>Daniel Caesar</name>
+      <mbid>b46e298d-d3a5-4695-a03e-63e8c523b23e</mbid>
+      <playcount>2</playcount>
+      <url>https://www.last.fm/music/Daniel+Caesar</url>
+    </artist>
+    <artist rank="16">
+      <name>Esha Tewari</name>
+      <mbid></mbid>
+      <playcount>2</playcount>
+      <url>https://www.last.fm/music/Esha+Tewari</url>
+    </artist>
+    <artist rank="17">
+      <name>Nena</name>
+      <mbid>38bfaa7f-ee98-48cb-acd0-946d7aeecd76</mbid>
+      <playcount>2</playcount>
+      <url>https://www.last.fm/music/Nena</url>
+    </artist>
+    <artist rank="18">
+      <name>Panchiko</name>
+      <mbid>8f64d6ea-3f6c-408c-b2e0-e5334b28dae9</mbid>
+      <playcount>2</playcount>
+      <url>https://www.last.fm/music/Panchiko</url>
+    </artist>
+    <artist rank="19">
+      <name>Pixies</name>
+      <mbid>b6b2bb8d-54a9-491f-9607-7b546023b433</mbid>
+      <playcount>2</playcount>
+      <url>https://www.last.fm/music/Pixies</url>
+    </artist>
+    <artist rank="20">
+      <name>Starflyer 59</name>
+      <mbid>250c38d6-0353-4c22-a371-f305d908573c</mbid>
+      <playcount>2</playcount>
+      <url>https://www.last.fm/music/Starflyer+59</url>
+    </artist>
+    <artist rank="21">
+      <name>Steve Lacy</name>
+      <mbid>b29020d6-5dbf-4c99-b16f-c009f8a712ff</mbid>
+      <playcount>2</playcount>
+      <url>https://www.last.fm/music/Steve+Lacy</url>
+    </artist>
+    <artist rank="22">
+      <name>beabadoobee</name>
+      <mbid>88d17133-abbc-42db-9526-4e2c1db60336</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/beabadoobee</url>
+    </artist>
+    <artist rank="23">
+      <name>Beach House</name>
+      <mbid>d5cc67b8-1cc4-453b-96e8-44487acdebea</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/Beach+House</url>
+    </artist>
+    <artist rank="24">
+      <name>Billy Idol</name>
+      <mbid>47c8f88b-987a-4b64-9175-2b1b57809727</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/Billy+Idol</url>
+    </artist>
+    <artist rank="25">
+      <name>blue diner.</name>
+      <mbid>d093e7af-fcc8-44df-b07e-9793a304e0e8</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/blue+diner.</url>
+    </artist>
+    <artist rank="26">
+      <name>Chrissy</name>
+      <mbid>7b826161-2949-4beb-aadf-de3f2b900ec7</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/Chrissy</url>
+    </artist>
+    <artist rank="27">
+      <name>Clairo</name>
+      <mbid>d786f59b-1836-4ddb-8393-ab753edbe984</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/Clairo</url>
+    </artist>
+    <artist rank="28">
+      <name>Cocteau Twins</name>
+      <mbid>000fc734-b7e1-4a01-92d1-f544261b43f5</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/Cocteau+Twins</url>
+    </artist>
+    <artist rank="29">
+      <name>Cryogeyser</name>
+      <mbid>c05d724c-7bff-47ea-8c96-95b444204a4b</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/Cryogeyser</url>
+    </artist>
+    <artist rank="30">
+      <name>EKKSTACY</name>
+      <mbid>e897ca8f-03ff-4405-9cf2-c71ab2950ddb</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/EKKSTACY</url>
+    </artist>
+    <artist rank="31">
+      <name>Eyedress</name>
+      <mbid>0b619a94-481c-40ac-abae-85f33f2b1588</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/Eyedress</url>
+    </artist>
+    <artist rank="32">
+      <name>flat7</name>
+      <mbid>2894aa86-83c8-42e7-9bb3-b58e5a6db3c0</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/flat7</url>
+    </artist>
+    <artist rank="33">
+      <name>Florence Road</name>
+      <mbid>9b189d1b-3d6d-41d1-9053-cf29a487a75e</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/Florence+Road</url>
+    </artist>
+    <artist rank="34">
+      <name>Jade Street</name>
+      <mbid></mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/Jade+Street</url>
+    </artist>
+    <artist rank="35">
+      <name>JPEGMAFIA</name>
+      <mbid>c42e60f4-4520-4954-b6e4-82bbdf532c11</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/JPEGMAFIA</url>
+    </artist>
+    <artist rank="36">
+      <name>Juice WRLD</name>
+      <mbid>4e4ebde4-0c56-4dec-844b-6c73adcdd92d</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/Juice+WRLD</url>
+    </artist>
+    <artist rank="37">
+      <name>Lamp</name>
+      <mbid></mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/Lamp</url>
+    </artist>
+    <artist rank="38">
+      <name>Launder</name>
+      <mbid>3bd7ecd6-bfc0-413b-ac4c-608fbae0b3cf</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/Launder</url>
+    </artist>
+    <artist rank="39">
+      <name>Mac DeMarco</name>
+      <mbid>f2492c31-54a8-4347-a1fc-f81f72873bbf</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/Mac+DeMarco</url>
+    </artist>
+    <artist rank="40">
+      <name>Montell Fish</name>
+      <mbid>20634ec0-4bdb-47dc-9bf4-07ed76f8154a</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/Montell+Fish</url>
+    </artist>
+    <artist rank="41">
+      <name>Night Swimming</name>
+      <mbid>50724a56-1549-4c18-8851-c52023277efe</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/Night+Swimming</url>
+    </artist>
+    <artist rank="42">
+      <name>Omar Apollo</name>
+      <mbid>0b966a38-5ad9-43c1-b86b-c07079523165</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/Omar+Apollo</url>
+    </artist>
+    <artist rank="43">
+      <name>Paradise Blossom</name>
+      <mbid>9834e6c8-3c91-44dd-8704-8e0c7d943b7b</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/Paradise+Blossom</url>
+    </artist>
+    <artist rank="44">
+      <name>Phil Collins</name>
+      <mbid>401c3991-b76b-499d-8082-9f2df958ef78</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/Phil+Collins</url>
+    </artist>
+    <artist rank="45">
+      <name>Quadeca</name>
+      <mbid>3a4024dc-cc62-4d9b-8bed-c22426136a52</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/Quadeca</url>
+    </artist>
+    <artist rank="46">
+      <name>re6ce</name>
+      <mbid>4e32e0a1-9a26-4ef2-a6ef-64e61cf5091e</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/re6ce</url>
+    </artist>
+    <artist rank="47">
+      <name>runo plum</name>
+      <mbid>e7807164-6ae4-41d4-bdae-c5f475022e96</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/runo+plum</url>
+    </artist>
+    <artist rank="48">
+      <name>Sade</name>
+      <mbid>67930b3e-e00b-469f-8c74-fd69f20522ec</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/Sade</url>
+    </artist>
+    <artist rank="49">
+      <name>Slow Pulp</name>
+      <mbid>00505f51-68a8-45fc-b6d6-51be64751378</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/Slow+Pulp</url>
+    </artist>
+    <artist rank="50">
+      <name>Still Corners</name>
+      <mbid>ea5493df-b8d9-4c89-bd5b-6c4aeba7a0ac</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/Still+Corners</url>
+    </artist>
+    <artist rank="51">
+      <name>Surf Curse</name>
+      <mbid>89ea85c2-c90a-46ea-93db-9bed95d5c8f8</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/Surf+Curse</url>
+    </artist>
+    <artist rank="52">
+      <name>sweet93</name>
+      <mbid>1560749d-5531-409c-844e-9bb021bb2e62</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/sweet93</url>
+    </artist>
+    <artist rank="53">
+      <name>SZA</name>
+      <mbid>272989c8-5535-492d-a25c-9f58803e027f</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/SZA</url>
+    </artist>
+    <artist rank="54">
+      <name>The Cranberries</name>
+      <mbid>c98d40fd-f6cf-4b26-883e-eaa515ee2851</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/The+Cranberries</url>
+    </artist>
+    <artist rank="55">
+      <name>The Kid LAROI</name>
+      <mbid>80609a00-b394-4a49-975b-2db6b543fa97</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/The+Kid+LAROI</url>
+    </artist>
+    <artist rank="56">
+      <name>The Lemon Twigs</name>
+      <mbid>f32d94e8-8d55-4ee2-9077-53d1c024a03b</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/The+Lemon+Twigs</url>
+    </artist>
+    <artist rank="57">
+      <name>The Radio Dept.</name>
+      <mbid>e664d1cd-23ab-48d5-b8fa-e98485daa5be</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/The+Radio+Dept.</url>
+    </artist>
+    <artist rank="58">
+      <name>Thorne</name>
+      <mbid>c40d6f31-747e-42bc-bb1e-56c6c4ff27c8</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/Thorne</url>
+    </artist>
+    <artist rank="59">
+      <name>TTYL</name>
+      <mbid></mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/TTYL</url>
+    </artist>
+    <artist rank="60">
+      <name>Wallows</name>
+      <mbid>9fae44ec-b95c-4b0f-a0a6-f0008613eabf</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/Wallows</url>
+    </artist>
+    <artist rank="61">
+      <name>You&apos;ll Never Get to Heaven</name>
+      <mbid>81dee823-aaa3-4da0-bffe-ac9b21ef5ad6</mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/You%27ll+Never+Get+to+Heaven</url>
+    </artist>
+    <artist rank="62">
+      <name>Zach Templar</name>
+      <mbid></mbid>
+      <playcount>1</playcount>
+      <url>https://www.last.fm/music/Zach+Templar</url>
+    </artist>
+  </weeklyartistchart>
+</lfm>

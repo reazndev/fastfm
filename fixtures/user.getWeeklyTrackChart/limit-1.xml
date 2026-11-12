@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lfm status="ok">
+  <weeklytrackchart user="Syntiiix" from="1793793600" to="1794398400">
+    <track rank="1">
+      <artist mbid="40f5d9e4-2de7-4f2d-ad41-e31a9a9fea27">The Smiths</artist>
+      <name>Bigmouth Strikes Again - 2011 Remaster</name>
+      <mbid>247879b3-a347-483b-8bd0-b0d46cea0152</mbid>
+      <playcount>5</playcount>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2a96cbd8b46e442fc41c2b86b821562f.png</image>
+      <url>https://www.last.fm/music/The+Smiths/_/Bigmouth+Strikes+Again+-+2011+Remaster</url>
+    </track>
+  </weeklytrackchart>
+</lfm>

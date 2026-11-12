@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lfm status="ok">
+  <weeklyartistchart user="Syntiiix" from="1793793600" to="1794398400">
+    <artist rank="1">
+      <name>glaive</name>
+      <mbid>fd36f43e-5bd1-488e-b844-0e059250ef78</mbid>
+      <playcount>34</playcount>
+      <url>https://www.last.fm/music/glaive</url>
+    </artist>
+  </weeklyartistchart>
+</lfm>

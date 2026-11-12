@@ -1,0 +1,7 @@
+.env
+/data/
+/target/
+node_modules/
+/web/dist/
+/web/.angular/
+.idea/
