@@ -5,7 +5,7 @@
 
 use rusqlite::{Connection, OptionalExtension, params};
 
-use crate::dims::{Resolver, entity_sql};
+use crate::dims::{Resolver, entity_sql, shown_mbid};
 use crate::error::Result;
 use crate::names::fold;
 use crate::pool::Store;
@@ -83,7 +83,7 @@ impl Store {
 
 fn insert(conn: &Connection, resolver: &mut Resolver<'_>, user: UserId, love: &Love) -> Result<()> {
     let artist = resolver.artist(&love.artist)?;
-    let track = resolver.track(artist, &love.track)?;
+    let track = resolver.track(artist, &love.track, Some(shown_mbid(&love.artist)))?;
     let sql = "INSERT INTO loved (user_id, track_id, uts) VALUES (?1, ?2, ?3) \
                ON CONFLICT DO UPDATE SET uts = excluded.uts";
     conn.prepare_cached(sql)?

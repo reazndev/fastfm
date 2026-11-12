@@ -1,0 +1,54 @@
+# Ignore rules for lfm-conformance. Format and categories: conformance/README.md.
+#
+# Seeded from a live run against ws.audioscrobbler.com on 2026-11-12, a few hours after the
+# fixtures were recorded: 131 JSON requests (every user.* fixture plus a sample of catalogue
+# methods), then the 5 drifting user.* fixtures again in both formats. These fields were the only
+# ones that changed between two calls of the same request. Each rule covers `value` differences
+# only, so a wrong type, shape, order or missing field on the same path still fails.
+
+# Global counters: every Last.fm user moves them, so they change by the minute.
+
+[[rule]]
+method = "artist.getInfo"
+path = "artist.stats.listeners"
+reason = "Global listener count; moved by about 700 between two calls hours apart."
+
+[[rule]]
+method = "artist.getInfo"
+path = "artist.stats.playcount"
+reason = "Global play count; moved by about 100,000 between two calls hours apart."
+
+[[rule]]
+method = "chart.getTopArtists"
+path = "artists.artist[*].listeners"
+reason = "Global listener count of each charting artist; all 50 changed between two calls."
+
+[[rule]]
+method = "chart.getTopArtists"
+path = "artists.artist[*].playcount"
+reason = "Global play count of each charting artist; all 50 changed between two calls."
+
+# Per-call values.
+
+[[rule]]
+method = "auth.getToken"
+path = "token"
+reason = "A fresh random request token on every call."
+
+# MusicBrainz ids that flap: for a few albums and tracks Last.fm returns one of several MBIDs
+# (or none), and the choice changes from call to call. user.getRecentTracks limit-1000 differed
+# on the first repeat and matched on the second; user.getTopTracks period-1month differed in JSON
+# and matched in XML one second apart. The rules name the exact ids, so a mirror that drops or
+# changes any other MBID still fails.
+
+[[rule]]
+method = "user.*"
+path = "**mbid"
+values = ["e604dee6-0c2d-4f31-a8f8-291d13578d4f", "d0874319-5fdd-4c32-ae82-9eab28ca95d5"]
+reason = "One album answers with either of these two MBIDs, flipping between calls."
+
+[[rule]]
+method = "user.*"
+path = "**mbid"
+values = ["7235d173-cacd-4a9c-ba67-dbbf17d4753c", ""]
+reason = "One track answers with this MBID or with none, flipping between calls."

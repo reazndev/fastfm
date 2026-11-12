@@ -1,5 +1,6 @@
 //! The router in-process: exact bodies, statuses and headers, matching what Last.fm returned
 //! for the same requests on 2026-11-12.
+#![allow(clippy::unwrap_used, reason = "tests fail on a broken in-memory store")]
 
 use std::sync::Arc;
 use std::time::Duration;
@@ -52,6 +53,8 @@ fn app() -> axum::Router {
         user: "syntiiix".into(),
     };
     let services = Services {
+        store: lfm_store::Store::open_in_memory().unwrap(),
+        clock: lfm_api::Clock::System,
         api_keys: Arc::new(InMemoryApiKeys::default().with(KEY, key)),
         sessions: Arc::new(InMemorySessions::default().with(SK, session)),
         cache: Arc::new(MemoryCache::new(1 << 20, Duration::from_secs(60))),

@@ -34,6 +34,15 @@ pub struct Profile {
     pub user_type: String,
 }
 
+/// `user.getInfo` fields that are kept apart from [`Profile`], set by `update_profile_extras`.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct ProfileExtras {
+    /// The `corrections` flag.
+    pub corrections: i64,
+    /// `spotify_expiry_estimate`, in unix seconds; 0 when unknown.
+    pub spotify_expiry: i64,
+}
+
 /// A mirrored user with everything the store keeps about them.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct MirroredUser {
@@ -43,6 +52,8 @@ pub struct MirroredUser {
     pub name: String,
     /// Profile fields.
     pub profile: Profile,
+    /// Profile fields kept apart.
+    pub extras: ProfileExtras,
     /// Where live sync continues: the last synced unix time.
     pub sync_cursor: i64,
     /// Bumped on every change to the user's data; drives cache invalidation and `ETag` headers.
@@ -53,7 +64,7 @@ pub struct MirroredUser {
 
 const USER_COLUMNS: &str = "id, name, realname, url, country, gender, age, subscriber, playlists, \
      bootstrap, registered_uts, image, user_type, sync_cursor, version, playcount, artist_count, \
-     album_count, track_count";
+     album_count, track_count, corrections, spotify_expiry";
 
 impl Store {
     /// Returns the id of the user named `name` (case-insensitive), creating the user if needed.
@@ -121,6 +132,17 @@ impl Store {
         .await
     }
 
+    /// Replaces the user's [`ProfileExtras`] and bumps the version.
+    pub async fn update_profile_extras(&self, user: UserId, extras: ProfileExtras) -> Result<()> {
+        self.write(move |tx| {
+            let sql = "UPDATE users SET corrections = ?2, spotify_expiry = ?3 WHERE id = ?1";
+            let values = params![user, extras.corrections, extras.spotify_expiry];
+            changed(tx.prepare_cached(sql)?.execute(values)?)?;
+            bump_version(tx, user)
+        })
+        .await
+    }
+
     /// Stores where live sync continues.
     pub async fn set_sync_cursor(&self, user: UserId, uts: i64) -> Result<()> {
         self.write(move |tx| {
@@ -161,6 +183,10 @@ fn user_from_row(row: &Row<'_>) -> rusqlite::Result<MirroredUser> {
         image: row.get(11)?,
         user_type: row.get(12)?,
     };
+    let extras = ProfileExtras {
+        corrections: row.get(19)?,
+        spotify_expiry: row.get(20)?,
+    };
     let stats = UserStats {
         playcount: count(row.get(15)?),
         artists: count(row.get(16)?),
@@ -171,6 +197,7 @@ fn user_from_row(row: &Row<'_>) -> rusqlite::Result<MirroredUser> {
         id: row.get(0)?,
         name: row.get(1)?,
         profile,
+        extras,
         sync_cursor: row.get(13)?,
         version: count(row.get(14)?),
         stats,

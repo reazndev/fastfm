@@ -251,6 +251,8 @@ pub struct Entity {
     pub image: Option<String>,
     /// The artist (albums and tracks).
     pub artist: Option<Named>,
+    /// Length in seconds (tracks, when known).
+    pub duration: Option<i64>,
 }
 
 /// An entity with its play count and rank in a top list.

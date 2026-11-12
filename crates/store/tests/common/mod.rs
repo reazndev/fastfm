@@ -11,7 +11,7 @@
 
 use std::path::PathBuf;
 
-use lfm_store::{Kind, Named, Scrobble, Store, TimeRange, UserId};
+use lfm_store::{Kind, Named, Scrobble, Store, TimeRange, UserId, collation_key};
 use rusqlite::Connection;
 use tempfile::TempDir;
 
@@ -208,22 +208,40 @@ pub async fn loaded(db: &TestDb) -> UserId {
     alice
 }
 
-/// The naive aggregation that top lists must agree with: (id, plays), by plays then id.
+const ARTIST_OF_ALBUM: &str = "(SELECT ar.name FROM albums x JOIN artists ar \
+     ON ar.id = x.artist_id WHERE x.id = s.album_id)";
+const ARTIST_OF_TRACK: &str = "(SELECT ar.name FROM tracks x JOIN artists ar \
+     ON ar.id = x.artist_id WHERE x.id = s.track_id)";
+
+/// The naive aggregation that top lists must agree with: (id, plays), by plays, ties by the
+/// artist's name and then the entity's name, as Last.fm orders them.
 pub fn naive_top(conn: &Connection, user: UserId, kind: Kind, range: TimeRange) -> Vec<(i64, u64)> {
-    let word = match kind {
-        Kind::Artist => "artist",
-        Kind::Album => "album",
-        Kind::Track => "track",
+    let (word, names) = match kind {
+        Kind::Artist => ("artist", "''"),
+        Kind::Album => ("album", ARTIST_OF_ALBUM),
+        Kind::Track => ("track", ARTIST_OF_TRACK),
     };
     let sql = format!(
-        "SELECT {word}_id, count(*) AS n FROM scrobbles WHERE user_id = ?1 AND uts >= ?2 \
-         AND uts < ?3 AND {word}_id IS NOT NULL GROUP BY 1 ORDER BY n DESC, 1"
+        "SELECT {word}_id, count(*) AS n, {names}, (SELECT name FROM {word}s WHERE id = {word}_id) \
+         FROM scrobbles s WHERE user_id = ?1 AND uts >= ?2 \
+         AND uts < ?3 AND {word}_id IS NOT NULL GROUP BY 1"
     );
     let mut stmt = conn.prepare(&sql).unwrap();
-    stmt.query_map(rusqlite::params![user.0, range.from, range.to], |row| {
-        Ok((row.get(0)?, row.get(1)?))
-    })
-    .unwrap()
-    .collect::<Result<_, _>>()
-    .unwrap()
+    let mut rows: Vec<(i64, u64, String, String)> = stmt
+        .query_map(rusqlite::params![user.0, range.from, range.to], |row| {
+            Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?))
+        })
+        .unwrap()
+        .collect::<Result<_, _>>()
+        .unwrap();
+    rows.sort_by_cached_key(|(_, plays, artist, name)| {
+        (
+            std::cmp::Reverse(*plays),
+            collation_key(artist),
+            collation_key(name),
+        )
+    });
+    rows.into_iter()
+        .map(|(id, plays, _, _)| (id, plays))
+        .collect()
 }

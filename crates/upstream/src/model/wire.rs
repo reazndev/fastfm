@@ -196,6 +196,14 @@ struct WireUser {
     subscriber: bool,
     #[serde(rename = "type", default)]
     kind: String,
+    #[serde(default)]
+    gender: String,
+    #[serde(default, deserialize_with = "number")]
+    age: u64,
+    #[serde(default, deserialize_with = "number")]
+    playlists: u64,
+    #[serde(default, deserialize_with = "number")]
+    bootstrap: u64,
 }
 
 impl From<WireUser> for User {
@@ -213,6 +221,10 @@ impl From<WireUser> for User {
             images: images(u.image),
             subscriber: u.subscriber,
             kind: u.kind,
+            gender: u.gender,
+            age: u.age,
+            playlists: u.playlists,
+            bootstrap: u.bootstrap,
         }
     }
 }

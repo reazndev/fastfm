@@ -1,5 +1,6 @@
 //! Dispatcher behaviour that the HTTP tests in `lfm-mirror` do not cover: key states, scopes
 //! and the response cache.
+#![allow(clippy::unwrap_used, reason = "tests fail on a broken in-memory store")]
 
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU32, Ordering};
@@ -88,6 +89,8 @@ fn dispatcher(cache: Arc<MemoryCache>) -> Dispatcher {
         user: "syntiiix".into(),
     };
     let services = Services {
+        store: lfm_store::Store::open_in_memory().unwrap(),
+        clock: lfm_api::Clock::System,
         api_keys: Arc::new(keys),
         sessions: Arc::new(InMemorySessions::default().with("sk", session)),
         cache,

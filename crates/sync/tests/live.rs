@@ -1,0 +1,115 @@
+//! Live sync and the now-playing state, against a fake Last.fm.
+
+mod support;
+
+use std::time::Duration;
+
+use lfm_store::TimeRange;
+use lfm_sync::SyncConfig;
+use support::{Harness, REGISTERED, USER, eventually, now};
+
+const ALL: TimeRange = TimeRange {
+    from: 0,
+    to: 1 << 40,
+};
+
+fn fast(page_limit: u32) -> SyncConfig {
+    SyncConfig::default()
+        .page_limit(page_limit)
+        .live_intervals(Duration::from_millis(10), Duration::from_millis(30))
+        .periods_interval(Duration::from_millis(50))
+}
+
+async fn mirrors(h: &Harness) -> bool {
+    h.stored(ALL).await == h.fake.listing(ALL)
+}
+
+/// Waits until the store mirrors the fake, then for a few more polls, and checks it still does.
+async fn settle(h: &Harness) {
+    eventually(|| mirrors(h)).await;
+    let polls = h.fake.calls("user.getRecentTracks");
+    eventually(|| async { h.fake.calls("user.getRecentTracks") >= polls + 3 }).await;
+    h.assert_mirrors(ALL).await;
+}
+
+#[tokio::test]
+async fn live_sync_appends_without_loss_or_doubling() {
+    let h = Harness::with_config(fast(1000)).await;
+    h.fake
+        .add(&[(REGISTERED, "old"), (REGISTERED + 1, "older")]);
+    h.service.follow(USER).await.unwrap();
+    settle(&h).await;
+
+    let base = now() + 100;
+    h.fake.add(&[(base, "a"), (base + 5, "b")]);
+    settle(&h).await;
+    // Another scrobble in the newest second already synced: it must arrive, once.
+    h.fake.add(&[(base + 5, "c"), (base + 6, "d")]);
+    settle(&h).await;
+    h.fake.add(&[(base + 6, "e")]);
+    settle(&h).await;
+
+    let user = h.user().await;
+    let cursor = h.store.user(user).await.unwrap().unwrap().sync_cursor;
+    assert_eq!(cursor, base + 6);
+    assert_eq!(h.stored(ALL).await.len(), 7);
+    h.service.shutdown().await;
+}
+
+#[tokio::test]
+async fn live_sync_catches_up_on_more_than_one_page() {
+    let h = Harness::with_config(fast(3)).await;
+    h.fake.add(&[(REGISTERED, "old")]);
+    h.service.follow(USER).await.unwrap();
+    settle(&h).await;
+
+    let base = now() + 100;
+    let names: Vec<String> = (0..11).map(|i| format!("n{i}")).collect();
+    let rows: Vec<(i64, &str)> = names
+        .iter()
+        .enumerate()
+        .map(|(i, n)| (base + i64::try_from(i / 2).unwrap(), n.as_str()))
+        .collect();
+    h.fake.add(&rows);
+    settle(&h).await;
+    assert_eq!(h.stored(ALL).await.len(), 12);
+    h.service.shutdown().await;
+}
+
+#[tokio::test]
+async fn now_playing_follows_the_last_poll() {
+    let h = Harness::with_config(fast(1000)).await;
+    h.fake.add(&[(REGISTERED, "old")]);
+    let user = h.service.follow(USER).await.unwrap();
+    let now_playing = h.service.now_playing();
+    settle(&h).await;
+    assert!(now_playing.get(user).is_none());
+
+    h.fake.with(|d| d.now_playing = Some("Believe".into()));
+    eventually(|| async { now_playing.get(user).is_some() }).await;
+    let playing = now_playing.get(user).unwrap();
+    assert_eq!(playing.track.name, "Believe");
+    assert_eq!(playing.track.artist.name, "Cher");
+    assert!(playing.seen_at > 0);
+
+    h.fake.with(|d| d.now_playing = None);
+    eventually(|| async { now_playing.get(user).is_none() }).await;
+
+    h.fake.with(|d| d.now_playing = Some("Strong".into()));
+    eventually(|| async { now_playing.get(user).is_some() }).await;
+    h.service.unfollow(user).await;
+    assert!(now_playing.get(user).is_none(), "unfollow clears the state");
+    h.service.shutdown().await;
+}
+
+#[tokio::test]
+async fn follow_skips_the_import_when_one_finished() {
+    let h = Harness::with_config(fast(1000)).await;
+    h.fake.add(&[(REGISTERED, "old")]);
+    h.import(None).await;
+    let planned = h.fake.calls("user.getInfo");
+    h.service.follow(USER).await.unwrap();
+    settle(&h).await;
+    assert_eq!(h.fake.calls("user.getInfo"), planned, "no second import");
+    h.service.shutdown().await;
+}

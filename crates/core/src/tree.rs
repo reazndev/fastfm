@@ -174,11 +174,22 @@ impl Node {
     }
 }
 
-/// A successful response: the element inside `<lfm status="ok">` plus JSON flavour settings.
+/// Which of Last.fm's two backends a method's formatting copies; see `fixtures/NOTES.md`.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
+pub enum Style {
+    /// "Style A": indented XML, empty lists self-close, errors as `{"message","error"}`.
+    #[default]
+    Classic,
+    /// "Style B": unindented XML, `?>` after a space, errors as `{"error","message","links"}`.
+    Modern,
+}
+
+/// A successful response: the element inside `<lfm status="ok">` plus flavour settings.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Response {
     pub(crate) root: Option<Node>,
     pub(crate) escape_slashes: bool,
+    pub(crate) style: Style,
 }
 
 impl Response {
@@ -188,6 +199,7 @@ impl Response {
         Self {
             root: Some(root),
             escape_slashes: false,
+            style: Style::Classic,
         }
     }
 
@@ -197,6 +209,7 @@ impl Response {
         Self {
             root: None,
             escape_slashes: false,
+            style: Style::Classic,
         }
     }
 
@@ -207,6 +220,13 @@ impl Response {
     #[must_use]
     pub fn escape_slashes(mut self) -> Self {
         self.escape_slashes = true;
+        self
+    }
+
+    /// Renders in the given backend's style.
+    #[must_use]
+    pub fn style(mut self, style: Style) -> Self {
+        self.style = style;
         self
     }
 

@@ -156,3 +156,22 @@ Probe (`cargo run -p lfm-record -- probe`): 160 `user.getInfo` calls at 8 req/s 
 req/s**: no error 29, no 429, no other error in either phase. So this does not settle per-key vs
 per-IP; the pool's per-key buckets at the default 4 req/s are well inside what was observed.
 The fixture run itself made about 450 calls at 2 req/s with no retries.
+
+## Import (lfm-sync, 2026-11-12)
+
+Full import of the same user with `limit=1000&extended=1`, 8 parallel ranges, 8 req/s shared
+across the key pool: 160,643 scrobbles in 54 s and 179 requests, `--until 1794518863`.
+
+- **Same-second scrobbles are common.** 1,458 scrobbles share their second with another one, and
+  one second holds 11. Any window or page boundary must keep a second whole.
+- **`limit=1&page=n` is an exact quantile.** Page 140,000 with `limit=1` and `to=` answers in
+  about half a second, so splitting a history into equal parts costs one request per part.
+- **Error 8 ("Operation failed") happens on big pages.** It came once in about 180
+  `limit=1000` calls and passed on the first retry.
+- **Range counts are slow on long ranges.** A `limit=1` call with `from`/`to` spanning months
+  takes 0.3 to 0.7 s, so the 33 reconcile comparisons take 12 to 22 s.
+- **Last.fm's library counts are not distinct names.** `user.getInfo` says 4,046 artists and
+  6,198 albums; the same scrobbles hold 4,052 case-folded artist names and 6,348 albums keyed by
+  track artist and name. Track counts agree (15,477).
+- The scrobble count for `to=1794518863` (160,643) equals `playcount` in the `user.getInfo`
+  fixture, and no request hit a rate limit at 8 req/s with eight requests in flight.

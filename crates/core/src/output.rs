@@ -2,7 +2,7 @@
 
 use crate::error::{ApiError, ErrorCode};
 use crate::params::Params;
-use crate::tree::Response;
+use crate::tree::{Response, Style};
 use crate::{json, xml};
 
 /// The response format.
@@ -108,13 +108,19 @@ impl Output {
         out
     }
 
-    /// Renders an error response.
+    /// Renders an error response in the classic style.
     #[must_use]
     pub fn render_error(&self, error: &ApiError) -> Vec<u8> {
+        self.render_error_in(error, Style::Classic)
+    }
+
+    /// Renders an error response in the given backend's style.
+    #[must_use]
+    pub fn render_error_in(&self, error: &ApiError, style: Style) -> Vec<u8> {
         let mut out = Vec::with_capacity(256);
         match self.format {
-            Format::Xml => xml::render_error(error, &mut out),
-            Format::Json => self.wrap(&mut out, |out| json::render_error(error, out)),
+            Format::Xml => xml::render_error(error, style, &mut out),
+            Format::Json => self.wrap(&mut out, |out| json::render_error(error, style, out)),
         }
         out
     }

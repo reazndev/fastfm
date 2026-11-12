@@ -376,3 +376,41 @@ fn every_error_code_has_a_distinct_number() {
     let expected: Vec<u8> = (2..=29).filter(|n| ![19, 28].contains(n)).collect();
     assert_eq!(numbers, expected);
 }
+
+#[test]
+fn modern_errors_put_the_code_first_and_skip_the_indent() {
+    let error = ApiError::new(ErrorCode::InvalidParameters)
+        .with_message("The artist you supplied could not be found");
+    let json = Output::plain(Format::Json).render_error_in(&error, lfm_core::Style::Modern);
+    assert_eq!(
+        String::from_utf8_lossy(&json),
+        r#"{"error":6,"message":"The artist you supplied could not be found","links":[]}"#
+    );
+    let xml = Output::plain(Format::Xml).render_error_in(&error, lfm_core::Style::Modern);
+    assert_eq!(
+        String::from_utf8_lossy(&xml),
+        "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<lfm status=\"failed\"><error code=\"6\">\
+         The artist you supplied could not be found</error>\n</lfm>\n"
+    );
+}
+
+#[test]
+fn modern_xml_has_no_indent_and_empty_lists_stay_open() {
+    let root = Node::new("toptags").array("tag").attr("user", "Syntiiix");
+    let response = Response::new(root).style(lfm_core::Style::Modern);
+    assert_eq!(
+        render(&response, Format::Xml),
+        "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<lfm status=\"ok\"><toptags \
+         user=\"Syntiiix\"></toptags>\n</lfm>\n"
+    );
+}
+
+#[test]
+fn classic_xml_self_closes_an_empty_list() {
+    let root = Node::new("lovedtracks").array("track").attr("page", 2u32);
+    assert_eq!(
+        render(&Response::new(root), Format::Xml),
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<lfm status=\"ok\">\n  \
+         <lovedtracks page=\"2\" />\n</lfm>\n"
+    );
+}

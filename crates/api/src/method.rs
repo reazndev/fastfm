@@ -3,10 +3,12 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use lfm_core::{ApiError, Params, Response};
+use lfm_core::{ApiError, Params, Response, Style};
+use lfm_store::{MirroredUser, Store};
 
 use crate::auth::{ApiKey, ApiKeys, Session, Sessions};
 use crate::cache::ResponseCache;
+use crate::clock::Clock;
 
 /// What a method needs from the caller before it runs.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -19,10 +21,13 @@ pub enum Access {
     Session,
 }
 
-/// Shared services that methods use. The store and the upstream client are added here when
-/// those crates land.
+/// Shared services that methods use. The upstream client is added here when pass-through lands.
 #[derive(Clone)]
 pub struct Services {
+    /// The database.
+    pub store: Store,
+    /// What "now" is for methods.
+    pub clock: Clock,
     /// API key lookup.
     pub api_keys: Arc<dyn ApiKeys>,
     /// Session key lookup.
@@ -50,6 +55,8 @@ pub struct Context<'a> {
     pub services: &'a Services,
     /// The request time in Unix seconds, for `period` ranges and dates.
     pub now: u64,
+    /// The mirrored user named by [`Method::cache_user`], when the store has them.
+    pub user: Option<&'a MirroredUser>,
 }
 
 /// One Last.fm API method. Implementations live in `methods/<package>/<method>.rs`; they parse
@@ -64,11 +71,23 @@ pub trait Method: Send + Sync {
         Access::Read
     }
 
-    /// The user whose data the response shows, when the rendered response may be cached until
-    /// that user's next ingest. `None` disables caching, which is the default.
+    /// The user whose data the response shows. The dispatcher looks them up for
+    /// [`Context::user`], and caches the rendered response until that user's next ingest.
+    /// `None` disables both, which is the default.
     fn cache_user<'p>(&self, params: &'p Params) -> Option<&'p str> {
         let _ = params;
         None
+    }
+
+    /// Which backend's formatting the method copies, for its body and its errors.
+    fn style(&self) -> Style {
+        Style::Classic
+    }
+
+    /// Whether Last.fm serves this method's JSON as `application/json; charset=UTF-8` with an
+    /// extra `access-control-request-headers` header, as some modern-style methods do.
+    fn utf8_json(&self) -> bool {
+        false
     }
 
     /// Runs the method.

@@ -113,6 +113,14 @@ pub struct User {
     pub subscriber: bool,
     /// Account type, such as `user` or `subscriber`.
     pub kind: String,
+    /// Gender code, such as `n`; empty where Last.fm leaves it out.
+    pub gender: String,
+    /// Age; 0 when hidden or left out.
+    pub age: u64,
+    /// Playlist count; 0 where Last.fm leaves it out.
+    pub playlists: u64,
+    /// Bootstrap flag as Last.fm reports it; 0 where left out.
+    pub bootstrap: u64,
 }
 
 /// One loved track.

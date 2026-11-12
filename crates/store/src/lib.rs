@@ -10,6 +10,7 @@
 mod accounts;
 mod buckets;
 mod cache;
+mod collate;
 mod counts;
 mod db;
 mod delta;
@@ -35,10 +36,11 @@ mod weekly;
 
 pub use accounts::{Account, AccountStatus, LastfmCredentials, Role};
 pub use cache::CachedResponse;
+pub use collate::collation_key;
 pub use error::{Result, StoreError};
 pub use jobs::{Job, JobStatus, JobUpdate};
 pub use keys::{ApiKey, KeyScope, NewApiKey};
-pub use lookup::{Lookup, UserPlays};
+pub use lookup::{Lookup, TrackDuration, UserPlays};
 pub use loved::{Love, LovedTrack};
 pub use names::{fold, image_key};
 pub use pool::Store;
@@ -49,4 +51,4 @@ pub use types::{
     AccountId, Entity, JobId, Kind, Listing, MAX_LIMIT, Named, Page, Period, Ranked, RecentTrack,
     Scrobble, TimeRange, UserId, UserStats,
 };
-pub use users::{MirroredUser, Profile};
+pub use users::{MirroredUser, Profile, ProfileExtras};

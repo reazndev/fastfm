@@ -7,7 +7,11 @@ use rusqlite::{Connection, OpenFlags, OptionalExtension};
 use crate::error::Result;
 
 /// Numbered migrations, applied in order. `PRAGMA user_version` holds how many have run.
-const MIGRATIONS: &[&str] = &[include_str!("../../../migrations/0001_init.sql")];
+const MIGRATIONS: &[&str] = &[
+    include_str!("../../../migrations/0001_init.sql"),
+    include_str!("../../../migrations/0002_details.sql"),
+    include_str!("../../../migrations/0003_track_artist_mbid.sql"),
+];
 
 /// Prepared statements kept per connection. The store uses fewer than this.
 const STATEMENT_CACHE: usize = 256;

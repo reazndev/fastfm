@@ -1,0 +1,44 @@
+# Conformance cases expected to pass (exactly or with ignores), one id per line.
+# A listed case that fails is a regression. Update after a method improves with:
+#   scripts/conformance.sh --write-expect conformance/expected.txt
+# or: lfm-conformance run --base-url <url> --write-expect <this file>
+user.getInfo/error-invalid-key.json
+user.getInfo/error-invalid-key.xml
+user.getInfo/error-missing-key.json
+user.getInfo/error-missing-key.xml
+user.getInfo/error-missing-user.json
+user.getInfo/error-missing-user.xml
+user.getInfo/error-unknown-user.json
+user.getInfo/error-unknown-user.xml
+user.getInfo/post-error-invalid-key.json
+user.getInfo/post-error-invalid-key.xml
+user.getRecentTracks/error-missing-user.json
+user.getRecentTracks/error-missing-user.xml
+user.getRecentTracks/error-page-out-of-range.json
+user.getRecentTracks/error-page-out-of-range.xml
+user.getRecentTracks/error-unknown-user.json
+user.getRecentTracks/error-unknown-user.xml
+user.getRecentTracks/limit-0.json
+user.getRecentTracks/limit-0.xml
+user.getRecentTracks/page-0.json
+user.getRecentTracks/page-0.xml
+user.getRecentTracks/range-from-equals-to.json
+user.getRecentTracks/range-from-equals-to.xml
+user.getRecentTracks/range-to-at-scrobble.json
+user.getRecentTracks/range-to-at-scrobble.xml
+user.getRecentTracks/range-zero-scrobbles.json
+user.getRecentTracks/range-zero-scrobbles.xml
+user.getTopArtists/error-unknown-user.json
+user.getTopArtists/error-unknown-user.xml
+user.getWeeklyAlbumChart/range-oldest.json
+user.getWeeklyAlbumChart/range-oldest.xml
+user.getWeeklyArtistChart/error-unknown-user.json
+user.getWeeklyArtistChart/error-unknown-user.xml
+user.getWeeklyArtistChart/range-oldest.json
+user.getWeeklyArtistChart/range-oldest.xml
+user.getWeeklyChartList/default.json
+user.getWeeklyChartList/default.xml
+user.getWeeklyTrackChart/range-oldest.json
+user.getWeeklyTrackChart/range-oldest.xml
+user.noSuchMethod/error-unknown-method.json
+user.noSuchMethod/error-unknown-method.xml

@@ -101,8 +101,8 @@ async fn parses_user_info() {
     let server = MockServer::start().await;
     let body = r##"{"user":{"name":"Alice","realname":"A","url":"https://www.last.fm/user/Alice",
         "country":"Germany","playcount":"160643","artist_count":"4046","album_count":"6198",
-        "track_count":"15477","subscriber":"0","type":"user",
-        "image":[{"size":"small","#text":""}],
+        "track_count":"15477","subscriber":"0","type":"user","gender":"n","age":"0",
+        "playlists":"2","bootstrap":"0","image":[{"size":"small","#text":""}],
         "registered":{"unixtime":"1628951940","#text":1628951940}}}"##;
     mount_json(&server, "user.getInfo", body).await;
     let user = fast_client(&server)
@@ -114,6 +114,8 @@ async fn parses_user_info() {
     assert_eq!(user.registered, 1_628_951_940);
     assert_eq!(user.kind, "user");
     assert!(!user.subscriber);
+    assert_eq!(user.gender, "n");
+    assert_eq!(user.playlists, 2);
 }
 
 #[tokio::test]

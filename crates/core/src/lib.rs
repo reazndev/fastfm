@@ -24,5 +24,5 @@ pub use paging::{PageSpec, Paging};
 pub use params::Params;
 pub use period::{Period, TimeRange};
 pub use signature::{api_signature, verify_signature};
-pub use tree::{Node, Response, Str, Text};
+pub use tree::{Node, Response, Str, Style, Text};
 pub use url::{album_url, artist_url, track_url, user_url};

@@ -90,7 +90,7 @@ impl RecentTracksQuery {
         self
     }
 
-    /// Sets the page size (Last.fm allows up to 200).
+    /// Sets the page size. Last.fm documents 200 as the maximum but accepts up to 1000.
     #[must_use]
     pub fn limit(mut self, limit: u32) -> Self {
         self.page.limit = Some(limit);
@@ -106,7 +106,7 @@ impl RecentTracksQuery {
         }
     }
 
-    /// Only scrobbles at or before this Unix time.
+    /// Only scrobbles before this Unix time; Last.fm treats `to` as exclusive.
     #[must_use]
     pub fn to(self, to: u64) -> Self {
         Self {

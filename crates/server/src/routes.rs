@@ -56,6 +56,9 @@ async fn api(
         HeaderValue::from_static(reply.content_type),
     );
     add_cors(headers);
+    for (name, value) in reply.headers {
+        headers.insert(*name, HeaderValue::from_static(value));
+    }
     response
 }
 

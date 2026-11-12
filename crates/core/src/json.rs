@@ -2,7 +2,7 @@
 //! `"#text"` for text next to attributes, repeated children as arrays, no trailing newline.
 
 use crate::error::ApiError;
-use crate::tree::{Node, Response, Text};
+use crate::tree::{Node, Response, Style, Text};
 
 /// Appends a successful response to `out`.
 pub fn render(response: &Response, out: &mut Vec<u8>) {
@@ -18,19 +18,30 @@ pub fn render(response: &Response, out: &mut Vec<u8>) {
     writer.out.push(b'}');
 }
 
-/// Appends an error response to `out`. Last.fm puts `message` before `error`.
-pub fn render_error(error: &ApiError, out: &mut Vec<u8>) {
+/// Appends an error response to `out`. The classic backend puts `message` before `error`; the
+/// modern one puts `error` first and adds an empty `links` list.
+pub fn render_error(error: &ApiError, style: Style, out: &mut Vec<u8>) {
     let mut writer = Writer {
         out,
         escape_slashes: false,
     };
-    writer.out.extend_from_slice(b"{\"message\":");
-    writer.string(error.message());
-    writer.out.extend_from_slice(b",\"error\":");
-    writer
-        .out
-        .extend_from_slice(error.code().number().to_string().as_bytes());
-    writer.out.push(b'}');
+    let code = error.code().number().to_string();
+    match style {
+        Style::Classic => {
+            writer.out.extend_from_slice(b"{\"message\":");
+            writer.string(error.message());
+            writer.out.extend_from_slice(b",\"error\":");
+            writer.out.extend_from_slice(code.as_bytes());
+            writer.out.push(b'}');
+        }
+        Style::Modern => {
+            writer.out.extend_from_slice(b"{\"error\":");
+            writer.out.extend_from_slice(code.as_bytes());
+            writer.out.extend_from_slice(b",\"message\":");
+            writer.string(error.message());
+            writer.out.extend_from_slice(b",\"links\":[]}");
+        }
+    }
 }
 
 enum Entry<'a> {

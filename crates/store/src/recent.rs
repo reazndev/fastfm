@@ -11,8 +11,9 @@ use crate::types::{Listing, Page, RecentTrack, TimeRange, UserId};
 /// The page is cut from the scrobbles table first, so names are joined for its rows only.
 const PAGE_SQL: &str = "\
     SELECT s.uts, \
-        t.id, t.name, t.mbid, t.url, NULL, ar.name, ar.mbid, ar.url, \
-        al.id, al.name, al.mbid, NULL, al.image, NULL, NULL, NULL, \
+        t.id, t.name, t.mbid, t.url, NULL, ar.name, coalesce(t.artist_mbid, ar.mbid), ar.url, \
+        t.duration, \
+        al.id, al.name, al.mbid, NULL, al.image, NULL, NULL, NULL, NULL, \
         l.uts IS NOT NULL \
     FROM (SELECT uts, seq, track_id, album_id, artist_id FROM scrobbles \
           WHERE user_id = +?1 AND uts >= ?2 AND uts < ?3 \
@@ -60,11 +61,11 @@ fn recent_tracks(
 }
 
 fn recent_from_row(row: &Row<'_>) -> rusqlite::Result<RecentTrack> {
-    let album_id: Option<i64> = row.get(9)?;
+    let album_id: Option<i64> = row.get(10)?;
     Ok(RecentTrack {
         uts: row.get(0)?,
         track: entity_at(row, 1)?,
-        album: album_id.map(|_| entity_at(row, 9)).transpose()?,
-        loved: row.get(17)?,
+        album: album_id.map(|_| entity_at(row, 10)).transpose()?,
+        loved: row.get(19)?,
     })
 }

@@ -39,10 +39,11 @@ pub fn user_url(user: &str) -> String {
 }
 
 /// Encodes one path segment the way Last.fm does: space becomes `+`, letters, digits and
-/// `-_.!~*(),` stay, everything else is percent-encoded as UTF-8 with uppercase hex.
+/// `-_.!~*(),&:$;=@` stay, everything else is percent-encoded as UTF-8 with uppercase hex.
 ///
-/// Observed: `,` `(` `)` stay; space, `/`, `'` and non-ASCII are encoded. The rest of the
-/// kept set is a guess.
+/// Observed in the 2026-11-12 fixtures: `,()&:$;=@*` stay; space, `/`, `'`, `"`, `#`, `%`, `?`,
+/// `[]{}<>` and non-ASCII are encoded. `!` appears both ways (Last.fm keeps each entity's URL as
+/// first created), so stored URLs win over this; `~` is a guess.
 pub fn encode_name(name: &str, out: &mut String) {
     for byte in name.bytes() {
         match byte {
@@ -58,7 +59,13 @@ pub fn encode_name(name: &str, out: &mut String) {
             | b'*'
             | b'('
             | b')'
-            | b',' => out.push(char::from(byte)),
+            | b','
+            | b'&'
+            | b':'
+            | b'$'
+            | b';'
+            | b'='
+            | b'@' => out.push(char::from(byte)),
             _ => {
                 let _ = write!(out, "%{byte:02X}");
             }

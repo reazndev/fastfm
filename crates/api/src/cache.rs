@@ -17,6 +17,7 @@ pub struct CacheKey {
     method: &'static str,
     params: String,
     format: Format,
+    version: u64,
 }
 
 impl CacheKey {
@@ -35,7 +36,16 @@ impl CacheKey {
             method,
             params: canonical.finish(),
             format,
+            version: 0,
         }
+    }
+
+    /// Ties the key to a version of the user's stored data, so the entry stops matching once
+    /// the store bumps that version.
+    #[must_use]
+    pub fn at_version(mut self, version: u64) -> Self {
+        self.version = version;
+        self
     }
 
     /// The lowercased user the entry belongs to.
