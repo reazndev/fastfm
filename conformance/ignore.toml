@@ -28,6 +28,45 @@ method = "chart.getTopArtists"
 path = "artists.artist[*].playcount"
 reason = "Global play count of each charting artist; all 50 changed between two calls."
 
+[[rule]]
+method = "tag.getInfo"
+path = "tag.total"
+reason = "Global tagging count of the tag; grew by 3 within two hours of recording."
+
+# Tag counters: every tagging on Last.fm moves them. Observed through the pass-through on
+# 2026-11-12, about 90 minutes after recording: reach and taggings of most top tags, and the total
+# number of tags (with totalPages, which is derived from it), changed by a few units.
+
+[[rule]]
+method = "chart.getTopTags"
+path = "tags.tag*.reach"
+reason = "Global tag reach; moved by a few units within 90 minutes."
+
+[[rule]]
+method = "chart.getTopTags"
+path = "tags.tag*.taggings"
+reason = "Global tagging count; moved by a few units within 90 minutes."
+
+[[rule]]
+method = "chart.getTopTags"
+path = "tags.**total*"
+reason = "Number of tags on Last.fm (and totalPages derived from it); grew within 90 minutes."
+
+[[rule]]
+method = "tag.getTopTags"
+path = "toptags.tag*.count"
+reason = "Global tagging count; moved by a few units within 90 minutes."
+
+[[rule]]
+method = "tag.getTopTags"
+path = "toptags.tag*.reach"
+reason = "Global tag reach; moved by a few units within 90 minutes."
+
+[[rule]]
+method = "tag.getTopTags"
+path = "toptags.**total"
+reason = "Number of tags on Last.fm; grew within 90 minutes."
+
 # Per-call values.
 
 [[rule]]
@@ -52,3 +91,85 @@ method = "user.*"
 path = "**mbid"
 values = ["7235d173-cacd-4a9c-ba67-dbbf17d4753c", ""]
 reason = "One track answers with this MBID or with none, flipping between calls."
+
+# Album counts the mirror cannot derive. Last.fm files a scrobble under its album artist, which
+# recent tracks do not show. The mirror recovers it from the overall top albums by matching each
+# scrobbled album spelling and cover (see crates/sync/src/enrich/plan.rs), which places all but
+# 62 of the 160,643 fixture scrobbles. Those 62 share spelling, cover and track artist with
+# scrobbles Last.fm files under another album artist, so 11 of Last.fm's 6,198 albums (small
+# single releases such as `Junkie` by `Maitchh`) get no plays locally. Only the album count is
+# exempt, and only with exactly these two values; every listed album and play count must match.
+
+[[rule]]
+method = "user.getInfo"
+path = "user.album_count"
+values = ["6198", "6187"]
+reason = "11 albums Last.fm files by an album artist that no scrobble shows; see above."
+
+[[rule]]
+method = "user.getTopAlbums"
+path = "topalbums.**total*"
+values = ["6198", "6187"]
+reason = "Total and, with limit=1, page count of the overall album list; same cause as above."
+
+# Catalogue data that changed on Last.fm between recording the fixtures (2026-11-12 21:27 UTC)
+# and the import behind data/conformance.db (2026-11-13). The mirror copies what Last.fm shows
+# at import time; the top lists fetched on 2026-11-12 23:45 UTC still had the recorded values.
+# Each rule names the old and the new value, so any other change still fails.
+
+[[rule]]
+method = "user.*"
+path = "**image**"
+values = [
+    "https://lastfm-img.freetls.fastly.net/i/u/34s/ae3aa05773f037f23b21b97a9b26ae0a.png",
+    "https://lastfm-img.freetls.fastly.net/i/u/64s/ae3aa05773f037f23b21b97a9b26ae0a.png",
+    "https://lastfm-img.freetls.fastly.net/i/u/174s/ae3aa05773f037f23b21b97a9b26ae0a.png",
+    "https://lastfm-img.freetls.fastly.net/i/u/300x300/ae3aa05773f037f23b21b97a9b26ae0a.png",
+    "https://lastfm-img.freetls.fastly.net/i/u/34s/3e9f44a18466985b01748600ee4892a3.png",
+    "https://lastfm-img.freetls.fastly.net/i/u/64s/3e9f44a18466985b01748600ee4892a3.png",
+    "https://lastfm-img.freetls.fastly.net/i/u/174s/3e9f44a18466985b01748600ee4892a3.png",
+    "https://lastfm-img.freetls.fastly.net/i/u/300x300/3e9f44a18466985b01748600ee4892a3.png",
+]
+reason = "Cover of `The Best of Sade` replaced on Last.fm after recording."
+
+[[rule]]
+method = "user.*"
+path = "**mbid"
+values = ["e12f8fc7-72e3-4a0e-a2a6-5c8226b725b8", "e4fed826-1714-3417-a9d6-c39fd87fc1d7"]
+reason = "MBID of `Everybody Wants to Rule the World` changed on Last.fm after recording."
+
+[[rule]]
+method = "user.*"
+path = "**mbid"
+values = ["67ffa1bb-a86d-4864-a878-c7bc6c28d347", "6a1016a7-90ca-4f3c-962c-83bd05758905"]
+reason = "MBID of `Take on Me` changed on Last.fm after recording."
+
+[[rule]]
+method = "user.*"
+path = "**mbid"
+values = ["8697694c-0345-3490-b37c-a3ff9cf6a98c", "8c8c00d8-d53a-4ead-bb5a-7d116a2631b1"]
+reason = "A track MBID that changed on Last.fm after recording."
+
+[[rule]]
+method = "user.*"
+path = "**mbid"
+values = ["4cf3b38f-a9d4-4486-8e01-b42ff5e6afd9", "52cb9554-cf0d-4ae5-960e-4b6de7329656"]
+reason = "A track MBID that changed on Last.fm after recording."
+
+[[rule]]
+method = "user.*"
+path = "**mbid"
+values = ["", "bc4cffde-4cb9-4e8a-be45-b5fe25b784bc"]
+reason = "A track that got an MBID on Last.fm after recording."
+
+[[rule]]
+method = "user.getTopTracks"
+path = "toptracks.track*.duration"
+values = ["247", "253"]
+reason = "Length of `Everybody Wants to Rule the World`, changed with its MBID."
+
+[[rule]]
+method = "user.getTopTracks"
+path = "toptracks.track*.duration"
+values = ["295", "297"]
+reason = "A track length that changed on Last.fm after recording."

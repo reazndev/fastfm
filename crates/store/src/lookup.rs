@@ -3,6 +3,7 @@
 use rusqlite::{Connection, OptionalExtension, params};
 
 use crate::error::Result;
+use crate::library::LibMap;
 use crate::names::fold;
 use crate::pool::Store;
 use crate::types::{Kind, Named, UserId, count};
@@ -39,7 +40,8 @@ pub enum Lookup {
 }
 
 impl Lookup {
-    fn kind(&self) -> Kind {
+    /// The kind of entity it finds.
+    pub(crate) fn kind(&self) -> Kind {
         match self {
             Self::Artist { .. } => Kind::Artist,
             Self::Album { .. } => Kind::Album,
@@ -129,11 +131,15 @@ fn user_plays(conn: &Connection, user: UserId, lookup: &Lookup) -> Result<UserPl
     let Some(id) = find(conn, lookup)? else {
         return Ok(UserPlays::default());
     };
+    // Plays count under the library entity, which for a corrected name is another one.
+    let lib = LibMap::new(user).id(conn, kind, id)?;
     let word = kind.word();
-    let sql = format!("SELECT plays FROM user_{word}_total WHERE user_id = ?1 AND {word}_id = ?2");
+    let sql = format!(
+        "SELECT plays FROM user_{word}_total WHERE user_id = ?1 AND period = 0 AND {word}_id = ?2"
+    );
     let plays: Option<i64> = conn
         .prepare_cached(&sql)?
-        .query_row(params![user, id], |row| row.get(0))
+        .query_row(params![user, lib], |row| row.get(0))
         .optional()?;
     let loved = kind == Kind::Track && {
         let sql = "SELECT 1 FROM loved WHERE user_id = ?1 AND track_id = ?2";
@@ -146,7 +152,8 @@ fn user_plays(conn: &Connection, user: UserId, lookup: &Lookup) -> Result<UserPl
     })
 }
 
-fn find(conn: &Connection, lookup: &Lookup) -> Result<Option<i64>> {
+/// The id of the entity `lookup` finds, if it is stored.
+pub(crate) fn find(conn: &Connection, lookup: &Lookup) -> Result<Option<i64>> {
     let get = |row: &rusqlite::Row<'_>| row.get(0);
     let found = match lookup {
         Lookup::Artist { name } => {
@@ -154,8 +161,10 @@ fn find(conn: &Connection, lookup: &Lookup) -> Result<Option<i64>> {
             conn.prepare_cached(sql)?.query_row([fold(name)], get)
         }
         Lookup::Album { artist, name } => {
+            // The library album first, then the oldest scrobbled variant.
             let sql = "SELECT al.id FROM albums al JOIN artists ar ON ar.id = al.artist_id \
-                       WHERE ar.name_fold = +?1 AND al.name_fold = +?2";
+                       WHERE ar.name_fold = +?1 AND al.name_fold = +?2 \
+                       ORDER BY al.variant != '', al.id LIMIT 1";
             conn.prepare_cached(sql)?
                 .query_row([fold(artist), fold(name)], get)
         }

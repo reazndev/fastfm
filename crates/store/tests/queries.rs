@@ -326,6 +326,8 @@ async fn upstream_cache_round_trip() {
     let entry = CachedResponse {
         body: b"<lfm/>".to_vec(),
         status: 200,
+        content_type: "text/xml; charset=UTF-8".to_owned(),
+        headers: "access-control-allow-origin: *".to_owned(),
         fetched_at: 10,
         expires_at: 20,
     };

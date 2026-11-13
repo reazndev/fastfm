@@ -10,10 +10,10 @@ use tracing::{info, warn};
 use crate::clock;
 use crate::context::Context;
 use crate::error::{Result, SyncError};
-use crate::{import, live, reconcile};
+use crate::{enrich, import, live, reconcile};
 
 /// Follows one user until `stop` fires: import first, then live polling with a reconcile pass
-/// every `reconcile_interval`.
+/// every `reconcile_interval` and an enrichment pass every `enrich_interval`.
 pub(crate) async fn follow(ctx: &Context, user: UserId, stop: &CancellationToken) {
     let Ok(name) = ctx.user_name(user).await else {
         warn!(user = user.0, "cannot follow a user missing from the store");
@@ -31,6 +31,7 @@ pub(crate) async fn follow(ctx: &Context, user: UserId, stop: &CancellationToken
     }
     let mut interval = ctx.config.live_interval;
     let mut next_reconcile = Instant::now() + ctx.config.reconcile_interval;
+    let mut next_enrich = Instant::now() + ctx.config.enrich_interval;
     loop {
         interval = match live::poll(ctx, user, &name).await {
             Ok(true) => ctx.config.live_interval,
@@ -43,6 +44,12 @@ pub(crate) async fn follow(ctx: &Context, user: UserId, stop: &CancellationToken
         if Instant::now() >= next_reconcile {
             next_reconcile = Instant::now() + ctx.config.reconcile_interval;
             run_reconcile(ctx, user, &name).await;
+        }
+        if Instant::now() >= next_enrich {
+            next_enrich = Instant::now() + ctx.config.enrich_interval;
+            if let Err(err) = enrich::enrich(ctx, user).await {
+                warn!(user = %name, error = %err, "enrichment failed");
+            }
         }
         if !pause(interval, stop).await {
             ctx.now_playing.set(user, None, 0);

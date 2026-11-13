@@ -43,9 +43,13 @@ pub(crate) fn range_plays(
     range: TimeRange,
 ) -> Result<PlayMap> {
     let word = kind.word();
+    // Rollups count library entities; raw rows are mapped to them the same way.
     let raw = format!(
-        "SELECT {word}_id, 1 FROM scrobbles WHERE user_id = ?1 AND uts >= ?2 AND uts < ?3 \
-         AND {word}_id IS NOT NULL"
+        "SELECT coalesce(m.lib_id, s.{word}_id), 1 FROM scrobbles s \
+         LEFT JOIN user_library_map m ON m.user_id = s.user_id AND m.kind = {code} \
+         AND m.raw_id = s.{word}_id \
+         WHERE s.user_id = ?1 AND s.uts >= ?2 AND s.uts < ?3 AND s.{word}_id IS NOT NULL",
+        code = kind.code()
     );
     let rolled = format!(
         "SELECT {word}_id, plays FROM user_{word}_rollup \

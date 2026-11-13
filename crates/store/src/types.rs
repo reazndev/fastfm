@@ -50,6 +50,15 @@ impl Kind {
     /// All kinds, in a fixed order.
     pub const ALL: [Self; 3] = [Self::Artist, Self::Album, Self::Track];
 
+    /// The value of a `kind` column.
+    pub(crate) fn code(self) -> i64 {
+        match self {
+            Self::Artist => 0,
+            Self::Album => 1,
+            Self::Track => 2,
+        }
+    }
+
     /// The word used in table and column names.
     pub(crate) fn word(self) -> &'static str {
         match self {

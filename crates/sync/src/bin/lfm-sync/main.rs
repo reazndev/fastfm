@@ -67,6 +67,7 @@ async fn run(args: &Args) -> Result<(), CliError> {
     match args.command {
         Command::Import => import(&service, &store, args).await,
         Command::Reconcile => reconcile(&service, &store, args).await,
+        Command::Enrich => enrich(&service, &store, args).await,
         Command::Live => live(&service, args).await,
     }
 }
@@ -113,6 +114,26 @@ async fn reconcile(service: &SyncService, store: &Store, args: &Args) -> Result<
         requests = report.requests,
         seconds = started.elapsed().as_secs_f64(),
         "reconcile finished"
+    );
+    Ok(())
+}
+
+async fn enrich(service: &SyncService, store: &Store, args: &Args) -> Result<(), CliError> {
+    let started = Instant::now();
+    let user = store
+        .user_by_name(&args.user)
+        .await?
+        .ok_or_else(|| SyncError::UnknownUser(args.user.clone()))?;
+    let report = service.enrich(user.id).await?;
+    let user = store.user(user.id).await?.unwrap_or(user);
+    info!(
+        user = %user.name,
+        ?report,
+        artists = user.stats.artists,
+        albums = user.stats.albums,
+        tracks = user.stats.tracks,
+        seconds = started.elapsed().as_secs_f64(),
+        "enrichment finished"
     );
     Ok(())
 }

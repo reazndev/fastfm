@@ -68,7 +68,7 @@ impl Client {
                 Ok(response) => is_retryable(response.status, response.lastfm_error().as_ref()),
                 Err(_) => true,
             };
-            if !retry || attempt >= self.retry.max_attempts {
+            if !retry || request.single_attempt || attempt >= self.retry.max_attempts {
                 return outcome;
             }
             let delay = backoff(&self.retry, attempt);
@@ -85,7 +85,10 @@ impl Client {
     }
 
     async fn send_once(&self, request: &RawRequest, key: Option<&ApiKey>) -> Result<RawResponse> {
-        let params = request.wire_params(key.map(ApiKey::expose));
+        let mut params = request.wire_params(key.map(ApiKey::expose));
+        if let Some(secret) = &request.secret {
+            params.push(("api_sig".to_owned(), secret.sign(&params)));
+        }
         let builder = match request.http_method {
             HttpMethod::Get => self.http.get(self.base_url.clone()).query(&params),
             HttpMethod::Post => self.http.post(self.base_url.clone()).form(&params),

@@ -12,7 +12,10 @@ use tower::ServiceExt;
 /// Sun 2026-11-08 12:00 UTC plus one second: the last listed week has just ended.
 const NOW: &str = "1794139201";
 
-async fn app() -> axum::Router {
+/// The router, and the data directory that must outlive it.
+async fn app() -> (axum::Router, tempfile::TempDir) {
+    let dir = tempfile::tempdir().unwrap();
+    let data_dir = dir.path().to_string_lossy().into_owned();
     let store = Store::open_in_memory().unwrap();
     store.ensure_user("Syntiiix").await.unwrap();
     let account = store.create_account("root", "hash", 1).await.unwrap();
@@ -26,10 +29,12 @@ async fn app() -> axum::Router {
     let config = Config::from_lookup(|name| match name {
         "LFM_NOW" => Some(NOW.into()),
         "LFM_DEV_API_KEY" => Some("dev".into()),
+        "LFM_DATA_DIR" => Some(data_dir.clone()),
         _ => None,
     })
     .unwrap();
-    lfm_mirror::router(App::new(store, &config).await.unwrap().dispatcher)
+    let app = App::new(store, &config).await.unwrap();
+    (lfm_mirror::router(app.dispatcher), dir)
 }
 
 async fn get(app: &axum::Router, query: &str) -> (u16, Option<String>, String) {
@@ -48,7 +53,7 @@ async fn get(app: &axum::Router, query: &str) -> (u16, Option<String>, String) {
 
 #[tokio::test]
 async fn dev_and_stored_keys_work_and_unknown_keys_do_not() {
-    let app = app().await;
+    let (app, _dir) = app().await;
     let query = |key: &str| format!("method=user.getWeeklyChartList&user=syntiiix&api_key={key}");
     let (status, extra, body) = get(&app, &query("dev")).await;
     assert_eq!(status, 200);
@@ -67,11 +72,29 @@ async fn dev_and_stored_keys_work_and_unknown_keys_do_not() {
 
 #[tokio::test]
 async fn unmirrored_user_is_not_found() {
-    let app = app().await;
+    let (app, _dir) = app().await;
     let (status, _, body) = get(&app, "method=user.getInfo&user=someone&api_key=dev").await;
     assert_eq!(status, 404);
     assert!(
         body.contains("<error code=\"6\">User not found</error>"),
         "{body}"
+    );
+}
+
+#[tokio::test]
+async fn replies_say_where_they_came_from() {
+    let (app, _dir) = app().await;
+    let request = Request::get("/2.0/?method=user.getInfo&user=syntiiix&api_key=dev")
+        .body(Body::empty())
+        .unwrap();
+    let response = app.oneshot(request).await.unwrap();
+    let source = response.headers().get("x-mirror-source").unwrap();
+    assert_eq!(source, "local");
+    assert_eq!(
+        response
+            .headers()
+            .get("access-control-allow-origin")
+            .unwrap(),
+        "*"
     );
 }

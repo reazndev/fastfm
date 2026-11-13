@@ -12,9 +12,9 @@ pub(crate) fn cache_user(params: &Params) -> Option<&str> {
 
 /// The mirrored user the request names, looked up case-insensitively by the dispatcher.
 ///
-/// A missing `user` and a user this instance does not mirror both get Last.fm's
-/// "User not found" (error 6, HTTP 404). Pass-through to Last.fm for users we do not mirror
-/// replaces the second case here.
+/// A missing `user` gets Last.fm's "User not found" (error 6, HTTP 404). A user this instance
+/// does not mirror reaches this only when no upstream client is configured: otherwise the
+/// dispatcher forwards the request to Last.fm before the method runs.
 pub(crate) fn mirrored_user<'c>(ctx: &'c Context<'_>) -> Result<&'c MirroredUser, ApiError> {
     ctx.user
         .ok_or_else(|| ApiError::not_found("User not found"))

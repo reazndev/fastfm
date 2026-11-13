@@ -37,7 +37,11 @@ impl Method for GetTopAlbums {
 fn top_album(ranked: &Ranked) -> Node {
     let album = &ranked.entity;
     // Albums without cover art show empty image URLs here, but the placeholder in recent tracks.
-    let image = album.image.as_deref().filter(|image| *image != PLACEHOLDER);
+    // The library cover is stored as "" for none.
+    let image = album
+        .image
+        .as_deref()
+        .filter(|image| !image.is_empty() && *image != PLACEHOLDER);
     Node::new("album")
         .json_order(&[
             "artist",

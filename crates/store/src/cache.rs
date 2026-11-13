@@ -12,6 +12,10 @@ pub struct CachedResponse {
     pub body: Vec<u8>,
     /// HTTP status.
     pub status: u16,
+    /// The `Content-Type` header as received.
+    pub content_type: String,
+    /// Last.fm's `access-control-*` headers, one `name: value` per line.
+    pub headers: String,
     /// When it was fetched, in unix seconds.
     pub fetched_at: i64,
     /// When it goes stale, in unix seconds.
@@ -32,7 +36,8 @@ impl Store {
     pub async fn cache_get(&self, key: &str, format: &str) -> Result<Option<CachedResponse>> {
         let (key, format) = (key.to_owned(), format.to_owned());
         self.read(move |conn| {
-            let sql = "SELECT body, status, fetched_at, expires_at FROM upstream_cache \
+            let sql = "SELECT body, status, content_type, headers, fetched_at, expires_at \
+                       FROM upstream_cache \
                        WHERE key = ?1 AND format = ?2";
             let entry = conn
                 .prepare_cached(sql)?
@@ -40,8 +45,10 @@ impl Store {
                     Ok(CachedResponse {
                         body: row.get(0)?,
                         status: row.get(1)?,
-                        fetched_at: row.get(2)?,
-                        expires_at: row.get(3)?,
+                        content_type: row.get(2)?,
+                        headers: row.get(3)?,
+                        fetched_at: row.get(4)?,
+                        expires_at: row.get(5)?,
                     })
                 });
             Ok(entry.optional()?)
@@ -53,9 +60,11 @@ impl Store {
     pub async fn cache_put(&self, key: &str, format: &str, entry: CachedResponse) -> Result<()> {
         let (key, format) = (key.to_owned(), format.to_owned());
         self.write(move |tx| {
-            let sql = "INSERT INTO upstream_cache (key, format, body, status, fetched_at, expires_at) \
-                       VALUES (?1, ?2, ?3, ?4, ?5, ?6) ON CONFLICT (key, format) DO UPDATE SET \
-                       body = excluded.body, status = excluded.status, \
+            let sql = "INSERT INTO upstream_cache \
+                       (key, format, body, status, content_type, headers, fetched_at, expires_at) \
+                       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8) ON CONFLICT (key, format) \
+                       DO UPDATE SET body = excluded.body, status = excluded.status, \
+                       content_type = excluded.content_type, headers = excluded.headers, \
                        fetched_at = excluded.fetched_at, expires_at = excluded.expires_at";
             let e = &entry;
             tx.prepare_cached(sql)?.execute(params![
@@ -63,6 +72,8 @@ impl Store {
                 format,
                 e.body,
                 e.status,
+                e.content_type,
+                e.headers,
                 e.fetched_at,
                 e.expires_at
             ])?;

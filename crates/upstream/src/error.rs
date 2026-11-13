@@ -55,3 +55,23 @@ impl From<LastFmError> for Error {
         }
     }
 }
+
+impl Error {
+    /// Whether the same call may succeed later: network failures, 5xx and 429, and Last.fm's
+    /// "try again" codes. Everything else, such as a bad session key, fails again.
+    #[must_use]
+    pub fn is_transient(&self) -> bool {
+        match self {
+            Self::Transport(_) => true,
+            Self::Http { status } => crate::retry::is_retryable(*status, None),
+            Self::LastFm { code, message } => crate::retry::is_retryable(
+                200,
+                Some(&LastFmError {
+                    code: *code,
+                    message: message.clone(),
+                }),
+            ),
+            Self::Parse(_) | Self::NoApiKey | Self::BaseUrl(_) => false,
+        }
+    }
+}

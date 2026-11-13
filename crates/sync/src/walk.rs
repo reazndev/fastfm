@@ -12,7 +12,7 @@ use tracing::debug;
 
 use crate::convert::{self, param, uts};
 use crate::error::{Result, SyncError};
-use crate::upstream::Upstream;
+use crate::upstream::{Upstream, recent_query};
 
 /// A time range together with every scrobble Last.fm has in it, oldest first.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -35,7 +35,10 @@ impl Walker<'_> {
     /// the next cursor, and equals `from` once the range is done.
     pub(crate) async fn step(&self, from: i64, cursor: i64) -> Result<Window> {
         let query = self.query(from, cursor);
-        let page = self.upstream.recent(&query, self.priority).await?;
+        let page = self
+            .upstream
+            .recent(self.user, &query, self.priority)
+            .await?;
         let inside = |s: &&lfm_upstream::Scrobble| (from..cursor).contains(&uts(s.uts));
         let fetched: Vec<_> = page.scrobbles.iter().filter(inside).collect();
         if u64::try_from(fetched.len()).unwrap_or(u64::MAX) >= page.page.total {
@@ -70,7 +73,10 @@ impl Walker<'_> {
         let mut page_number = 1;
         loop {
             let query = self.query(second, second + 1).page(page_number);
-            let page = self.upstream.recent(&query, self.priority).await?;
+            let page = self
+                .upstream
+                .recent(self.user, &query, self.priority)
+                .await?;
             let empty = page.scrobbles.is_empty();
             newest_first.extend(page.scrobbles);
             if empty || page_number >= page.page.total_pages {
@@ -101,7 +107,7 @@ impl Walker<'_> {
     }
 
     fn query(&self, from: i64, to: i64) -> RecentTracksQuery {
-        RecentTracksQuery::new(self.user)
+        recent_query(self.user)
             .limit(self.limit)
             .from(param(from))
             .to(param(to))

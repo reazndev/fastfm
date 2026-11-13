@@ -1,6 +1,6 @@
 //! Turning Last.fm's answers into the store's input types.
 
-use lfm_store::{Love, Named, Profile, Scrobble};
+use lfm_store::{Love, Named, Profile, ProfileExtras, Scrobble};
 use lfm_upstream::{ArtistRef, Image, LovedTrack, User};
 
 /// Converts a Unix time from Last.fm to the store's signed seconds.
@@ -21,9 +21,17 @@ pub(crate) fn scrobble(scrobble: &lfm_upstream::Scrobble) -> Scrobble {
         mbid: track.album.mbid.clone(),
         url: None,
     });
+    let mut artist = artist(&track.artist);
+    // Plain pages carry no artist URL; the track URL starts with it.
+    if artist.url.is_none() {
+        artist.url = track
+            .url
+            .split_once("/_/")
+            .map(|(artist_url, _)| artist_url.to_owned());
+    }
     Scrobble {
         uts: uts(scrobble.uts),
-        artist: artist(&track.artist),
+        artist,
         album,
         track: Named {
             name: track.name.clone(),
@@ -52,6 +60,14 @@ pub(crate) fn love(loved: &LovedTrack) -> Love {
             mbid: loved.mbid.clone(),
             url: Some(loved.url.clone()),
         },
+    }
+}
+
+/// Converts the `user.getInfo` fields the store keeps apart from the profile.
+pub(crate) fn profile_extras(user: &User) -> ProfileExtras {
+    ProfileExtras {
+        corrections: uts(user.corrections),
+        spotify_expiry: uts(user.spotify_expiry),
     }
 }
 

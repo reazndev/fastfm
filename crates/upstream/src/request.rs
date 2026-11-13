@@ -3,7 +3,8 @@ use reqwest::header::HeaderMap;
 
 use crate::config::ApiKey;
 use crate::error::LastFmError;
-use crate::retry::detect_error;
+use crate::retry::{detect_error, is_retryable};
+use crate::signed::Secret;
 
 /// Scheduling lane. Waiting requests in a higher lane are sent first.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -63,6 +64,10 @@ pub struct RawRequest {
     pub(crate) priority: Priority,
     pub(crate) http_method: HttpMethod,
     pub(crate) key: KeyChoice,
+    /// Shared secret that signs the request with `api_sig`, for auth and write methods.
+    pub(crate) secret: Option<Secret>,
+    /// Sends once, without retries, for writes a client is waiting on.
+    pub(crate) single_attempt: bool,
 }
 
 impl RawRequest {
@@ -180,6 +185,13 @@ impl RawResponse {
     #[must_use]
     pub fn lastfm_error(&self) -> Option<LastFmError> {
         detect_error(&self.body)
+    }
+
+    /// Whether this is a failure the client retries (codes 8, 11, 16, 29, HTTP 429 and 5xx),
+    /// which a cache should not keep as Last.fm's answer.
+    #[must_use]
+    pub fn is_transient(&self) -> bool {
+        is_retryable(self.status, self.lastfm_error().as_ref())
     }
 
     /// Whether the status is 2xx.

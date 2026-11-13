@@ -105,8 +105,9 @@ pub async fn user(store: &Store, name: &str) -> UserId {
 /// Asserts that every aggregate equals a fresh recount from the scrobbles table.
 pub fn assert_aggregates_match(conn: &Connection) {
     for kind in ["artist", "album", "track"] {
+        let id = lib_id(kind);
         let total = format!(
-            "SELECT user_id, {kind}_id, count(*) FROM scrobbles WHERE {kind}_id IS NOT NULL \
+            "SELECT user_id, {id}, count(*) FROM scrobbles s WHERE {kind}_id IS NOT NULL \
              GROUP BY 1, 2"
         );
         assert_same(
@@ -130,8 +131,8 @@ pub fn assert_aggregates_match(conn: &Connection) {
         );
         for (level, days) in [(0, 1), (1, 8), (2, 64)] {
             let recount = format!(
-                "SELECT user_id, {level}, uts / ({days} * 86400), {kind}_id, count(*) FROM scrobbles \
-                 WHERE {kind}_id IS NOT NULL GROUP BY 1, 3, 4"
+                "SELECT user_id, {level}, uts / ({days} * 86400), {id}, count(*) \
+                 FROM scrobbles s WHERE {kind}_id IS NOT NULL GROUP BY 1, 3, 4"
             );
             let stored = format!(
                 "SELECT user_id, lvl, bucket, {kind}_id, plays FROM user_{kind}_rollup \
@@ -169,8 +170,9 @@ pub fn assert_periods_match(conn: &Connection) {
     let periods = "(SELECT 1 AS period, 7 AS days UNION ALL SELECT 2, 30 UNION ALL SELECT 3, 90 \
                    UNION ALL SELECT 4, 180 UNION ALL SELECT 5, 365) p";
     for kind in ["artist", "album", "track"] {
+        let id = lib_id(kind);
         let recount = format!(
-            "SELECT s.user_id, p.period, s.{kind}_id, count(*) FROM scrobbles s \
+            "SELECT s.user_id, p.period, {id}, count(*) FROM scrobbles s \
              JOIN users u ON u.id = s.user_id CROSS JOIN {periods} \
              WHERE u.period_day IS NOT NULL AND s.{kind}_id IS NOT NULL \
              AND s.uts >= (u.period_day - p.days + 1) * 86400 GROUP BY 1, 2, 3"
@@ -180,6 +182,19 @@ pub fn assert_periods_match(conn: &Connection) {
         );
         assert_same(conn, &stored, &recount);
     }
+}
+
+/// The library entity a scrobble `s` counts under for `kind`.
+fn lib_id(kind: &str) -> String {
+    let code = match kind {
+        "artist" => 0,
+        "album" => 1,
+        _ => 2,
+    };
+    format!(
+        "coalesce((SELECT m.lib_id FROM user_library_map m WHERE m.user_id = s.user_id \
+         AND m.kind = {code} AND m.raw_id = s.{kind}_id), s.{kind}_id)"
+    )
 }
 
 fn assert_same(conn: &Connection, stored: &str, recount: &str) {

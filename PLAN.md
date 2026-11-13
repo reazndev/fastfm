@@ -61,12 +61,21 @@ web UI ───► /app/api   ─► jobs (import, live sync, reconcile, pre-wa
 
 ### Import
 
-1. Record `T0 = now`. Request `user.getRecentTracks` with `limit=200&extended=1&to=T0`, page by
-   page. The fixed `to` keeps the pages stable while new scrobbles arrive.
+1. Record `T0 = now`. Request `user.getRecentTracks` with `limit=1000&to=T0` (plain, not
+   `extended=1`, which blanks the per-track artist MBID), page by page. The fixed `to` keeps the
+   pages stable while new scrobbles arrive.
 2. Write each time window in one transaction as delete-then-insert for that window. A retry
    cannot create duplicates, and real same-second duplicates on Last.fm are kept.
 3. Sync loved tracks, friends, tags, the profile, and `user.getWeeklyChartList`.
 4. Queue pre-warming of `getInfo` for every artist, album, and track in the library.
+5. Enrich: read the all-time top artists, albums and tracks (1000 per request) and call
+   `artist.getCorrection` for scrobbled artist names they do not list. This gives Last.fm's
+   library entities (corrected artists, albums under their album artist) with MBIDs, URLs,
+   covers and durations, and a per-user map from each scrobbled artist, album (per spelling and
+   cover) and track to the library entity it counts under. Every aggregate counts library
+   entities; scrobbles keep their own names. New scrobbles of known names map at once, unknown
+   ones count as themselves until the next enrichment, which runs daily. About 65 requests for
+   160k scrobbles.
 
 100k scrobbles are 500 pages, around 5 to 15 minutes at Last.fm's speed.
 
@@ -92,15 +101,18 @@ the smallest differing window. A full check costs a few dozen requests.
 ## 5. Storage
 
 ```
-artists(id, name, name_fold, mbid, url)
-albums(id, artist_id, name, name_fold, mbid, image_hash)
-tracks(id, artist_id, name, name_fold, mbid, url, duration)
+artists(id, name, name_fold, mbid, url, lib_name)
+albums(id, artist_id, name, name_fold, mbid, image_hash, variant, url, artist_mbid)
+    UNIQUE (artist_id, name_fold, variant): variant is spelling + cover when scrobbled, '' for
+    a library album
+tracks(id, artist_id, name, name_fold, mbid, url, duration, artist_mbid, artist_name)
 scrobbles(user_id, uts, seq, track_id, album_id, artist_id)
     PRIMARY KEY (user_id, uts, seq) WITHOUT ROWID
     INDEX (user_id, artist_id, uts), INDEX (user_id, track_id, uts)
 user_artist_total / user_album_total / user_track_total(user_id, entity_id, plays)
     INDEX (user_id, plays DESC)
-loved(user_id, track_id, uts)
+user_library_map(user_id, kind, raw_id, lib_id)   -- scrobbled entity -> library entity
+loved(user_id, track_id, uts, seq)
 weekly_chart_list(user_id, from_uts, to_uts)
 upstream_cache(key, format, body, status, fetched_at, expires_at)
 accounts(id, name, password_hash, role, status, lastfm_user, own_key, own_secret, lastfm_sk)

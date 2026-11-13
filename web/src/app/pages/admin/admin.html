@@ -1,0 +1,53 @@
+<div class="page">
+  <div class="stack">
+    <h1>Admin</h1>
+    @if (pending() > 0) {
+      <p>{{ pending() }} {{ pending() === 1 ? 'account is' : 'accounts are' }} waiting for you.</p>
+    }
+  </div>
+
+  <section class="section" aria-labelledby="accounts-heading">
+    <h2 id="accounts-heading">Accounts</h2>
+    <app-error-notice [error]="accountError()" />
+    @if (accounts.hasValue()) {
+      @for (account of sorted(); track account.id) {
+        <app-account-row
+          [account]="account"
+          [self]="account.id === session.account()?.id"
+          [busy]="working() === account.id"
+          (changed)="change(account, $event)"
+        />
+      } @empty {
+        <p class="muted">No accounts.</p>
+      }
+    } @else if (accounts.error()) {
+      <app-error-notice [error]="accounts.error()" />
+      <div><button type="button" class="button" (click)="accounts.reload()">Try again</button></div>
+    } @else {
+      <app-loading />
+    }
+  </section>
+
+  <section class="section" aria-labelledby="signup-heading">
+    <h2 id="signup-heading">Sign-up</h2>
+    @if (settings.hasValue()) {
+      @let s = settings.value();
+      <app-signup-mode [mode]="s.signupMode" (picked)="setMode($event)" />
+      <app-error-notice [error]="modeError()" />
+      <h2>Last.fm key pool</h2>
+      <p class="muted">
+        {{ s.lastfmKeyPool.keys }} {{ s.lastfmKeyPool.keys === 1 ? 'key' : 'keys' }} for imports and
+        sync.
+        @if (s.lastfmKeyPool.canSign) {
+          A shared secret is set, so users can connect Last.fm.
+        } @else {
+          No shared secret is set, so users need their own Last.fm key to connect Last.fm.
+        }
+      </p>
+    } @else if (settings.error()) {
+      <app-error-notice [error]="settings.error()" />
+    } @else {
+      <app-loading />
+    }
+  </section>
+</div>

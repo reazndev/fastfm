@@ -1,64 +1,111 @@
 //! The mirror's HTTP server: configuration, routes and service wiring.
 
 pub mod config;
+pub mod jobs;
 pub mod routes;
+mod ui;
 
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::Context as _;
-use lfm_api::{ApiKey, Clock, Dispatcher, MemoryCache, Scope, Services, StoreKeys, StoreSessions};
-use lfm_store::Store;
+use lfm_api::methods::registry;
+use lfm_api::{
+    ApiKey, Clock, Dispatcher, MemoryCache, NowPlayingSource, Passthrough, Scope, Services,
+    StoreKeys, StoreSessions, recent_track_of,
+};
+use lfm_store::{RecentTrack, Store, UserId};
+use lfm_sync::{NowPlaying, SyncConfig, SyncService};
+use lfm_upstream::{Client, ClientConfig};
+use lfm_web::{Web, WebConfig, WebDeps};
 
 pub use config::{Config, DevKey};
-pub use routes::router;
+pub use jobs::Jobs;
+pub use routes::{app_router, router};
 
 /// Response cache budget: 256 MiB of rendered bodies, each kept for a day at most.
 const CACHE_BYTES: u64 = 256 << 20;
 const CACHE_TTL: Duration = Duration::from_secs(86_400);
 
+/// How long an expired Last.fm answer is kept to serve while Last.fm is down, in seconds.
+const STALE_KEPT: i64 = 30 * 86_400;
+
 /// How often key use is written, keys are reloaded and period totals move on.
 const MAINTENANCE_EVERY: Duration = Duration::from_secs(60);
 
-/// The running service: the dispatcher and what background maintenance needs.
+/// The running service: the dispatcher, the web API and what background maintenance needs.
 #[derive(Debug, Clone)]
 pub struct App {
     /// Routes API calls.
     pub dispatcher: Arc<Dispatcher>,
+    /// The JSON API behind the web UI.
+    pub web: Web,
     /// The in-memory key map, reloaded by [`App::maintain`].
     pub keys: Arc<StoreKeys>,
+    /// The read-through cache in front of Last.fm, when `LASTFM_API_KEYS` is set.
+    pub passthrough: Option<Passthrough>,
+    /// Import and live sync, unless the clock is frozen.
+    pub sync: Option<Arc<SyncService>>,
 }
 
 impl App {
-    /// Wires the dispatcher to the store, with every registered method.
+    /// Wires the dispatcher and the web API to the store and to Last.fm. Without
+    /// `LASTFM_API_KEYS` only accounts that bring their own Last.fm key can sync.
     ///
     /// # Errors
-    /// When the API keys cannot be loaded.
+    /// When the API keys cannot be loaded, the Last.fm client cannot be built or the web API's
+    /// secrets key file cannot be opened.
     pub async fn new(store: Store, config: &Config) -> anyhow::Result<Self> {
-        let fixed: HashMap<String, ApiKey> = config
-            .dev_key
-            .iter()
-            .map(|dev| (dev.key.clone(), dev_key(dev)))
-            .collect();
-        let keys = Arc::new(
-            StoreKeys::load(store.clone(), fixed)
-                .await
-                .context("loading API keys")?,
-        );
+        let keys = load_keys(&store, config).await?;
+        let client = ClientConfig::new(config.lastfm_keys.iter().cloned());
+        let client = Arc::new(Client::new(client).context("building the Last.fm client")?);
+        let service = Arc::new(SyncService::new(
+            store.clone(),
+            Arc::clone(&client),
+            SyncConfig::default(),
+        ));
+        let deps = WebDeps {
+            store: store.clone(),
+            sync: Arc::clone(&service),
+            upstream: Arc::clone(&client),
+            keys: Arc::clone(&keys),
+        };
+        let web = Web::start(web_config(config), deps)
+            .await
+            .context("starting the web API")?;
+        let registry = lfm_api::methods::with_accounts(registry(), &web.accounts());
         let services = Services {
             store: store.clone(),
             clock: config.now.map_or(Clock::System, Clock::Fixed),
             api_keys: Arc::clone(&keys) as Arc<dyn lfm_api::ApiKeys>,
-            sessions: Arc::new(StoreSessions::new(store)),
+            sessions: Arc::new(StoreSessions::new(store.clone())),
             cache: Arc::new(MemoryCache::new(CACHE_BYTES, CACHE_TTL)),
         };
-        let dispatcher = Arc::new(Dispatcher::new(lfm_api::methods::registry(), services));
-        Ok(Self { dispatcher, keys })
+        let mut dispatcher = Dispatcher::new(registry, services);
+        let passthrough =
+            (!config.lastfm_keys.is_empty()).then(|| Passthrough::new(store, Arc::clone(&client)));
+        if let Some(cache) = &passthrough {
+            dispatcher = dispatcher.with_passthrough(cache.clone());
+        }
+        // A frozen clock is for comparing with fixtures; syncing would change the data.
+        let sync = config.now.is_none().then_some(service);
+        if let Some(service) = &sync {
+            let playing = Arc::new(LiveNowPlaying(service.now_playing()));
+            dispatcher = dispatcher.with_now_playing(playing);
+        }
+        Ok(Self {
+            dispatcher: Arc::new(dispatcher),
+            web,
+            keys,
+            passthrough,
+            sync,
+        })
     }
 
-    /// Runs forever: every minute, writes key use, reloads keys and moves period totals to the
-    /// current day. Failures are logged and retried on the next round.
+    /// Runs forever: every minute, writes key use, reloads keys, moves period totals to the
+    /// current day and drops Last.fm answers expired for a month. Failures are logged and
+    /// retried on the next round.
     pub async fn maintain(self) {
         let services = self.dispatcher.services().clone();
         let mut ticks = tokio::time::interval(MAINTENANCE_EVERY);
@@ -74,7 +121,50 @@ impl App {
             if let Err(error) = self.keys.refresh().await {
                 tracing::warn!(%error, "reloading API keys failed");
             }
+            let wall = i64::try_from(lfm_api::clock::system_now()).unwrap_or(i64::MAX);
+            if let Err(error) = services.store.cache_purge(wall - STALE_KEPT).await {
+                tracing::warn!(%error, "purging the upstream cache failed");
+            }
         }
+    }
+}
+
+/// Live sync's now-playing map, as the dispatcher reads it.
+#[derive(Debug)]
+struct LiveNowPlaying(NowPlaying);
+
+impl NowPlayingSource for LiveNowPlaying {
+    fn now_playing(&self, user: UserId) -> Option<RecentTrack> {
+        self.0
+            .get(user)
+            .map(|playing| recent_track_of(&playing.track))
+    }
+}
+
+async fn load_keys(store: &Store, config: &Config) -> anyhow::Result<Arc<StoreKeys>> {
+    let fixed: HashMap<String, ApiKey> = config
+        .dev_key
+        .iter()
+        .map(|dev| (dev.key.clone(), dev_key(dev)))
+        .collect();
+    let keys = StoreKeys::load(store.clone(), fixed)
+        .await
+        .context("loading API keys")?;
+    Ok(Arc::new(keys))
+}
+
+fn web_config(config: &Config) -> WebConfig {
+    let web = WebConfig::new(&config.data_dir)
+        .cookies(config.cookies)
+        .trust_proxy(config.trust_proxy)
+        .key_pool_size(config.lastfm_keys.len());
+    let web = match &config.public_url {
+        Some(url) => web.public_url(url.as_str()),
+        None => web,
+    };
+    match config.lastfm_app() {
+        Some(app) => web.lastfm_app(app),
+        None => web,
     }
 }
 

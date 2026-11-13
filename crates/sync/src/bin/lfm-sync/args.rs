@@ -5,6 +5,7 @@ use std::path::PathBuf;
 pub(crate) const USAGE: &str = "usage:
   lfm-sync import    --user <name> --db <path> [--until <uts>] [--rps <n>] [--concurrency <n>]
   lfm-sync reconcile --user <name> --db <path> [--until <uts>] [--rps <n>]
+  lfm-sync enrich    --user <name> --db <path> [--rps <n>]
   lfm-sync live      --user <name> --db <path> [--rps <n>]
 Reads LASTFM_API_KEYS from the environment or from .env in the working directory.";
 
@@ -13,6 +14,7 @@ Reads LASTFM_API_KEYS from the environment or from .env in the working directory
 pub(crate) enum Command {
     Import,
     Reconcile,
+    Enrich,
     Live,
 }
 
@@ -31,6 +33,7 @@ pub(crate) fn parse(mut args: impl Iterator<Item = String>) -> Result<Args, Stri
     let command = match args.next().as_deref() {
         Some("import") => Command::Import,
         Some("reconcile") => Command::Reconcile,
+        Some("enrich") => Command::Enrich,
         Some("live") => Command::Live,
         Some(other) => return Err(format!("unknown command {other}")),
         None => return Err("missing command".to_owned()),

@@ -11,6 +11,9 @@ const MIGRATIONS: &[&str] = &[
     include_str!("../../../migrations/0001_init.sql"),
     include_str!("../../../migrations/0002_details.sql"),
     include_str!("../../../migrations/0003_track_artist_mbid.sql"),
+    include_str!("../../../migrations/0004_upstream_cache_headers.sql"),
+    include_str!("../../../migrations/0005_write_through.sql"),
+    include_str!("../../../migrations/0006_library.sql"),
 ];
 
 /// Prepared statements kept per connection. The store uses fewer than this.

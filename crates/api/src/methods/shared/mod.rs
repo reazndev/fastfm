@@ -2,6 +2,7 @@
 
 mod list;
 mod nodes;
+mod now_playing;
 mod top;
 mod user;
 
@@ -12,5 +13,6 @@ pub(crate) use nodes::{
     PLACEHOLDER, album_url, artist_mbid_attr, artist_of, artist_url, mbid, named_artist,
     streamable_full, track_url,
 };
+pub(crate) use now_playing::now_playing;
 pub(crate) use top::{ListShape, chart_list, top_list, top_page};
 pub(crate) use user::{OrFailed, cache_user, mirrored_user};

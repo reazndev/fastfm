@@ -1,5 +1,8 @@
 //! In-process latency of the dispatcher: 1,000 calls each of `user.getRecentTracks` with
-//! `limit=200` and `user.getTopArtists`, without and with the response cache.
+//! `limit=200` and `user.getTopArtists`, without and with the response cache, and of
+//! `artist.getInfo` served from the pass-through cache (from memory, and from the store as after
+//! a restart). The database must hold that `artist.getInfo` answer, as it does after one
+//! conformance run against it; the benchmark never calls Last.fm.
 //!
 //! `LFM_BENCH_DB=<copy of data/conformance.db> LFM_BENCH_USER=syntiiix \
 //!  cargo run -p lfm-api --release --example bench`
@@ -13,7 +16,8 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use lfm_api::{
-    ApiKey, Clock, Dispatcher, InMemoryApiKeys, InMemorySessions, MemoryCache, Scope, Services,
+    ApiKey, Clock, Dispatcher, InMemoryApiKeys, InMemorySessions, MemoryCache, Passthrough, Scope,
+    Services,
 };
 use lfm_core::Params;
 use lfm_store::Store;
@@ -38,12 +42,22 @@ fn dispatcher(store: Store, cache_bytes: u64) -> Dispatcher {
     Dispatcher::new(lfm_api::methods::registry(), services)
 }
 
-/// Median and 99th percentile of `CALLS` calls, after one warm-up call.
-async fn measure(d: &Dispatcher, params: &Params) -> (Duration, Duration, usize) {
+/// A pass-through cache whose client points nowhere, so a miss fails instead of calling out.
+fn offline(store: Store) -> Passthrough {
+    let config = lfm_upstream::ClientConfig::new([]).base_url("http://127.0.0.1:9/2.0/");
+    let client = lfm_upstream::Client::new(config).expect("build the client");
+    Passthrough::new(store, Arc::new(client))
+}
+
+/// Median and 99th percentile of `CALLS` calls, after one warm-up call. `make` gives the
+/// dispatcher of each call.
+async fn measure(make: impl Fn() -> Dispatcher, params: &Params) -> (Duration, Duration, usize) {
+    let d = make();
     let warm = d.dispatch(params).await;
     assert_eq!(warm.status, 200, "{}", String::from_utf8_lossy(&warm.body));
     let mut times = Vec::with_capacity(CALLS);
     for _ in 0..CALLS {
+        let d = make();
         let start = Instant::now();
         let reply = d.dispatch(params).await;
         times.push(start.elapsed());
@@ -76,8 +90,26 @@ async fn main() {
     for (label, cache) in [("uncached", 0), ("cached", 64 << 20)] {
         let d = dispatcher(store.clone(), cache);
         for (name, params) in &cases {
-            let (p50, p99, bytes) = measure(&d, params).await;
+            let (p50, p99, bytes) = measure(|| d.clone(), params).await;
             println!("{label:9} {name:32} p50 {p50:>10.1?}  p99 {p99:>10.1?}  {bytes} bytes");
         }
+    }
+    let info = Params::new()
+        .with("method", "artist.getInfo")
+        .with("artist", "Juice WRLD")
+        .with("api_key", KEY)
+        .with("format", "json");
+    let hot = dispatcher(store.clone(), 0).with_passthrough(offline(store.clone()));
+    let restarted = || dispatcher(store.clone(), 0).with_passthrough(offline(store.clone()));
+    for (label, make) in [
+        (
+            "memory",
+            Box::new(|| hot.clone()) as Box<dyn Fn() -> Dispatcher>,
+        ),
+        ("store", Box::new(restarted)),
+    ] {
+        let (p50, p99, bytes) = measure(make, &info).await;
+        let name = "artist.getInfo pass-through";
+        println!("{label:9} {name:32} p50 {p50:>10.1?}  p99 {p99:>10.1?}  {bytes} bytes");
     }
 }

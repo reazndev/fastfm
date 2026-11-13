@@ -33,27 +33,39 @@ impl Delta {
         }
     }
 
-    /// Counts one scrobble in (`sign` 1) or out (`sign` -1).
+    /// Counts one scrobble in (`sign` 1) or out (`sign` -1). `ids` are the library entities
+    /// the scrobble counts under.
     pub(crate) fn add(&mut self, uts: i64, ids: Ids, sign: i64) {
         self.plays += sign;
-        let periods: Vec<Period> = Period::ALL
-            .into_iter()
-            .filter(|period| match (period, self.period_day) {
-                (Period::Overall, _) => true,
-                (_, Some(day)) => uts >= period.start(day),
-                (_, None) => false,
-            })
-            .collect();
         for (kind, id) in ids.by_kind() {
-            for period in &periods {
-                *self.totals.entry((kind, *period, id)).or_default() += sign;
-            }
-            for (level, bucket) in buckets_of(uts) {
-                *self.rollups.entry((kind, level, bucket, id)).or_default() += sign;
-            }
+            self.add_entity(uts, (kind, id), sign);
         }
         for key in buckets_of(uts) {
             *self.counts.entry(key).or_default() += sign;
+        }
+    }
+
+    /// Moves one scrobble at `uts` from one entity of `kind` to another, leaving the scrobble
+    /// counts alone.
+    pub(crate) fn shift(&mut self, uts: i64, kind: Kind, (from, to): (i64, i64)) {
+        self.add_entity(uts, (kind, from), -1);
+        self.add_entity(uts, (kind, to), 1);
+    }
+
+    fn add_entity(&mut self, uts: i64, (kind, id): (Kind, i64), sign: i64) {
+        let period_day = self.period_day;
+        let periods = Period::ALL
+            .into_iter()
+            .filter(|period| match (period, period_day) {
+                (Period::Overall, _) => true,
+                (_, Some(day)) => uts >= period.start(day),
+                (_, None) => false,
+            });
+        for period in periods {
+            *self.totals.entry((kind, period, id)).or_default() += sign;
+        }
+        for (level, bucket) in buckets_of(uts) {
+            *self.rollups.entry((kind, level, bucket, id)).or_default() += sign;
         }
     }
 

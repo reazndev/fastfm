@@ -1,0 +1,83 @@
+<div class="page">
+  <h1>Settings</h1>
+  @if (status.hasValue()) {
+    @let s = status.value();
+    <section class="section" aria-labelledby="forward-heading">
+      <h2 id="forward-heading">Send scrobbles on to Last.fm</h2>
+      @if (s.authorized) {
+        <p>
+          <span class="ok">Connected</span> as {{ s.username }}. Scrobbles and loves from your apps
+          go on to Last.fm.
+        </p>
+      } @else {
+        <p class="muted">
+          Approve this server on last.fm so that scrobbles and loves from your apps reach your
+          Last.fm profile too. This also proves the profile is yours.
+        </p>
+        <app-error-notice [error]="errorOf('connect')" />
+        <div>
+          <button
+            type="button"
+            class="button primary"
+            [disabled]="busy() === 'connect'"
+            (click)="connect()"
+          >
+            Connect Last.fm
+          </button>
+        </div>
+      }
+    </section>
+
+    <section class="section" aria-labelledby="key-heading">
+      <h2 id="key-heading">Your own Last.fm API key</h2>
+      <p class="muted">
+        Optional. With your own key, your import and sync do not share this server's rate limit, and
+        you can connect Last.fm when the server has no shared secret.
+      </p>
+      @if (s.ownKey) {
+        <div class="row">
+          <p class="grow">Your key is in use.</p>
+          <app-confirm-button
+            label="Remove key"
+            question="You will need to connect Last.fm again."
+            confirmLabel="Remove"
+            [busy]="busy() === 'key'"
+            (confirmed)="removeKey()"
+          />
+        </div>
+        <app-error-notice [error]="errorOf('key')" />
+      } @else {
+        <app-own-key-form
+          [busy]="busy() === 'key'"
+          [error]="errorOf('key')"
+          (saved)="saveKey($event)"
+        />
+      }
+    </section>
+
+    @if (s.username) {
+      <section class="section" aria-labelledby="link-heading">
+        <h2 id="link-heading">Linked profile</h2>
+        <div class="row">
+          <p class="grow">Mirroring {{ s.username }}.</p>
+          <app-confirm-button
+            label="Unlink"
+            question="Sync stops; mirrored scrobbles stay."
+            confirmLabel="Unlink"
+            [busy]="busy() === 'unlink'"
+            (confirmed)="unlink()"
+          />
+        </div>
+        <app-error-notice [error]="errorOf('unlink')" />
+      </section>
+    }
+  } @else if (status.error()) {
+    <app-error-notice [error]="status.error()" />
+    <div><button type="button" class="button" (click)="status.reload()">Try again</button></div>
+  } @else {
+    <app-loading />
+  }
+  <div>
+    <button type="button" class="button text" (click)="logout()">Log out</button>
+  </div>
+</div>

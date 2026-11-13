@@ -7,7 +7,7 @@ use lfm_store::{Page, RecentTrack, TimeRange};
 use crate::method::{Context, Method};
 use crate::methods::shared::{
     ListAttrs, OrFailed, PLACEHOLDER, artist_mbid_attr, artist_of, artist_url, cache_user,
-    list_root, mbid, mirrored_user, track_url,
+    list_root, mbid, mirrored_user, now_playing, track_url,
 };
 
 const DEFAULT_LIMIT: u64 = 50;
@@ -43,6 +43,7 @@ impl Method for GetRecentTracks {
             .items
             .iter()
             .map(|track| recent_track(track, extended));
+        let items = now_playing(ctx, user).into_iter().chain(items);
         let attrs = ListAttrs::of(&user.name, &listing).recent();
         let root = list_root("recenttracks", "track", attrs, items);
         Ok(Response::new(root).escape_slashes())

@@ -6,13 +6,19 @@
 //! - `LFM_BENCH_USERS` (20) and `LFM_BENCH_SCROBBLES` (1500000) set the size.
 //! - `LFM_BENCH_DIR` is where the temporary database goes (the system temp dir by default).
 //! - `LFM_BENCH_DB` names a database file to keep and reuse between runs instead.
+//!
+//! After loading, every user gets a library as large as a real one (every album moved, one
+//! artist in a hundred merged), so the timed queries read mapped aggregates.
 #![allow(clippy::print_stdout, reason = "the benchmark reports to the terminal")]
 
 use std::future::Future;
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
 
-use lfm_store::{Kind, Listing, Named, Page, Period, Scrobble, Store, TimeRange, TopQuery, UserId};
+use lfm_store::{
+    Kind, LibAlbum, LibMove, Library, Listing, Lookup, Named, Page, Period, Scrobble, Store,
+    TimeRange, TopQuery, UserId,
+};
 
 const DAY: i64 = 86_400;
 const START: i64 = 1_262_304_000; // 2010-01-01
@@ -233,9 +239,57 @@ async fn run_queries(store: &Store, users: &[(UserId, i64)]) {
         "built period totals in {:.1} s",
         started.elapsed().as_secs_f64()
     );
+    enrich(store, users).await;
 
     time_history(store, &pick, &end).await;
     time_top_lists(store, &pick, &end, now).await;
+}
+
+/// Applies a library to every user as large as a real one needs: every scrobbled album counts
+/// under a library album, and one artist in a hundred under another artist.
+async fn enrich(store: &Store, users: &[(UserId, i64)]) {
+    for (user, _) in users {
+        let started = Instant::now();
+        let Ok(inputs) = store.library_inputs(*user).await else {
+            continue;
+        };
+        let albums = inputs.albums.iter().map(|a| LibAlbum {
+            artist: Named::new(a.artist.clone()),
+            album: Named::new(a.name.clone()),
+            image: None,
+        });
+        let album_moves = inputs.albums.iter().map(|a| LibMove {
+            raw: a.id,
+            to: Lookup::Album {
+                artist: a.artist.clone(),
+                name: a.name.clone(),
+            },
+        });
+        let first = inputs
+            .artists
+            .first()
+            .map(|a| a.name.clone())
+            .unwrap_or_default();
+        let artist_moves = inputs.artists.iter().skip(1).step_by(100).map(|a| LibMove {
+            raw: a.id,
+            to: Lookup::Artist {
+                name: first.clone(),
+            },
+        });
+        let library = Library {
+            albums: albums.collect(),
+            moves: album_moves.chain(artist_moves).collect(),
+            ..Library::default()
+        };
+        let moves = library.moves.len();
+        if let Err(error) = store.apply_library(*user, library).await {
+            println!("enrichment failed: {error}");
+        }
+        println!(
+            "applied a library of {moves} moves in {:.1} s",
+            started.elapsed().as_secs_f64()
+        );
+    }
 }
 
 async fn time_history(

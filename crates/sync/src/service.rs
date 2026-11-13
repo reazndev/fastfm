@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex, PoisonError};
 
 use lfm_store::{Job, Store, UserId};
-use lfm_upstream::Client;
+use lfm_upstream::{ApiKey, Client};
 use tokio::task::JoinHandle;
 use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
@@ -12,6 +12,7 @@ use tracing::{info, warn};
 
 use crate::config::SyncConfig;
 use crate::context::Context;
+use crate::enrich::{self, EnrichReport};
 use crate::error::Result;
 use crate::import::{self, IMPORT, ImportProgress, ImportState};
 use crate::now_playing::NowPlaying;
@@ -61,6 +62,12 @@ impl SyncService {
     #[must_use]
     pub fn now_playing(&self) -> NowPlaying {
         self.ctx.now_playing.clone()
+    }
+
+    /// Makes `name`'s import, live sync, reconciliation and enrichment call Last.fm with the
+    /// account's own key, or with the shared pool again when `key` is `None`.
+    pub fn use_key(&self, name: &str, key: Option<ApiKey>) {
+        self.ctx.upstream.use_key(name, key);
     }
 
     /// Last.fm requests made through this service so far.
@@ -159,6 +166,12 @@ impl SyncService {
             None => tasks::sync_cursor(&self.ctx, user).await?,
         };
         reconcile::reconcile(&self.ctx, user, until).await
+    }
+
+    /// Reads the user's all-time top lists and stores the library entities their scrobbles
+    /// count under, in the caller's task. Imports already do this once at their end.
+    pub async fn enrich(&self, user: UserId) -> Result<EnrichReport> {
+        enrich::enrich(&self.ctx, user).await
     }
 
     /// Stops every job and waits for them. Unfinished imports stay `running` in the store and

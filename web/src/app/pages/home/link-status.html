@@ -1,0 +1,80 @@
+@let s = status();
+<div class="stack">
+  <h1>{{ s.username }}</h1>
+  <p class="muted">
+    Mirrored from <a [href]="profileUrl()" target="_blank" rel="noopener">Last.fm</a>
+  </p>
+</div>
+
+<section class="section" aria-labelledby="import-heading">
+  <h2 id="import-heading">Import</h2>
+  @if (s.import; as job) {
+    @switch (job.status) {
+      @case ('done') {
+        <p>Done. {{ count(job.imported) }} scrobbles imported.</p>
+      }
+      @case ('failed') {
+        <p>Stopped after {{ count(job.imported) }} scrobbles.</p>
+        @if (job.error; as error) {
+          <p class="small error" role="alert">{{ error }}</p>
+        }
+      }
+      @case ('queued') {
+        <p class="muted" role="status">Waiting to start…</p>
+      }
+      @default {
+        <progress
+          [value]="job.imported"
+          [max]="job.estimatedTotal || 1"
+          aria-label="Import progress"
+        ></progress>
+        <p role="status">
+          {{ count(job.imported) }}
+          @if (job.estimatedTotal > 0) {
+            of about {{ count(job.estimatedTotal) }}
+          }
+          scrobbles imported
+        </p>
+      }
+    }
+  } @else {
+    <p class="muted" role="status">Starting the import…</p>
+  }
+</section>
+
+<section class="section" aria-labelledby="sync-heading">
+  <h2 id="sync-heading">Live sync</h2>
+  @if (s.sync && s.sync.cursor > 0) {
+    <dl>
+      <dt>Mirrored up to</dt>
+      <dd>{{ time(s.sync.cursor) }}</dd>
+      <dt>Scrobbles</dt>
+      <dd>{{ count(s.sync.scrobbles) }}</dd>
+    </dl>
+  } @else {
+    <p class="muted">Starts when the import is done.</p>
+  }
+</section>
+
+<section class="section" aria-labelledby="writes-heading">
+  <h2 id="writes-heading">Scrobbles and loves from apps</h2>
+  @if (s.writes.forwarding) {
+    <p>Saved here and sent on to Last.fm.</p>
+  } @else {
+    <p>
+      Saved on this server only.
+      <a routerLink="/settings">Connect Last.fm</a> to send them on.
+    </p>
+  }
+  @if (backlog().length > 0) {
+    <dl>
+      @for (item of backlog(); track item.label) {
+        <dt>{{ item.label }}</dt>
+        <dd>{{ count(item.value) }}</dd>
+      }
+    </dl>
+  }
+  @if (s.writes.lastError; as error) {
+    <p class="small error">Last error: {{ error }}</p>
+  }
+</section>

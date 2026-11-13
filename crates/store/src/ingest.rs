@@ -5,6 +5,7 @@ use rusqlite::{Connection, params};
 use crate::delta::Delta;
 use crate::dims::{Ids, Resolver};
 use crate::error::{Result, StoreError};
+use crate::library::LibMap;
 use crate::pool::Store;
 use crate::types::{Scrobble, TimeRange, UserId};
 use crate::users::{bump_version, period_day};
@@ -72,10 +73,11 @@ fn replace_window(
     conn.prepare_cached(delete)?
         .execute(params![user, range.from, range.to])?;
     let mut delta = Delta::new(period_day(conn, user)?);
+    let mut map = LibMap::assigning(user);
     for row in &old {
-        delta.add(row.uts, row.ids(), -1);
+        delta.add(row.uts, map.ids(conn, row.ids())?, -1);
     }
-    let mut new = insert_all(conn, user, scrobbles, &mut delta)?;
+    let mut new = insert_all(conn, user, scrobbles, (&mut map, &mut delta))?;
     new.sort_unstable();
     delta.apply(conn, user)?;
     if old != new {
@@ -84,9 +86,14 @@ fn replace_window(
     Ok(())
 }
 
-fn append(conn: &Connection, user: UserId, scrobbles: &[Scrobble]) -> Result<()> {
+pub(crate) fn append(conn: &Connection, user: UserId, scrobbles: &[Scrobble]) -> Result<()> {
     let mut delta = Delta::new(period_day(conn, user)?);
-    let new = insert_all(conn, user, scrobbles, &mut delta)?;
+    let new = insert_all(
+        conn,
+        user,
+        scrobbles,
+        (&mut LibMap::assigning(user), &mut delta),
+    )?;
     delta.apply(conn, user)?;
     if !new.is_empty() {
         bump_version(conn, user)?;
@@ -94,12 +101,13 @@ fn append(conn: &Connection, user: UserId, scrobbles: &[Scrobble]) -> Result<()>
     Ok(())
 }
 
-/// Inserts scrobbles after any already stored in the same second, in the order given.
+/// Inserts scrobbles after any already stored in the same second, in the order given, and
+/// counts each under its library entities.
 fn insert_all(
     conn: &Connection,
     user: UserId,
     scrobbles: &[Scrobble],
-    delta: &mut Delta,
+    (map, delta): (&mut LibMap, &mut Delta),
 ) -> Result<Vec<Stored>> {
     let mut resolver = Resolver::new(conn);
     let next_seq =
@@ -115,7 +123,7 @@ fn insert_all(
                 .query_row(params![user, s.uts], |row| row.get(0))?;
             let values = params![user, s.uts, seq, ids.track, ids.album, ids.artist];
             conn.prepare_cached(insert)?.execute(values)?;
-            delta.add(s.uts, ids, 1);
+            delta.add(s.uts, map.ids(conn, ids)?, 1);
             Ok(Stored {
                 uts: s.uts,
                 seq,

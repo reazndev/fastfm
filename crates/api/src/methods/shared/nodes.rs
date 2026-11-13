@@ -36,9 +36,12 @@ pub(crate) fn track_url(track: &Entity) -> String {
         .unwrap_or_else(|| lfm_core::track_url(&artist_of(track).name, &track.name))
 }
 
-/// The album's Last.fm URL, built from the names.
+/// The album's Last.fm URL as stored, or built from the names.
 pub(crate) fn album_url(album: &Entity) -> String {
-    lfm_core::album_url(&artist_of(album).name, &album.name)
+    album
+        .url
+        .clone()
+        .unwrap_or_else(|| lfm_core::album_url(&artist_of(album).name, &album.name))
 }
 
 /// `<artist mbid="…">Name</artist>`, in JSON `{"mbid":"…","#text":"Name"}`.

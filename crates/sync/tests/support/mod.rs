@@ -34,6 +34,14 @@ pub struct Data {
     /// After this many more `user.getRecentTracks` calls, answer with error 8 forever.
     pub fail_after: Option<usize>,
     pub calls: HashMap<String, usize>,
+    /// Artist, album and artist MBID per track name; tracks not listed are Cher's on Believe.
+    pub catalogue: HashMap<String, (String, String, String)>,
+    /// Entries of the all-time top artists, albums and tracks, as Last.fm's JSON shows them.
+    pub top: [Vec<Value>; 3],
+    /// What `artist.getCorrection` answers per name; other names are unknown.
+    pub corrections: HashMap<String, String>,
+    /// Requested `extended` values of `user.getRecentTracks`.
+    pub extended: Vec<String>,
 }
 
 /// A fake Last.fm whose data tests change while it runs.
@@ -84,11 +92,18 @@ impl Respond for Fake {
             }
             "user.getRecentTracks" => {
                 data.fail_after = data.fail_after.map(|n| n - 1);
+                let extended = query.get("extended").cloned().unwrap_or_default();
+                data.extended.push(extended);
                 recent(&data, &query)
             }
+            "user.getTopArtists" => top(&data.top[0], "topartists", "artist", &query),
+            "user.getTopAlbums" => top(&data.top[1], "topalbums", "album", &query),
+            "user.getTopTracks" => top(&data.top[2], "toptracks", "track", &query),
+            "artist.getCorrection" => correction(&data, &query),
             "user.getInfo" => json!({"user": {"name": USER, "playcount": "0",
                 "registered": {"unixtime": REGISTERED.to_string(), "#text": REGISTERED},
-                "type": "user", "image": []}}),
+                "corrections": "1", "type": "user", "image": [],
+                "spotify_expiry_estimate": {"unixtime": "1802563200", "#text": 1_802_563_200}}}),
             "user.getLovedTracks" => loved(&data),
             "user.getWeeklyChartList" => json!({"weeklychartlist": {"chart": [
                 {"#text": "", "from": "1000", "to": "605800"},
@@ -116,27 +131,61 @@ fn recent(data: &Data, query: &HashMap<String, String>) -> Value {
         .iter()
         .skip(skip)
         .take(usize::try_from(limit).unwrap())
-        .map(|(uts, name)| track(name, Some(*uts)))
+        .map(|(uts, name)| track(data, name, Some(*uts), query))
         .collect();
     if let (Some(name), 1) = (&data.now_playing, page) {
-        tracks.insert(0, track(name, None));
+        tracks.insert(0, track(data, name, None, query));
     }
     let attr = json!({"user": USER, "page": page.to_string(), "perPage": limit.to_string(),
         "totalPages": ((total + limit - 1) / limit).to_string(), "total": total.to_string()});
     json!({"recenttracks": {"track": tracks, "@attr": attr}})
 }
 
-fn track(name: &str, uts: Option<i64>) -> Value {
+/// A recent track; `extended=1` shows the artist's URL and no MBID, a plain page the MBID.
+fn track(data: &Data, name: &str, uts: Option<i64>, query: &HashMap<String, String>) -> Value {
+    let cher = ("Cher".to_owned(), "Believe".to_owned(), String::new());
+    let (artist, album, mbid) = data.catalogue.get(name).unwrap_or(&cher);
+    let artist_url = format!("https://www.last.fm/music/{}", artist.replace(' ', "+"));
+    let artist_node = if query.get("extended").map(String::as_str) == Some("1") {
+        json!({"url": artist_url, "name": artist, "mbid": "", "image": []})
+    } else {
+        json!({"mbid": mbid, "#text": artist})
+    };
     let mut track = json!({
-        "artist": {"url": "https://www.last.fm/music/Cher", "name": "Cher", "mbid": "", "image": []},
-        "name": name, "mbid": "", "url": format!("https://www.last.fm/music/Cher/_/{name}"),
-        "album": {"mbid": "", "#text": "Believe"}, "image": [], "loved": "0", "streamable": "0"
+        "artist": artist_node,
+        "name": name, "mbid": "", "url": format!("{artist_url}/_/{name}"),
+        "album": {"mbid": "", "#text": album}, "image": [], "loved": "0", "streamable": "0"
     });
     match uts {
         Some(uts) => track["date"] = json!({"uts": uts.to_string(), "#text": ""}),
         None => track["@attr"] = json!({"nowplaying": "true"}),
     }
     track
+}
+
+fn top(entries: &[Value], root: &str, item: &str, query: &HashMap<String, String>) -> Value {
+    let (limit, page) = (number(query, "limit", 50), number(query, "page", 1));
+    let total = i64::try_from(entries.len()).unwrap();
+    let skip = usize::try_from((page - 1) * limit).unwrap();
+    let items: Vec<Value> = entries
+        .iter()
+        .skip(skip)
+        .take(usize::try_from(limit).unwrap())
+        .cloned()
+        .collect();
+    let attr = json!({"user": USER, "page": page.to_string(), "perPage": limit.to_string(),
+        "totalPages": ((total + limit - 1) / limit).to_string(), "total": total.to_string()});
+    json!({root: {item: items, "@attr": attr}})
+}
+
+fn correction(data: &Data, query: &HashMap<String, String>) -> Value {
+    let asked = query.get("artist").cloned().unwrap_or_default();
+    match data.corrections.get(&asked) {
+        Some(name) => json!({"corrections": {"correction": {
+            "artist": {"name": name, "mbid": "", "url": "u"}, "@attr": {"index": "0"}}}}),
+        None => json!({"error": 6, "message": "The artist you supplied could not be found",
+            "links": []}),
+    }
 }
 
 fn loved(data: &Data) -> Value {

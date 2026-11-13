@@ -9,7 +9,7 @@ use super::{
 };
 
 #[derive(Deserialize)]
-struct PageAttr {
+pub(super) struct PageAttr {
     #[serde(default)]
     user: String,
     #[serde(default, deserialize_with = "number")]
@@ -34,14 +34,14 @@ impl From<&PageAttr> for PageInfo {
 }
 
 #[derive(Deserialize)]
-struct WireImage {
+pub(super) struct WireImage {
     #[serde(default)]
     size: String,
     #[serde(rename = "#text", default)]
     url: String,
 }
 
-fn images(wire: Vec<WireImage>) -> Vec<Image> {
+pub(super) fn images(wire: Vec<WireImage>) -> Vec<Image> {
     wire.into_iter()
         .map(|i| Image {
             size: i.size,
@@ -52,7 +52,7 @@ fn images(wire: Vec<WireImage>) -> Vec<Image> {
 
 /// An artist as `{name, mbid, url}` (extended) or `{#text, mbid}` (plain).
 #[derive(Deserialize)]
-struct WireArtist {
+pub(super) struct WireArtist {
     #[serde(default)]
     name: Option<String>,
     #[serde(rename = "#text", default)]
@@ -204,6 +204,10 @@ struct WireUser {
     playlists: u64,
     #[serde(default, deserialize_with = "number")]
     bootstrap: u64,
+    #[serde(default, deserialize_with = "number")]
+    corrections: u64,
+    #[serde(default)]
+    spotify_expiry_estimate: Registered,
 }
 
 impl From<WireUser> for User {
@@ -225,6 +229,8 @@ impl From<WireUser> for User {
             age: u.age,
             playlists: u.playlists,
             bootstrap: u.bootstrap,
+            corrections: u.corrections,
+            spotify_expiry: u.spotify_expiry_estimate.unixtime,
         }
     }
 }

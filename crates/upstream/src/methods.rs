@@ -35,7 +35,7 @@ impl CallOptions {
         }
     }
 
-    fn apply(&self, request: RawRequest) -> RawRequest {
+    pub(crate) fn apply(&self, request: RawRequest) -> RawRequest {
         let request = request.priority(self.priority).format(Format::Json);
         match &self.api_key {
             Some(key) => request.api_key(key.clone()),
@@ -54,21 +54,22 @@ pub struct PageRequest {
 }
 
 impl PageRequest {
-    fn params(self) -> impl Iterator<Item = (&'static str, String)> {
+    pub(crate) fn params(self) -> impl Iterator<Item = (&'static str, String)> {
         let page = self.page.map(|p| ("page", p.to_string()));
         let limit = self.limit.map(|l| ("limit", l.to_string()));
         limit.into_iter().chain(page)
     }
 }
 
-/// Parameters of `user.getRecentTracks`, built by chaining setters. Always sends
-/// `extended=1` so loved flags, artist URLs and MBIDs come back.
+/// Parameters of `user.getRecentTracks`, built by chaining setters. Sends `extended=1` unless
+/// [`RecentTracksQuery::extended`] turns it off.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RecentTracksQuery {
     user: String,
     page: PageRequest,
     from: Option<u64>,
     to: Option<u64>,
+    extended: bool,
 }
 
 impl RecentTracksQuery {
@@ -80,7 +81,15 @@ impl RecentTracksQuery {
             page: PageRequest::default(),
             from: None,
             to: None,
+            extended: true,
         }
+    }
+
+    /// `extended=1` (the default) adds loved flags and artist URLs but blanks every artist
+    /// MBID; `extended=0` shows the artist MBID Last.fm keeps per track.
+    #[must_use]
+    pub fn extended(self, extended: bool) -> Self {
+        Self { extended, ..self }
     }
 
     /// Sets the page number.
@@ -120,14 +129,14 @@ impl RecentTracksQuery {
         let to = self.to.map(|t| ("to", t.to_string()));
         RawRequest::new("user.getRecentTracks")
             .param("user", self.user.as_str())
-            .param("extended", "1")
+            .param("extended", if self.extended { "1" } else { "0" })
             .params(self.page.params())
             .params(from.into_iter().chain(to))
     }
 }
 
 impl Client {
-    /// `user.getRecentTracks` with `extended=1`.
+    /// `user.getRecentTracks`.
     ///
     /// # Errors
     ///
@@ -200,7 +209,7 @@ impl Client {
         self.typed::<FriendsBody, _>(options.apply(request)).await
     }
 
-    async fn typed<W, T>(&self, request: RawRequest) -> Result<T>
+    pub(crate) async fn typed<W, T>(&self, request: RawRequest) -> Result<T>
     where
         W: DeserializeOwned + Into<T>,
     {

@@ -7,12 +7,13 @@
 //! rather than appended to, the ones already stored are not doubled.
 
 use lfm_store::{TimeRange, UserId};
-use lfm_upstream::{Priority, RecentTracksQuery};
+use lfm_upstream::Priority;
 
 use crate::clock;
 use crate::context::Context;
 use crate::convert::{self, param, uts};
 use crate::error::{Result, SyncError};
+use crate::upstream::recent_query;
 
 /// Polls once. Returns whether a track is playing.
 pub(crate) async fn poll(ctx: &Context, user: UserId, name: &str) -> Result<bool> {
@@ -22,10 +23,10 @@ pub(crate) async fn poll(ctx: &Context, user: UserId, name: &str) -> Result<bool
         .await?
         .ok_or_else(|| SyncError::UnknownUser(name.to_owned()))?
         .sync_cursor;
-    let query = RecentTracksQuery::new(name)
+    let query = recent_query(name)
         .limit(ctx.config.page_limit)
         .from(param(cursor));
-    let page = ctx.upstream.recent(&query, Priority::Live).await?;
+    let page = ctx.upstream.recent(name, &query, Priority::Live).await?;
     let playing = page.now_playing.is_some();
     ctx.now_playing.set(user, page.now_playing, clock::now());
     let fresh: Vec<_> = page

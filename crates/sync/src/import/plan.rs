@@ -4,12 +4,13 @@
 //! requests give exact quantiles of the history without reading it.
 
 use lfm_store::TimeRange;
-use lfm_upstream::{Priority, RecentTracksQuery};
+use lfm_upstream::Priority;
 
 use crate::context::Context;
 use crate::convert::{param, uts};
 use crate::error::Result;
 use crate::import::state::{ImportState, Segment};
+use crate::upstream::recent_query;
 
 /// Last.fm's largest accepted page number.
 const MAX_PAGE: u64 = 1_000_000;
@@ -46,10 +47,10 @@ pub(crate) async fn plan(ctx: &Context, user: &str, state: &mut ImportState) -> 
 async fn newest_at(ctx: &Context, user: &str, t0: i64, index: u64) -> Result<i64> {
     let limit = if index < MAX_PAGE { 1 } else { 1000 };
     let page = u32::try_from(index / limit + 1).unwrap_or(u32::MAX);
-    let query = RecentTracksQuery::new(user)
+    let query = recent_query(user)
         .limit(u32::try_from(limit).unwrap_or(1))
         .page(page)
         .to(param(t0));
-    let found = ctx.upstream.recent(&query, Priority::Import).await?;
+    let found = ctx.upstream.recent(user, &query, Priority::Import).await?;
     Ok(found.scrobbles.first().map_or(0, |s| uts(s.uts)))
 }

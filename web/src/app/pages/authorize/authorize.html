@@ -1,0 +1,38 @@
+<div class="page">
+  @if (request.hasValue()) {
+    @let r = request.value();
+    @if (done()) {
+      <div class="stack" role="status">
+        <h1>Access allowed</h1>
+        <p class="muted">You can return to the app now. It finishes signing in by itself.</p>
+      </div>
+    } @else {
+      <div class="stack">
+        <h1>Allow {{ r.label ?? 'this app' }} to use your account?</h1>
+        <p class="muted">
+          It will be able to read your data and scrobble as
+          <strong>{{ session.account()?.username }}</strong> on this server.
+        </p>
+      </div>
+      <dl>
+        <dt>API key</dt>
+        <dd class="mono">{{ r.apiKey }}</dd>
+        @if (r.owner) {
+          <dt>Key owner</dt>
+          <dd>{{ r.owner }}</dd>
+        }
+      </dl>
+      <app-error-notice [error]="approveError()" />
+      <div>
+        <button type="button" class="button primary" [disabled]="approving()" (click)="approve()">
+          Allow access
+        </button>
+      </div>
+    }
+  } @else if (request.error()) {
+    <h1>Allow access</h1>
+    <app-error-notice [error]="request.error()" />
+  } @else {
+    <app-loading />
+  }
+</div>

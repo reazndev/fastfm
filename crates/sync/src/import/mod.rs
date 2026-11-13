@@ -3,8 +3,8 @@
 //! The import fixes its upper bound `t0` when it starts, splits `[0, t0)` into ranges of about
 //! equal size, and walks each range backwards in parallel. One coordinator writes every window
 //! with `replace_window` and saves the cursors after each one, so a restart repeats at most the
-//! windows that were in flight. Profile, loved tracks, and the chart list follow, and the user's
-//! sync cursor is set to `t0` last.
+//! windows that were in flight. Profile, loved tracks, the chart list and enrichment follow, and
+//! the user's sync cursor is set to `t0` last.
 
 mod extras;
 mod plan;
@@ -19,6 +19,7 @@ use tracing::{info, warn};
 
 use crate::clock;
 use crate::context::Context;
+use crate::enrich;
 use crate::error::{Result, SyncError};
 use crate::walk::Window;
 
@@ -142,6 +143,7 @@ async fn steps(
     }
     fetch(ctx, (job, user), &name, state, cancel).await?;
     extras::loved_and_charts(ctx, user, &name, state.t0).await?;
+    enrich::enrich(ctx, user).await?;
     ctx.store.set_sync_cursor(user, state.t0).await?;
     ctx.store.advance_periods(clock::now()).await?;
     info!(user = %name, imported = state.imported, "import done");

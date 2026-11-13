@@ -5,11 +5,14 @@ mod client;
 mod config;
 mod error;
 mod gate;
+mod library;
 mod methods;
 mod model;
 mod pool;
 mod request;
 mod retry;
+mod signed;
+mod writes;
 
 pub use client::Client;
 pub use config::{ApiKey, BucketMode, ClientConfig, DEFAULT_BASE_URL, RetryPolicy};
@@ -17,6 +20,8 @@ pub use error::{Error, LastFmError, Result};
 pub use methods::{CallOptions, PageRequest, RecentTracksQuery};
 pub use model::{
     AlbumRef, ArtistRef, ChartRange, Friends, Image, LovedTrack, LovedTracks, PageInfo,
-    RecentTracks, Scrobble, Track, User,
+    RecentTracks, Scrobble, TopAlbum, TopArtist, TopPage, TopTrack, Track, User,
 };
 pub use request::{Format, HttpMethod, Priority, RawRequest, RawResponse};
+pub use signed::{AppCredentials, Secret, WriteCredentials};
+pub use writes::{Corrected, Ignored, LastfmSession, ScrobbleItem, ScrobbleOutcome, TrackItem};

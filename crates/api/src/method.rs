@@ -9,6 +9,7 @@ use lfm_store::{MirroredUser, Store};
 use crate::auth::{ApiKey, ApiKeys, Session, Sessions};
 use crate::cache::ResponseCache;
 use crate::clock::Clock;
+use crate::now_playing::NowPlayingSource;
 
 /// What a method needs from the caller before it runs.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -21,7 +22,7 @@ pub enum Access {
     Session,
 }
 
-/// Shared services that methods use. The upstream client is added here when pass-through lands.
+/// Shared services that methods use.
 #[derive(Clone)]
 pub struct Services {
     /// The database.
@@ -57,6 +58,8 @@ pub struct Context<'a> {
     pub now: u64,
     /// The mirrored user named by [`Method::cache_user`], when the store has them.
     pub user: Option<&'a MirroredUser>,
+    /// What mirrored users are playing, when live sync runs.
+    pub now_playing: Option<&'a dyn NowPlayingSource>,
 }
 
 /// One Last.fm API method. Implementations live in `methods/<package>/<method>.rs`; they parse

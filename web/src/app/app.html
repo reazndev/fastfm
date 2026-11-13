@@ -1,0 +1,28 @@
+<header class="bar">
+  <a class="brand" routerLink="/"><span class="dot" aria-hidden="true"></span>lfm-mirror</a>
+  @if (session.account(); as account) {
+    @if (account.status === 'active') {
+      <nav class="nav" aria-label="Main">
+        <a routerLink="/" routerLinkActive="current" [routerLinkActiveOptions]="{ exact: true }"
+          >Home</a
+        >
+        <a routerLink="/keys" routerLinkActive="current">Keys</a>
+        @if (session.isAdmin()) {
+          <a routerLink="/admin" routerLinkActive="current">Admin</a>
+        }
+      </nav>
+    }
+    <button type="button" class="account" popovertarget="account-menu">
+      {{ account.username }} <span aria-hidden="true">▾</span>
+    </button>
+    <div id="account-menu" class="menu" popover #menu>
+      @if (account.status === 'active') {
+        <a routerLink="/settings" (click)="menu.hidePopover()">Settings</a>
+      }
+      <button type="button" (click)="menu.hidePopover(); logout()">Log out</button>
+    </div>
+  }
+</header>
+<main>
+  <router-outlet />
+</main>

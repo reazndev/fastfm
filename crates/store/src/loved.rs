@@ -5,7 +5,7 @@
 
 use rusqlite::{Connection, OptionalExtension, params};
 
-use crate::dims::{Resolver, entity_sql, shown_mbid};
+use crate::dims::{Resolver, entity_sql};
 use crate::error::Result;
 use crate::names::fold;
 use crate::pool::Store;
@@ -33,24 +33,30 @@ pub struct LovedTrack {
 }
 
 impl Store {
-    /// Replaces all of the user's loved tracks.
+    /// Replaces all of the user's loved tracks. `loves` is in Last.fm's order, newest first;
+    /// tracks loved in the same second keep that order.
     pub async fn replace_loved(&self, user: UserId, loves: Vec<Love>) -> Result<()> {
         self.write(move |tx| {
             tx.prepare_cached("DELETE FROM loved WHERE user_id = ?1")?
                 .execute([user])?;
             let mut resolver = Resolver::new(tx);
-            for love in &loves {
-                insert(tx, &mut resolver, user, love)?;
+            for (love, seq) in loves.iter().rev().zip(1..) {
+                insert(tx, &mut resolver, user, (love, seq))?;
             }
             bump_version(tx, user)
         })
         .await
     }
 
-    /// Loves one track, or updates the time it was loved.
+    /// Loves one track, or updates the time it was loved. It comes before tracks loved in the
+    /// same second.
     pub async fn love(&self, user: UserId, love: Love) -> Result<()> {
         self.write(move |tx| {
-            insert(tx, &mut Resolver::new(tx), user, &love)?;
+            let sql = "SELECT coalesce(max(seq), 0) + 1 FROM loved WHERE user_id = ?1";
+            let seq = tx
+                .prepare_cached(sql)?
+                .query_row([user], |row| row.get(0))?;
+            insert(tx, &mut Resolver::new(tx), user, (&love, seq))?;
             bump_version(tx, user)
         })
         .await
@@ -81,13 +87,18 @@ impl Store {
     }
 }
 
-fn insert(conn: &Connection, resolver: &mut Resolver<'_>, user: UserId, love: &Love) -> Result<()> {
+fn insert(
+    conn: &Connection,
+    resolver: &mut Resolver<'_>,
+    user: UserId,
+    (love, seq): (&Love, i64),
+) -> Result<()> {
     let artist = resolver.artist(&love.artist)?;
-    let track = resolver.track(artist, &love.track, Some(shown_mbid(&love.artist)))?;
-    let sql = "INSERT INTO loved (user_id, track_id, uts) VALUES (?1, ?2, ?3) \
-               ON CONFLICT DO UPDATE SET uts = excluded.uts";
+    let track = resolver.track(artist, &love.track, &love.artist)?;
+    let sql = "INSERT INTO loved (user_id, track_id, uts, seq) VALUES (?1, ?2, ?3, ?4) \
+               ON CONFLICT DO UPDATE SET uts = excluded.uts, seq = excluded.seq";
     conn.prepare_cached(sql)?
-        .execute(params![user, track, love.uts])?;
+        .execute(params![user, track, love.uts, seq])?;
     Ok(())
 }
 
@@ -98,7 +109,7 @@ fn loved_tracks(conn: &Connection, user: UserId, page: Page) -> Result<Listing<L
             .query_row([user], |row| row.get(0))?,
     );
     let sql = "SELECT track_id, uts FROM loved WHERE user_id = ?1 \
-               ORDER BY uts DESC, track_id LIMIT ?2 OFFSET ?3";
+               ORDER BY uts DESC, seq DESC, track_id LIMIT ?2 OFFSET ?3";
     let mut stmt = conn.prepare_cached(sql)?;
     let rows = stmt.query_map(params![user, page.limit, page.offset()], |row| {
         Ok((row.get::<_, i64>(0)?, row.get::<_, i64>(1)?))

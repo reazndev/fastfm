@@ -71,7 +71,8 @@ impl<'c> Resolver<'c> {
         self.upsert(key, sql, params![artist.name, name_fold, mbid, url])
     }
 
-    /// Resolves an album of `artist_id`, creating it if needed and keeping the newest image.
+    /// Resolves an album of `artist_id` as scrobbled: one row per spelling and cover, since
+    /// Last.fm may file them under different library albums.
     pub(crate) fn album(
         &mut self,
         artist_id: i64,
@@ -80,47 +81,52 @@ impl<'c> Resolver<'c> {
     ) -> Result<i64> {
         let name_fold = fold(&album.name);
         let image = non_empty(image).and_then(image_key);
+        let variant = scrobbled_variant(&album.name, image.as_deref());
         let mbid = opt(album.mbid.as_ref());
         let key = (
             Kind::Album,
             artist_id,
-            name_fold.clone(),
-            owned([mbid, image.as_deref(), None]),
+            variant.clone(),
+            owned([mbid, None, None]),
         );
-        let sql = "INSERT INTO albums (artist_id, name, name_fold, mbid, image) \
-                   VALUES (?1, ?2, ?3, ?4, ?5) ON CONFLICT (artist_id, name_fold) DO UPDATE \
-                   SET mbid = coalesce(excluded.mbid, mbid), \
-                   image = coalesce(excluded.image, image) RETURNING id";
-        self.upsert(
-            key,
-            sql,
-            params![artist_id, album.name, name_fold, mbid, image],
-        )
+        let sql = "INSERT INTO albums (artist_id, name, name_fold, mbid, image, variant) \
+                   VALUES (?1, ?2, ?3, ?4, ?5, ?6) \
+                   ON CONFLICT (artist_id, name_fold, variant) DO UPDATE \
+                   SET mbid = coalesce(excluded.mbid, mbid) RETURNING id";
+        let values = params![artist_id, album.name, name_fold, mbid, image, variant];
+        self.upsert(key, sql, values)
     }
 
     /// Resolves a track of `artist_id`, creating it if needed.
     ///
-    /// `artist_mbid` is the artist MBID Last.fm showed with this track, which may be empty even
-    /// when the artist has one; recent and loved tracks repeat it per track.
-    pub(crate) fn track(
-        &mut self,
-        artist_id: i64,
-        track: &Named,
-        artist_mbid: Option<&str>,
-    ) -> Result<i64> {
+    /// `artist` is the artist as Last.fm showed it with this track: its MBID may be empty even
+    /// when the artist has one (recent and loved tracks repeat it per track), and its spelling
+    /// is kept with a new track when it differs from the artist row's.
+    pub(crate) fn track(&mut self, artist_id: i64, track: &Named, artist: &Named) -> Result<i64> {
         let name_fold = fold(&track.name);
         let (mbid, url) = (opt(track.mbid.as_ref()), opt(track.url.as_ref()));
+        let artist_mbid = Some(shown_mbid(artist));
         let key = (
             Kind::Track,
             artist_id,
             name_fold.clone(),
             owned([mbid, url, artist_mbid]),
         );
-        let sql = "INSERT INTO tracks (artist_id, name, name_fold, mbid, url, artist_mbid) \
-                   VALUES (?1, ?2, ?3, ?4, ?5, ?6) ON CONFLICT (artist_id, name_fold) DO UPDATE \
+        let sql = "INSERT INTO tracks (artist_id, name, name_fold, mbid, url, artist_mbid, \
+                   artist_name) VALUES (?1, ?2, ?3, ?4, ?5, ?6, \
+                   nullif(?7, (SELECT name FROM artists WHERE id = ?1))) \
+                   ON CONFLICT (artist_id, name_fold) DO UPDATE \
                    SET mbid = coalesce(excluded.mbid, mbid), url = coalesce(excluded.url, url), \
                    artist_mbid = coalesce(excluded.artist_mbid, artist_mbid) RETURNING id";
-        let values = params![artist_id, track.name, name_fold, mbid, url, artist_mbid];
+        let values = params![
+            artist_id,
+            track.name,
+            name_fold,
+            mbid,
+            url,
+            artist_mbid,
+            artist.name
+        ];
         self.upsert(key, sql, values)
     }
 
@@ -137,13 +143,18 @@ impl<'c> Resolver<'c> {
         let album_id = album
             .map(|album| self.album(artist_id, album, image))
             .transpose()?;
-        let track_id = self.track(artist_id, track, Some(shown_mbid(artist)))?;
+        let track_id = self.track(artist_id, track, artist)?;
         Ok(Ids {
             artist: artist_id,
             album: album_id,
             track: track_id,
         })
     }
+}
+
+/// The variant of a scrobbled album: its exact spelling and cover.
+pub(crate) fn scrobbled_variant(name: &str, image: Option<&str>) -> String {
+    format!("{name}\u{1f}{}", image.unwrap_or_default())
 }
 
 /// The artist MBID as shown next to a track: empty when none was given.
@@ -159,26 +170,41 @@ fn opt(value: Option<&String>) -> Option<&str> {
     non_empty(value.map(String::as_str))
 }
 
+/// The artist columns of a track joined as `t` with its artist as `ar`: the spelling, MBID and
+/// URL Last.fm shows with the track. A spelling of its own comes with a URL of its own, which is
+/// the track URL's artist part.
+macro_rules! track_artist_columns {
+    () => {
+        "coalesce(t.artist_name, ar.name), coalesce(t.artist_mbid, ar.mbid), \
+         CASE WHEN t.artist_name IS NOT NULL AND instr(t.url, '/_/') > 0 \
+         THEN substr(t.url, 1, instr(t.url, '/_/') - 1) ELSE ar.url END"
+    };
+}
+pub(crate) use track_artist_columns;
+
 /// In statements that join, parameters compared with `=` are written `+?N`. A plain `?N`
 /// lets `SQLite` propagate the value through the join, which makes it re-prepare the statement
 /// every time the statement cache clears its bindings, costing several microseconds per use.
 ///
 /// Columns shared by `entity_sql`: id, name, mbid, url, image, then the artist's name, mbid, url,
-/// then the duration. A track's artist MBID is the one shown with the track.
+/// then the duration. Artists show as Last.fm's library spells them; a library album shows its
+/// URL and the artist MBID Last.fm shows with it.
 pub(crate) fn entity_sql(kind: Kind) -> &'static str {
     match kind {
         Kind::Artist => {
-            "SELECT id, name, mbid, url, NULL, NULL, NULL, NULL, NULL FROM artists WHERE id = ?1"
+            "SELECT id, coalesce(lib_name, name), mbid, url, NULL, NULL, NULL, NULL, NULL \
+             FROM artists WHERE id = ?1"
         }
         Kind::Album => {
-            "SELECT al.id, al.name, al.mbid, NULL, al.image, ar.name, ar.mbid, ar.url, NULL \
+            "SELECT al.id, al.name, al.mbid, al.url, al.image, coalesce(ar.lib_name, ar.name), \
+             coalesce(al.artist_mbid, ar.mbid), ar.url, NULL \
              FROM albums al JOIN artists ar ON ar.id = al.artist_id WHERE al.id = +?1"
         }
-        Kind::Track => {
-            "SELECT t.id, t.name, t.mbid, t.url, NULL, ar.name, \
-             coalesce(t.artist_mbid, ar.mbid), ar.url, t.duration \
-             FROM tracks t JOIN artists ar ON ar.id = t.artist_id WHERE t.id = +?1"
-        }
+        Kind::Track => concat!(
+            "SELECT t.id, t.name, t.mbid, t.url, NULL, ",
+            track_artist_columns!(),
+            ", t.duration FROM tracks t JOIN artists ar ON ar.id = t.artist_id WHERE t.id = +?1"
+        ),
     }
 }
 

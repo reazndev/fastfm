@@ -11,6 +11,7 @@ pub struct SyncConfig {
     pub(crate) idle_interval: Duration,
     pub(crate) periods_interval: Duration,
     pub(crate) reconcile_interval: Duration,
+    pub(crate) enrich_interval: Duration,
 }
 
 impl Default for SyncConfig {
@@ -22,6 +23,7 @@ impl Default for SyncConfig {
             idle_interval: Duration::from_secs(60),
             periods_interval: Duration::from_secs(300),
             reconcile_interval: Duration::from_secs(86_400),
+            enrich_interval: Duration::from_secs(86_400),
         }
     }
 }
@@ -62,6 +64,16 @@ impl SyncConfig {
     pub fn periods_interval(self, periods_interval: Duration) -> Self {
         Self {
             periods_interval,
+            ..self
+        }
+    }
+
+    /// How often each followed user's library is enriched again from their top lists.
+    /// Defaults to one day.
+    #[must_use]
+    pub fn enrich_interval(self, enrich_interval: Duration) -> Self {
+        Self {
+            enrich_interval,
             ..self
         }
     }

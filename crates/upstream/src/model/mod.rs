@@ -1,7 +1,10 @@
 //! This crate's own view of Last.fm data, independent of the rest of the workspace.
 
 mod de;
+pub(crate) mod library;
 pub(crate) mod wire;
+
+pub use library::{TopAlbum, TopArtist, TopPage, TopTrack};
 
 /// One image URL of a given size (`small`, `medium`, `large`, `extralarge`, `mega`).
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -121,6 +124,10 @@ pub struct User {
     pub playlists: u64,
     /// Bootstrap flag as Last.fm reports it; 0 where left out.
     pub bootstrap: u64,
+    /// The undocumented `corrections` flag of `user.getInfo`; 0 where left out.
+    pub corrections: u64,
+    /// `spotify_expiry_estimate` of `user.getInfo`, in Unix seconds; 0 where left out.
+    pub spotify_expiry: u64,
 }
 
 /// One loved track.

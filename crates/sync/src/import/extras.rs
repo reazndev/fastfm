@@ -17,6 +17,9 @@ pub(crate) async fn profile(ctx: &Context, name: &str) -> Result<UserId> {
     ctx.store
         .update_profile(id, convert::profile(&user))
         .await?;
+    ctx.store
+        .update_profile_extras(id, convert::profile_extras(&user))
+        .await?;
     Ok(id)
 }
 

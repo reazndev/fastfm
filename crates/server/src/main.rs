@@ -1,7 +1,9 @@
 //! `lfm-mirror`: serves the Last.fm API from a local copy.
 
 use anyhow::Context as _;
-use lfm_mirror::{App, Config, router};
+use std::net::SocketAddr;
+
+use lfm_mirror::{App, Config, Jobs, app_router};
 use lfm_store::Store;
 use tracing_subscriber::EnvFilter;
 
@@ -24,18 +26,34 @@ async fn main() -> anyhow::Result<()> {
     let store =
         Store::open(&config.db).with_context(|| format!("opening {}", config.db.display()))?;
     let app = App::new(store, &config).await?;
+    if app.passthrough.is_none() {
+        tracing::warn!(
+            "LASTFM_API_KEYS is not set; catalogue methods answer error 3, and only accounts \
+             with their own Last.fm key can sync"
+        );
+    }
+    if config.lastfm_app().is_none() {
+        tracing::info!(
+            "LASTFM_API_SECRET is not set; Last.fm web auth and forwarded writes need an \
+             account's own key"
+        );
+    }
 
-    // SEAM: background jobs (import, live sync, reconcile, pre-warm) start here, sharing the
-    // store with the dispatcher, and stop on the same shutdown signal.
+    // Background jobs share the store with the dispatcher and stop on the same signal.
+    let jobs = Jobs::start(&app, &config).await?;
     let maintenance = tokio::spawn(app.clone().maintain());
     let listener = tokio::net::TcpListener::bind(config.bind)
         .await
         .with_context(|| format!("binding {}", config.bind))?;
-    axum::serve(listener, router(app.dispatcher))
+    let service = app_router(&app).into_make_service_with_connect_info::<SocketAddr>();
+    axum::serve(listener, service)
         .with_graceful_shutdown(shutdown_signal())
         .await
         .context("serving")?;
     maintenance.abort();
+    if let Some(jobs) = jobs {
+        jobs.shutdown().await;
+    }
     tracing::info!("stopped");
     Ok(())
 }

@@ -175,3 +175,57 @@ across the key pool: 160,643 scrobbles in 54 s and 179 requests, `--until 179451
   track artist and name. Track counts agree (15,477).
 - The scrobble count for `to=1794518863` (160,643) equals `playcount` in the `user.getInfo`
   fixture, and no request hit a rate limit at 8 req/s with eight requests in flight.
+
+## Pass-through (lfm-api, 2026-11-12)
+
+Replaying the catalogue fixtures through the mirror's read-through cache, about 90 minutes after
+recording:
+
+- **`getInfo` with `username` is not the global answer plus two fields.** `artist.getInfo`
+  shows the artist's real image with `username` and the placeholder without it, and
+  `album.getInfo` orders its JSON keys differently (`name`, `userplaycount`, `image`, `tracks`,
+  `listeners`, `playcount`, `url` against `playcount`, `image`, `tracks`, `url`, `name`,
+  `listeners`). So the mirror forwards these requests with the user name and replaces only the
+  `userplaycount` and `userloved` values with local ones. `userplaycount` is a string in artist
+  and track JSON and a number in album JSON; `userloved` is a string.
+- **Lookups ignore case and do not echo it.** `artist`, `album`, `track` (getInfo, similar, top
+  lists, tags, corrections) and `country` (geo) bodies are identical whatever the request's case,
+  so the cache key folds them. Search terms are echoed in `opensearch:Query`, so they are not.
+- **Drift within 90 minutes.** Besides the counters already listed: `chart.getTopTags` and
+  `tag.getTopTags` reach, taggings and the total tag count, `tag.getInfo` `total`,
+  `chart.getTopTracks` play and listener counts (in one run and not the next, as the hourly chart
+  turned over), a rank swap in `chart.getTopArtists` and `chart.getTopTracks`, and result order in
+  `album.search` and `track.search`, where tracks with close listener counts swap places between
+  calls.
+- With several keys in the pool, the 186 uncached requests of one run took about 9 s, with no
+  error 29.
+
+## Library entities (lfm-sync enrichment, 2026-11-13)
+
+Last.fm's top lists, `library.getArtists`, weekly charts and `user.getInfo` counts do not count
+plays under the names in the scrobbles. Compared with the user's all-time top lists
+(`period=overall&limit=1000`: 5 + 7 + 16 requests here):
+
+- **Artists are corrected.** 37 scrobbled names count under the name `artist.getCorrection`
+  gives: `zzz.` under `ZZZ`, `Travis Scott` under `Travi$ Scott`, `Berlioz` under
+  `Hector Berlioz`, `STRFKR` under `Starfucker`, `Ye` under `Yes`, `?` and `06` under
+  `[unknown]`. With those, all 4,046 artists and play counts match.
+- **Tracks are not.** Top tracks keep the scrobbled artist (`zzz.`), and all 15,477 match by name
+  but one (`Udo Lindenberg` / `Horizont (feat. Nena)` is listed under
+  `Udo Lindenberg & das Panik-Orchester`; `track.getCorrection` does not say so).
+- **Albums are filed under the album artist**, which no API response shows per scrobble. The
+  scrobble's exact album spelling and cover tell most of them apart: `FIRST FINALE` (one cover)
+  and `First Finale` (another) by the same track artist are two albums by two album artists, and
+  the cover shown in recent tracks is that album's. Matching by spelling and cover, then artist,
+  then remaining play count places all but 62 of 160,643 scrobbles; 11 albums stay empty.
+- **`extended=1` blanks every artist MBID** in recent tracks. Plain pages show an artist MBID per
+  track (empty for some tracks of artists that have one); top tracks, weekly track charts and
+  loved tracks show the same per-track value. Top albums and weekly album charts show a
+  per-album artist MBID. Plain pages lack the artist URL, which is the track URL's start.
+- **Ties sort by a Unicode collation**: punctuation, then symbols and emoji, then currency (`$`,
+  `¥`), digits, letters. `ø` sorts as `o`, `Ł` as `l`, small capitals (`ʟᴏꜱᴛ`) right after
+  their letter, and `🥵` (Unicode 11) after everything. In top tracks the 1-play group is not
+  sorted by name at all (it looks like internal id order); no fixture reaches it.
+- **Loved tracks in the same second** keep the order of `user.getLovedTracks`.
+- **Catalogue values drift**: one day after recording, two track MBIDs and lengths and one album
+  cover had changed on Last.fm; `conformance/ignore.toml` names them.

@@ -32,8 +32,9 @@ impl NowPlaying {
             .cloned()
     }
 
-    /// Records the result of a poll: a track, or `None` when nothing plays.
-    pub(crate) fn set(&self, user: UserId, track: Option<Track>, now: i64) {
+    /// Records the result of a poll, or a client's `track.updateNowPlaying`: a track, or `None`
+    /// when nothing plays.
+    pub fn set(&self, user: UserId, track: Option<Track>, now: i64) {
         let mut tracks = self.tracks.write().unwrap_or_else(PoisonError::into_inner);
         match track {
             Some(track) => tracks.insert(

@@ -1,0 +1,11 @@
+# Only sources go into the build context.
+target/
+data/
+fixtures/
+conformance/
+.env
+.git/
+.idea/
+web/node_modules/
+web/dist/
+web/.angular/
