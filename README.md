@@ -53,8 +53,8 @@ You need Docker and a Last.fm API account (create one at
    at once.
 4. If you started the server without `LASTFM_API_KEYS`, open **Settings** and enter your own
    Last.fm API key and shared secret. With the instance key from step 2 you can skip this.
-   Without an instance key, catalogue methods and the speed page stay off; your own key is used
-   only for your import, sync and writes.
+   Without an instance key the speed page stays off, and catalogue requests made with one of
+   your mirror API keys call Last.fm with your own key.
 5. On the home page, enter your Last.fm username. The import starts in the background and the
    page shows its progress. It costs about one Last.fm request per 1,000 scrobbles.
 6. Optional: choose **Connect Last.fm** to approve the mirror on last.fm. Scrobbles and loves
@@ -94,7 +94,7 @@ directory for any variable the environment does not set.
 | `LFM_BIND` | `0.0.0.0:3055` | Address and port to listen on. |
 | `LFM_DATA_DIR` | `/data` | Directory for the database and `secrets.key`. |
 | `LFM_DB` | `lfm.db` in the data directory | Path of the SQLite database. |
-| `LASTFM_API_KEYS` | none | Last.fm API keys, comma separated: the instance key pool for imports, sync, the catalogue cache and the speed page. Without keys, catalogue methods answer error 3 and only accounts with their own key can sync. |
+| `LASTFM_API_KEYS` | none | Last.fm API keys, comma separated: the instance key pool for imports, sync, the catalogue cache and the speed page. Without keys, only accounts with their own key can sync, and a catalogue request not yet cached uses the own key of the account behind the calling API key (error 16 when it has none). |
 | `LASTFM_API_SECRET` | none | Shared secret of the first key in `LASTFM_API_KEYS`. Needed for Last.fm web auth and forwarded writes of accounts without their own key. |
 | `LFM_PUBLIC_URL` | none | Where browsers reach the instance, such as `https://fm.example.org`. Used for the Last.fm web auth callback; without it the request's `Host` header is used. |
 | `LFM_TRUST_PROXY` | `false` | Trust `X-Forwarded-For` and `X-Forwarded-Proto` from a reverse proxy. The login rate limit then uses the rightmost `X-Forwarded-For` entry, the one the proxy added. Leave off when clients connect directly. |
@@ -165,7 +165,8 @@ every session issued to it.
 
 **Your own Last.fm key.** Under **Settings** an account can enter its own Last.fm API key and
 shared secret. Its import, live sync and forwarded writes then use that key instead of the
-instance pool. The secret is encrypted at rest with `secrets.key`.
+instance pool, and on an instance without a pool so do catalogue requests made with the
+account's API keys. The secret is encrypted at rest with `secrets.key`.
 
 **Private profiles.** Last.fm refuses to list the scrobbles of a private profile (error 17). The
 import then fails with a message and is retried once a day, in case the profile becomes public.
@@ -215,6 +216,7 @@ the web UI, and `curl` and `python3` for the conformance script.
 |---|---|
 | `scripts/check.sh` | Every check CI runs: file sizes, `cargo fmt`, `clippy` with warnings as errors, tests, and the web lint, format, test and build. Run it before each commit. |
 | `scripts/conformance.sh` | Replays the fixtures against a server built from this tree, serving a copy of `data/conformance.db`. Pass `--only <method>` or `--expect conformance/expected.txt`. |
+| `scripts/conformance-multi.sh` | Replays Last.fm answers saved for ten users (`fixtures-multi/`) against a copy of the database they were compared with. Run `scripts/conformance-multi.sh prepare` once to copy it out of the `lfm-load-data` volume. |
 | `cargo run -p lfm-sync -- import --user NAME --db data/conformance.db` | Imports one user into a database file without the server. Also `enrich`, `reconcile` and `live`. |
 | `cargo run -p lfm-record` | Records fixtures from the real Last.fm for `LASTFM_USER`. Run by hand only; add `--force` to overwrite and `--only <method-prefix>` to narrow. |
 | `cargo run -p lfm-api --release --example bench` | In-process timing of every local method against a database copy; see the file for its variables. |

@@ -26,7 +26,8 @@ use crate::types::{Kind, Named, UserId, count};
 pub struct Scrobbled {
     /// Store id.
     pub id: i64,
-    /// The artist's name; for an artist, its own name.
+    /// The artist's name; for an artist, its own name; for a track, the exact artist spelling
+    /// it was scrobbled with.
     pub artist: String,
     /// The album or track name; for an artist, its own name again.
     pub name: String,
@@ -108,6 +109,17 @@ impl Store {
         })
         .await
     }
+
+    /// When the user scrobbled the stored track `track`, oldest first.
+    pub async fn track_scrobble_times(&self, user: UserId, track: i64) -> Result<Vec<i64>> {
+        self.read(move |conn| {
+            let sql = "SELECT uts FROM scrobbles WHERE user_id = ?1 AND track_id = ?2 ORDER BY uts";
+            let mut stmt = conn.prepare_cached(sql)?;
+            let rows = stmt.query_map(params![user, track], |row| row.get(0))?;
+            Ok(rows.collect::<rusqlite::Result<_>>()?)
+        })
+        .await
+    }
 }
 
 fn scrobbled(conn: &Connection, user: UserId, kind: Kind) -> Result<Vec<Scrobbled>> {
@@ -128,8 +140,8 @@ fn scrobbled(conn: &Connection, user: UserId, kind: Kind) -> Result<Vec<Scrobble
             plays("album")
         ),
         Kind::Track => format!(
-            "SELECT e.id, ar.name, e.name, NULL, x.n FROM {} JOIN tracks e ON e.id = x.id \
-             JOIN artists ar ON ar.id = e.artist_id",
+            "SELECT e.id, e.artist_spelling, e.name, NULL, x.n FROM {} \
+             JOIN tracks e ON e.id = x.id",
             plays("track")
         ),
     };

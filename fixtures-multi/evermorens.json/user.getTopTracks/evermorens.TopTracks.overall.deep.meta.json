@@ -1,0 +1,48 @@
+{
+ "method": "user.getTopTracks",
+ "variant": "evermorens.TopTracks.overall.deep",
+ "http_method": "GET",
+ "recorded_at": 1794600865,
+ "responses": {
+  "json": {
+   "params": [
+    [
+     "method",
+     "user.getTopTracks"
+    ],
+    [
+     "api_key",
+     "REDACTED"
+    ],
+    [
+     "user",
+     "evermorens"
+    ],
+    [
+     "period",
+     "overall"
+    ],
+    [
+     "limit",
+     "50"
+    ],
+    [
+     "page",
+     "66"
+    ],
+    [
+     "format",
+     "json"
+    ]
+   ],
+   "status": 200,
+   "content_type": "application/json",
+   "headers": {
+    "access-control-allow-methods": "POST, GET, OPTIONS",
+    "access-control-allow-origin": "*",
+    "access-control-max-age": "86400",
+    "content-type": "application/json"
+   }
+  }
+ }
+}

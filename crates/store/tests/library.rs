@@ -416,3 +416,44 @@ async fn album_spellings_and_covers_can_belong_to_different_albums() {
     );
     assert_aggregates_match(&db.raw());
 }
+
+/// Each library album keeps the artist spelling its top-albums entry shows: `The_Beast_Playz`'s
+/// album chart says `Jaÿ-Z` where the artist list says `JAŸ-Z`.
+#[tokio::test]
+async fn library_albums_keep_their_own_artist_spelling() {
+    let db = TestDb::new();
+    let alice = user(&db.store, "alice").await;
+    let plays = vec![
+        scrobble(T0, "JAŸ-Z", "The Blueprint", "Izzo"),
+        scrobble(T0 + 1, "JAŸ-Z", "Reasonable Doubt", "D'Evils"),
+    ];
+    db.store.append_scrobbles(alice, plays).await.unwrap();
+    let album = |artist: &str, name: &str| LibAlbum {
+        artist: Named::new(artist),
+        album: Named::new(name),
+        image: None,
+    };
+    let library = Library {
+        artists: vec![Named::new("JAŸ-Z")],
+        albums: vec![
+            album("Jaÿ-Z", "The Blueprint"),
+            album("JAŸ-Z", "Reasonable Doubt"),
+        ],
+        ..Library::default()
+    };
+    db.store.apply_library(alice, library).await.unwrap();
+    let sql = "SELECT al.name, al.artist_name FROM albums al WHERE al.variant = '' ORDER BY 1";
+    let conn = db.raw();
+    let mut stmt = conn.prepare(sql).unwrap();
+    let stored: Vec<(String, Option<String>)> = stmt
+        .query_map([], |row| Ok((row.get(0)?, row.get(1)?)))
+        .unwrap()
+        .collect::<rusqlite::Result<_>>()
+        .unwrap();
+    let want = [("Reasonable Doubt", "JAŸ-Z"), ("The Blueprint", "Jaÿ-Z")];
+    let want: Vec<_> = want
+        .iter()
+        .map(|(album, artist)| ((*album).to_owned(), Some((*artist).to_owned())))
+        .collect();
+    assert_eq!(stored, want);
+}

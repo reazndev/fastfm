@@ -147,8 +147,9 @@ fn kana_sound(code: u32) -> u32 {
         other => other,
     };
     let full = match hiragana {
-        0x3041 | 0x3043 | 0x3045 | 0x3047 | 0x3049 | 0x3063 | 0x3083 | 0x3085 | 0x3087
-        | 0x308E => Some(hiragana + 1),
+        0x3041 | 0x3043 | 0x3045 | 0x3047 | 0x3049 | 0x3063 | 0x3083 | 0x3085 | 0x3087 | 0x308E => {
+            Some(hiragana + 1)
+        }
         0x3095 => Some(0x304B),
         0x3096 => Some(0x3051),
         _ => None,

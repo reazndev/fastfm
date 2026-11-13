@@ -1,0 +1,40 @@
+{
+ "method": "user.getTopAlbums",
+ "variant": "ZachSkov.TopAlbums.12month",
+ "http_method": "GET",
+ "recorded_at": 1794600895,
+ "responses": {
+  "xml": {
+   "params": [
+    [
+     "method",
+     "user.getTopAlbums"
+    ],
+    [
+     "api_key",
+     "REDACTED"
+    ],
+    [
+     "user",
+     "ZachSkov"
+    ],
+    [
+     "period",
+     "12month"
+    ],
+    [
+     "limit",
+     "50"
+    ]
+   ],
+   "status": 200,
+   "content_type": "text/xml; charset=UTF-8",
+   "headers": {
+    "access-control-allow-methods": "POST, GET, OPTIONS",
+    "access-control-allow-origin": "*",
+    "access-control-max-age": "86400",
+    "content-type": "text/xml; charset=UTF-8"
+   }
+  }
+ }
+}

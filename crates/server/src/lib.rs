@@ -94,7 +94,7 @@ impl App {
         dispatcher = dispatcher.with_passthrough(if pooled {
             passthrough.clone()
         } else {
-            passthrough.clone().without_pool(Arc::new(NoOwnKeys))
+            passthrough.clone().without_pool(web.caller_keys())
         });
         // Pre-warming needs the pool: it acts for no account.
         let passthrough = pooled.then_some(passthrough);
@@ -136,19 +136,6 @@ impl App {
                 tracing::warn!(%error, "purging the upstream cache failed");
             }
         }
-    }
-}
-
-/// Own Last.fm keys of accounts, for an instance without a key pool. The web crate holds the
-/// decrypted keys and is to implement [`lfm_api::CallerKeys`]; until it does, a pass-through
-/// miss on such an instance answers error 16 and logs why.
-#[derive(Debug)]
-struct NoOwnKeys;
-
-#[async_trait::async_trait]
-impl lfm_api::CallerKeys for NoOwnKeys {
-    async fn lastfm_key(&self, _account_id: i64) -> Option<lfm_upstream::ApiKey> {
-        None
     }
 }
 

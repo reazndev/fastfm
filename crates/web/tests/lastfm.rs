@@ -93,6 +93,29 @@ async fn the_own_key_rule_blocks_linking_until_a_key_is_saved() {
 }
 
 #[tokio::test]
+async fn caller_keys_answer_an_accounts_own_lastfm_key() {
+    let h = Harness::new().await;
+    let admin = h.signup("admin").await;
+    let caller_keys = h.web.caller_keys();
+    let id = account_id(&h, &admin).await;
+    assert!(caller_keys.lastfm_key(id.0).await.is_none());
+
+    mount_get(&h, "auth.getToken", r#"{"token":"t"}"#).await;
+    let own = "a".repeat(32);
+    let key = json!({ "apiKey": own, "secret": "b".repeat(32) });
+    let saved = h
+        .call("PUT", "/app/api/lastfm/key")
+        .cookie(&admin)
+        .json(key)
+        .send()
+        .await;
+    assert_eq!(saved.status, 204, "{}", saved.json);
+    let found = caller_keys.lastfm_key(id.0).await.unwrap();
+    assert_eq!(found.expose(), own);
+    assert!(caller_keys.lastfm_key(id.0 + 1).await.is_none());
+}
+
+#[tokio::test]
 async fn without_the_rule_the_instance_key_is_used() {
     let h = Harness::new().await;
     mount_profile(&h).await;

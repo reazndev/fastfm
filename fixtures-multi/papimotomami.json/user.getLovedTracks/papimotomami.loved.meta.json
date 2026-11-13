@@ -1,0 +1,40 @@
+{
+ "method": "user.getLovedTracks",
+ "variant": "papimotomami.loved",
+ "http_method": "GET",
+ "recorded_at": 1794600642,
+ "responses": {
+  "json": {
+   "params": [
+    [
+     "method",
+     "user.getLovedTracks"
+    ],
+    [
+     "api_key",
+     "REDACTED"
+    ],
+    [
+     "user",
+     "papimotomami"
+    ],
+    [
+     "limit",
+     "50"
+    ],
+    [
+     "format",
+     "json"
+    ]
+   ],
+   "status": 200,
+   "content_type": "application/json",
+   "headers": {
+    "access-control-allow-methods": "POST, GET, OPTIONS",
+    "access-control-allow-origin": "*",
+    "access-control-max-age": "86400",
+    "content-type": "application/json"
+   }
+  }
+ }
+}

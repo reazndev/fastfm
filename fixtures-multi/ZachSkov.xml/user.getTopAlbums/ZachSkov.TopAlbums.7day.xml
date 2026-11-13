@@ -1,0 +1,755 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lfm status="ok">
+  <topalbums user="ZachSkov" page="1" perPage="50" totalPages="2" total="57">
+    <album rank="1">
+      <name>Pinponism</name>
+      <playcount>10</playcount>
+      <mbid>4a0c7053-c57f-4fd7-bab7-04a6c2f2da9b</mbid>
+      <url>https://www.last.fm/music/pinponpanpon/Pinponism</url>
+      <artist>
+        <name>pinponpanpon</name>
+        <mbid>36c557c3-d149-491e-90ed-46d69d978f9a</mbid>
+        <url>https://www.last.fm/music/pinponpanpon</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/3d3f3f5d25c7e43e9e7760d640ee9dc3.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/3d3f3f5d25c7e43e9e7760d640ee9dc3.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/3d3f3f5d25c7e43e9e7760d640ee9dc3.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/3d3f3f5d25c7e43e9e7760d640ee9dc3.jpg</image>
+    </album>
+    <album rank="2">
+      <name>Patched Up</name>
+      <playcount>6</playcount>
+      <mbid>0ee14efe-798d-460e-b7dd-7d2654edb75d</mbid>
+      <url>https://www.last.fm/music/beabadoobee/Patched+Up</url>
+      <artist>
+        <name>beabadoobee</name>
+        <mbid>88d17133-abbc-42db-9526-4e2c1db60336</mbid>
+        <url>https://www.last.fm/music/beabadoobee</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/ed2ddfd6c3fae84a69912d918d80b510.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/ed2ddfd6c3fae84a69912d918d80b510.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/ed2ddfd6c3fae84a69912d918d80b510.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/ed2ddfd6c3fae84a69912d918d80b510.jpg</image>
+    </album>
+    <album rank="3">
+      <name>C</name>
+      <playcount>4</playcount>
+      <mbid>d9e806fa-f3cc-406c-a50e-06eebbb863c9</mbid>
+      <url>https://www.last.fm/music/Lucy+Bedroque/C</url>
+      <artist>
+        <name>Lucy Bedroque</name>
+        <mbid>bb7959ac-84cc-45c4-8138-d80ee5f2bd9a</mbid>
+        <url>https://www.last.fm/music/Lucy+Bedroque</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/fe70a827d3d057c3d88382d2c86ba696.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/fe70a827d3d057c3d88382d2c86ba696.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/fe70a827d3d057c3d88382d2c86ba696.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/fe70a827d3d057c3d88382d2c86ba696.jpg</image>
+    </album>
+    <album rank="4">
+      <name>E</name>
+      <playcount>3</playcount>
+      <mbid>b59ae45d-6d81-4b23-a72e-15b858f3de85</mbid>
+      <url>https://www.last.fm/music/Effie/E</url>
+      <artist>
+        <name>Effie</name>
+        <mbid>2cc69c26-bec0-47f9-87f5-99242f7f5a73</mbid>
+        <url>https://www.last.fm/music/Effie</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/df991bdc8022b342aa1993b66e81ddc9.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/df991bdc8022b342aa1993b66e81ddc9.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/df991bdc8022b342aa1993b66e81ddc9.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/df991bdc8022b342aa1993b66e81ddc9.jpg</image>
+    </album>
+    <album rank="5">
+      <name>Tweaker Poem</name>
+      <playcount>3</playcount>
+      <mbid>cfa79705-a2ae-4eb9-8938-733c2b482857</mbid>
+      <url>https://www.last.fm/music/Frost+Children/Tweaker+Poem</url>
+      <artist>
+        <name>Frost Children</name>
+        <mbid>3f1ed758-50e4-401f-8dc6-e0066e546e7c</mbid>
+        <url>https://www.last.fm/music/Frost+Children</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/6cc8b75c9af7e2197480247acf06aa83.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/6cc8b75c9af7e2197480247acf06aa83.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/6cc8b75c9af7e2197480247acf06aa83.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/6cc8b75c9af7e2197480247acf06aa83.jpg</image>
+    </album>
+    <album rank="6">
+      <name>Zhuang Zhuang Mixtape</name>
+      <playcount>2</playcount>
+      <mbid>0837821e-50e7-4e32-893e-87aaec3ced48</mbid>
+      <url>https://www.last.fm/music/jackzebra/Zhuang+Zhuang+Mixtape</url>
+      <artist>
+        <name>jackzebra</name>
+        <mbid>57f88c69-323c-4be4-a992-79efeca09a34</mbid>
+        <url>https://www.last.fm/music/jackzebra</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/8d525f69f57ebdd5312bb509f08b1d24.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/8d525f69f57ebdd5312bb509f08b1d24.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/8d525f69f57ebdd5312bb509f08b1d24.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/8d525f69f57ebdd5312bb509f08b1d24.jpg</image>
+    </album>
+    <album rank="7">
+      <name>Revengeseekerz</name>
+      <playcount>2</playcount>
+      <mbid>f33f2384-761b-4c27-9db3-922edc9b8cbd</mbid>
+      <url>https://www.last.fm/music/Jane+Remover/Revengeseekerz</url>
+      <artist>
+        <name>Jane Remover</name>
+        <mbid>f4b6e451-5dce-4842-a555-f793892299b3</mbid>
+        <url>https://www.last.fm/music/Jane+Remover</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/7e63ec5a92240a2f3292aa15bd5af39a.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/7e63ec5a92240a2f3292aa15bd5af39a.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/7e63ec5a92240a2f3292aa15bd5af39a.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/7e63ec5a92240a2f3292aa15bd5af39a.jpg</image>
+    </album>
+    <album rank="8">
+      <name>Lose Yourself</name>
+      <playcount>2</playcount>
+      <mbid>72841628-bbf7-42a3-bb45-7cc0420aeecd</mbid>
+      <url>https://www.last.fm/music/Kiss+of+Life/Lose+Yourself</url>
+      <artist>
+        <name>Kiss of Life</name>
+        <mbid>cbe629e3-fbbd-4071-9e12-4c5074c2231b</mbid>
+        <url>https://www.last.fm/music/Kiss+of+Life</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/ec90e5e32ce7c2bf9ddfa1be3f480ff3.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/ec90e5e32ce7c2bf9ddfa1be3f480ff3.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/ec90e5e32ce7c2bf9ddfa1be3f480ff3.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/ec90e5e32ce7c2bf9ddfa1be3f480ff3.jpg</image>
+    </album>
+    <album rank="9">
+      <name>SPEED DEMON / I KNOW (MY INFLUENCE)</name>
+      <playcount>2</playcount>
+      <mbid>6797b350-3863-4fcc-b1d5-d715d056ae4c</mbid>
+      <url>https://www.last.fm/music/Lucy+Bedroque/SPEED+DEMON+%2F+I+KNOW+(MY+INFLUENCE)</url>
+      <artist>
+        <name>Lucy Bedroque</name>
+        <mbid>bb7959ac-84cc-45c4-8138-d80ee5f2bd9a</mbid>
+        <url>https://www.last.fm/music/Lucy+Bedroque</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/b46eb014fadee6798bdd128d368e0df3.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/b46eb014fadee6798bdd128d368e0df3.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/b46eb014fadee6798bdd128d368e0df3.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/b46eb014fadee6798bdd128d368e0df3.jpg</image>
+    </album>
+    <album rank="10">
+      <name>A Girl is a Gun</name>
+      <playcount>2</playcount>
+      <mbid></mbid>
+      <url>https://www.last.fm/music/Molly+Santana/A+Girl+is+a+Gun</url>
+      <artist>
+        <name>Molly Santana</name>
+        <mbid>7c2fd839-62ca-4787-b687-8a4067c48e24</mbid>
+        <url>https://www.last.fm/music/Molly+Santana</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/0d2475fce865f5e660acfa3dac059eb2.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/0d2475fce865f5e660acfa3dac059eb2.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/0d2475fce865f5e660acfa3dac059eb2.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/0d2475fce865f5e660acfa3dac059eb2.jpg</image>
+    </album>
+    <album rank="11">
+      <name>Angel Tattoo</name>
+      <playcount>2</playcount>
+      <mbid>3c9210ce-b331-4777-b51c-8f8d922d473e</mbid>
+      <url>https://www.last.fm/music/The+Deep/Angel+Tattoo</url>
+      <artist>
+        <name>The Deep</name>
+        <mbid>3974c610-c0e7-494f-8341-4700bf2e787f</mbid>
+        <url>https://www.last.fm/music/The+Deep</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/06d1ebb893549298e8ce27c7d11aa049.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/06d1ebb893549298e8ce27c7d11aa049.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/06d1ebb893549298e8ce27c7d11aa049.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/06d1ebb893549298e8ce27c7d11aa049.jpg</image>
+    </album>
+    <album rank="12">
+      <name>Trouble Mountain</name>
+      <playcount>1</playcount>
+      <mbid></mbid>
+      <url>https://www.last.fm/music/Aesop+Rock+X+Blockhead/Trouble+Mountain</url>
+      <artist>
+        <name>Aesop Rock X Blockhead</name>
+        <mbid></mbid>
+        <url>https://www.last.fm/music/Aesop+Rock+X+Blockhead</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/176b1bf6aa253276676cfcedc4f26eba.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/176b1bf6aa253276676cfcedc4f26eba.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/176b1bf6aa253276676cfcedc4f26eba.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/176b1bf6aa253276676cfcedc4f26eba.png</image>
+    </album>
+    <album rank="13">
+      <name>&lt;BURN&gt;</name>
+      <playcount>1</playcount>
+      <mbid>03cec33b-2dea-4789-a424-dcefc3617f9b</mbid>
+      <url>https://www.last.fm/music/ARTMS/%3CBURN%3E</url>
+      <artist>
+        <name>ARTMS</name>
+        <mbid>ae98b8c4-d8fc-4ff9-9b4e-4bc1fd8575d1</mbid>
+        <url>https://www.last.fm/music/ARTMS</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/da6f910e77935495a0d24102c230b7b9.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/da6f910e77935495a0d24102c230b7b9.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/da6f910e77935495a0d24102c230b7b9.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/da6f910e77935495a0d24102c230b7b9.jpg</image>
+    </album>
+    <album rank="14">
+      <name>&lt;Dall&gt;</name>
+      <playcount>1</playcount>
+      <mbid>064c9c60-de5c-4a3c-819c-ca67590b46ed</mbid>
+      <url>https://www.last.fm/music/ARTMS/%3CDall%3E</url>
+      <artist>
+        <name>ARTMS</name>
+        <mbid>ae98b8c4-d8fc-4ff9-9b4e-4bc1fd8575d1</mbid>
+        <url>https://www.last.fm/music/ARTMS</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/25eb1503aeb96fb6b37b3e1d961d7685.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/25eb1503aeb96fb6b37b3e1d961d7685.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/25eb1503aeb96fb6b37b3e1d961d7685.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/25eb1503aeb96fb6b37b3e1d961d7685.jpg</image>
+    </album>
+    <album rank="15">
+      <name>춤 (CHOOM)</name>
+      <playcount>1</playcount>
+      <mbid>2795c9e2-217a-4c1a-b575-6575fb1674a1</mbid>
+      <url>https://www.last.fm/music/BABYMONSTER/%EC%B6%A4+(CHOOM)</url>
+      <artist>
+        <name>BABYMONSTER</name>
+        <mbid>5829cd4f-e693-4b03-abe5-1226243c23d6</mbid>
+        <url>https://www.last.fm/music/BABYMONSTER</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/db8e93778eecab1d6ba8cf39d463da29.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/db8e93778eecab1d6ba8cf39d463da29.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/db8e93778eecab1d6ba8cf39d463da29.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/db8e93778eecab1d6ba8cf39d463da29.jpg</image>
+    </album>
+    <album rank="16">
+      <name>PEACE + WAR</name>
+      <playcount>1</playcount>
+      <mbid></mbid>
+      <url>https://www.last.fm/music/bassvictim/PEACE+%252B+WAR</url>
+      <artist>
+        <name>bassvictim</name>
+        <mbid>4de1756c-e988-4f9f-87bf-bae46f56fefe</mbid>
+        <url>https://www.last.fm/music/bassvictim</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/02d00cdcc7add74b7875423c77eb9d54.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/02d00cdcc7add74b7875423c77eb9d54.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/02d00cdcc7add74b7875423c77eb9d54.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/02d00cdcc7add74b7875423c77eb9d54.jpg</image>
+    </album>
+    <album rank="17">
+      <name>White Flag</name>
+      <playcount>1</playcount>
+      <mbid>3df44b33-b148-43f4-83cd-7cad95cff9e9</mbid>
+      <url>https://www.last.fm/music/bassvictim/White+Flag</url>
+      <artist>
+        <name>bassvictim</name>
+        <mbid>4de1756c-e988-4f9f-87bf-bae46f56fefe</mbid>
+        <url>https://www.last.fm/music/bassvictim</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2fd1d52e9b3ed6c06df86449c50d129e.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2fd1d52e9b3ed6c06df86449c50d129e.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2fd1d52e9b3ed6c06df86449c50d129e.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2fd1d52e9b3ed6c06df86449c50d129e.jpg</image>
+    </album>
+    <album rank="18">
+      <name>Cold Visions</name>
+      <playcount>1</playcount>
+      <mbid>d7d52cb9-0b8e-487a-b1fa-29d06e33ae65</mbid>
+      <url>https://www.last.fm/music/Bladee/Cold+Visions</url>
+      <artist>
+        <name>Bladee</name>
+        <mbid>cd689e77-dfdd-4f81-b50c-5e5a3f5e38a4</mbid>
+        <url>https://www.last.fm/music/Bladee</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/091ed7bca47d5c69795b3ccc9ca0d477.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/091ed7bca47d5c69795b3ccc9ca0d477.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/091ed7bca47d5c69795b3ccc9ca0d477.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/091ed7bca47d5c69795b3ccc9ca0d477.jpg</image>
+    </album>
+    <album rank="19">
+      <name>Ste the Beautiful Martyr 1st Attempt</name>
+      <playcount>1</playcount>
+      <mbid>81ca6e4a-7d6a-4fc1-bf58-abd87473631e</mbid>
+      <url>https://www.last.fm/music/Bladee/Ste+the+Beautiful+Martyr+1st+Attempt</url>
+      <artist>
+        <name>Bladee</name>
+        <mbid>cd689e77-dfdd-4f81-b50c-5e5a3f5e38a4</mbid>
+        <url>https://www.last.fm/music/Bladee</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/b36e0d855b5dc84450801fbe119c16d7.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/b36e0d855b5dc84450801fbe119c16d7.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/b36e0d855b5dc84450801fbe119c16d7.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/b36e0d855b5dc84450801fbe119c16d7.jpg</image>
+    </album>
+    <album rank="20">
+      <name>POST HUMAN: NeX GEn</name>
+      <playcount>1</playcount>
+      <mbid>7fe8d509-ffed-40fd-a17a-3611709e5ec0</mbid>
+      <url>https://www.last.fm/music/Bring+Me+the+Horizon/POST+HUMAN:+NeX+GEn</url>
+      <artist>
+        <name>Bring Me the Horizon</name>
+        <mbid>074e3847-f67f-49f9-81f1-8c8cea147e8e</mbid>
+        <url>https://www.last.fm/music/Bring+Me+the+Horizon</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/0be3075e1dc23fefc736eabe52454831.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/0be3075e1dc23fefc736eabe52454831.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/0be3075e1dc23fefc736eabe52454831.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/0be3075e1dc23fefc736eabe52454831.jpg</image>
+    </album>
+    <album rank="21">
+      <name>Bare&amp;Rare, Pt. 1</name>
+      <playcount>1</playcount>
+      <mbid>b14cad8f-ed74-4e39-9da8-fc0e697eb8b2</mbid>
+      <url>https://www.last.fm/music/CHUNG+HA/Bare&amp;Rare,+Pt.+1</url>
+      <artist>
+        <name>CHUNG HA</name>
+        <mbid>08525643-7a01-411e-8188-8bf57261c8b3</mbid>
+        <url>https://www.last.fm/music/CHUNG+HA</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/9a1e11505c412f47ea97a9d749454948.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/9a1e11505c412f47ea97a9d749454948.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/9a1e11505c412f47ea97a9d749454948.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/9a1e11505c412f47ea97a9d749454948.jpg</image>
+    </album>
+    <album rank="22">
+      <name>Let God Sort Em Out</name>
+      <playcount>1</playcount>
+      <mbid>f64764aa-c7b3-4958-93bb-f2051b77d23b</mbid>
+      <url>https://www.last.fm/music/Clipse/Let+God+Sort+Em+Out</url>
+      <artist>
+        <name>Clipse</name>
+        <mbid>e6424fa5-08d3-41c6-96f3-8549f733708c</mbid>
+        <url>https://www.last.fm/music/Clipse</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/3e9c2e43ea71b186dcafb715351689e3.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/3e9c2e43ea71b186dcafb715351689e3.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/3e9c2e43ea71b186dcafb715351689e3.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/3e9c2e43ea71b186dcafb715351689e3.jpg</image>
+    </album>
+    <album rank="23">
+      <name>King of the Mischievous South</name>
+      <playcount>1</playcount>
+      <mbid>2eaf1349-1e12-47d2-b939-9cd3d7453bb5</mbid>
+      <url>https://www.last.fm/music/Denzel+Curry/King+of+the+Mischievous+South</url>
+      <artist>
+        <name>Denzel Curry</name>
+        <mbid>5f95440d-7737-4a36-9bcf-c05337f7129b</mbid>
+        <url>https://www.last.fm/music/Denzel+Curry</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/d51e85ffad9b662408d8114f3faa6336.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/d51e85ffad9b662408d8114f3faa6336.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/d51e85ffad9b662408d8114f3faa6336.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/d51e85ffad9b662408d8114f3faa6336.jpg</image>
+    </album>
+    <album rank="24">
+      <name>Strictly 4 The Scythe</name>
+      <playcount>1</playcount>
+      <mbid>74810d06-6c4e-43ad-9b33-ce7fc70f3a60</mbid>
+      <url>https://www.last.fm/music/Denzel+Curry/Strictly+4+The+Scythe</url>
+      <artist>
+        <name>Denzel Curry</name>
+        <mbid>5f95440d-7737-4a36-9bcf-c05337f7129b</mbid>
+        <url>https://www.last.fm/music/Denzel+Curry</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/422c098afc207de80f251483e30d5cb3.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/422c098afc207de80f251483e30d5cb3.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/422c098afc207de80f251483e30d5cb3.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/422c098afc207de80f251483e30d5cb3.jpg</image>
+    </album>
+    <album rank="25">
+      <name>Acid Fly</name>
+      <playcount>1</playcount>
+      <mbid></mbid>
+      <url>https://www.last.fm/music/Effie/Acid+Fly</url>
+      <artist>
+        <name>Effie</name>
+        <mbid>2cc69c26-bec0-47f9-87f5-99242f7f5a73</mbid>
+        <url>https://www.last.fm/music/Effie</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/7fdd81400794d61290c1127bcbc23592.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/7fdd81400794d61290c1127bcbc23592.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/7fdd81400794d61290c1127bcbc23592.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/7fdd81400794d61290c1127bcbc23592.png</image>
+    </album>
+    <album rank="26">
+      <name>pullup to busan 4 morE hypEr summEr it’s gonna bE a fuckin moviE</name>
+      <playcount>1</playcount>
+      <mbid>8a8b808c-c1d9-411e-a0a7-5d289012712d</mbid>
+      <url>https://www.last.fm/music/Effie/pullup+to+busan+4+morE+hypEr+summEr+it%E2%80%99s+gonna+bE+a+fuckin+moviE</url>
+      <artist>
+        <name>Effie</name>
+        <mbid>2cc69c26-bec0-47f9-87f5-99242f7f5a73</mbid>
+        <url>https://www.last.fm/music/Effie</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/f2cf02e06a8588051ebea0a1ef6784a6.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/f2cf02e06a8588051ebea0a1ef6784a6.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/f2cf02e06a8588051ebea0a1ef6784a6.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/f2cf02e06a8588051ebea0a1ef6784a6.jpg</image>
+    </album>
+    <album rank="27">
+      <name>Red Horse</name>
+      <playcount>1</playcount>
+      <mbid>c2069234-d232-42ed-91e1-6eb450624c3f</mbid>
+      <url>https://www.last.fm/music/Effie/Red+Horse</url>
+      <artist>
+        <name>Effie</name>
+        <mbid>2cc69c26-bec0-47f9-87f5-99242f7f5a73</mbid>
+        <url>https://www.last.fm/music/Effie</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/6304ba6f363ef958f92015e153c96c72.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/6304ba6f363ef958f92015e153c96c72.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/6304ba6f363ef958f92015e153c96c72.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/6304ba6f363ef958f92015e153c96c72.jpg</image>
+    </album>
+    <album rank="28">
+      <name>BlackBolshevik</name>
+      <playcount>1</playcount>
+      <mbid>325fed88-10c8-4b4c-8f26-af27fc9fd124</mbid>
+      <url>https://www.last.fm/music/Ghais+Guevara/BlackBolshevik</url>
+      <artist>
+        <name>Ghais Guevara</name>
+        <mbid>060e8048-a944-46c8-9cdc-3143b0f96bad</mbid>
+        <url>https://www.last.fm/music/Ghais+Guevara</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/25d1da02f6e10e14ab913e7e2ed35653.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/25d1da02f6e10e14ab913e7e2ed35653.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/25d1da02f6e10e14ab913e7e2ed35653.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/25d1da02f6e10e14ab913e7e2ed35653.jpg</image>
+    </album>
+    <album rank="29">
+      <name>来世は偉人！</name>
+      <playcount>1</playcount>
+      <mbid></mbid>
+      <url>https://www.last.fm/music/HANABIE./%E6%9D%A5%E4%B8%96%E3%81%AF%E5%81%89%E4%BA%BA%EF%BC%81</url>
+      <artist>
+        <name>HANABIE.</name>
+        <mbid></mbid>
+        <url>https://www.last.fm/music/HANABIE.</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/dbfe4184188bed1e592c9a0a45dace40.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/dbfe4184188bed1e592c9a0a45dace40.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/dbfe4184188bed1e592c9a0a45dace40.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/dbfe4184188bed1e592c9a0a45dace40.jpg</image>
+    </album>
+    <album rank="30">
+      <name>&lt;unevermet&gt;</name>
+      <playcount>1</playcount>
+      <mbid>b906373c-b2ef-40fa-a335-e08cc241fc8c</mbid>
+      <url>https://www.last.fm/music/idntt/%3Cunevermet%3E</url>
+      <artist>
+        <name>idntt</name>
+        <mbid>e9aad754-9f17-4189-ac81-7a6cb4d9dbcb</mbid>
+        <url>https://www.last.fm/music/idntt</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/7ab5be7c6357a5a17d4897ef9d138468.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/7ab5be7c6357a5a17d4897ef9d138468.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/7ab5be7c6357a5a17d4897ef9d138468.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/7ab5be7c6357a5a17d4897ef9d138468.jpg</image>
+    </album>
+    <album rank="31">
+      <name>LOVE DIVE</name>
+      <playcount>1</playcount>
+      <mbid>c1381794-5a20-42d0-8073-df9f03b59922</mbid>
+      <url>https://www.last.fm/music/IVE/LOVE+DIVE</url>
+      <artist>
+        <name>IVE</name>
+        <mbid></mbid>
+        <url>https://www.last.fm/music/IVE</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/e9c0075644fc7c781455f4c34e954e7e.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/e9c0075644fc7c781455f4c34e954e7e.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/e9c0075644fc7c781455f4c34e954e7e.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/e9c0075644fc7c781455f4c34e954e7e.jpg</image>
+    </album>
+    <album rank="32">
+      <name>Less than a Lover</name>
+      <playcount>1</playcount>
+      <mbid>70b21316-ede2-4d7f-9a39-198514022546</mbid>
+      <url>https://www.last.fm/music/Jennie/Less+than+a+Lover</url>
+      <artist>
+        <name>Jennie</name>
+        <mbid></mbid>
+        <url>https://www.last.fm/music/Jennie</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/57d00c092f6de1b385257459678b35a2.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/57d00c092f6de1b385257459678b35a2.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/57d00c092f6de1b385257459678b35a2.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/57d00c092f6de1b385257459678b35a2.jpg</image>
+    </album>
+    <album rank="33">
+      <name>Ruby</name>
+      <playcount>1</playcount>
+      <mbid>4530b90f-3a07-4f01-9d2a-53d25cc0e2b2</mbid>
+      <url>https://www.last.fm/music/Jennie/Ruby</url>
+      <artist>
+        <name>Jennie</name>
+        <mbid></mbid>
+        <url>https://www.last.fm/music/Jennie</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/96d5b9adcdc061748bbfb29f292558d7.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/96d5b9adcdc061748bbfb29f292558d7.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/96d5b9adcdc061748bbfb29f292558d7.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/96d5b9adcdc061748bbfb29f292558d7.png</image>
+    </album>
+    <album rank="34">
+      <name>From JOY, with Love</name>
+      <playcount>1</playcount>
+      <mbid>86a7a8af-1aa6-4a26-9465-b4bd0012bb5e</mbid>
+      <url>https://www.last.fm/music/Joy/From+JOY,+with+Love</url>
+      <artist>
+        <name>Joy</name>
+        <mbid></mbid>
+        <url>https://www.last.fm/music/Joy</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/c2ad50ec0fab744feacaf31a493701f2.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/c2ad50ec0fab744feacaf31a493701f2.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/c2ad50ec0fab744feacaf31a493701f2.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/c2ad50ec0fab744feacaf31a493701f2.jpg</image>
+    </album>
+    <album rank="35">
+      <name>More Chaos</name>
+      <playcount>1</playcount>
+      <mbid>3b30e058-7183-410a-925f-d0dd6654525c</mbid>
+      <url>https://www.last.fm/music/Ken+Carson/More+Chaos</url>
+      <artist>
+        <name>Ken Carson</name>
+        <mbid></mbid>
+        <url>https://www.last.fm/music/Ken+Carson</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/1064ca8e270b530391afefa720ff76ff.gif</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/1064ca8e270b530391afefa720ff76ff.gif</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/1064ca8e270b530391afefa720ff76ff.gif</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/1064ca8e270b530391afefa720ff76ff.gif</image>
+    </album>
+    <album rank="36">
+      <name>WhyKiiiKiii</name>
+      <playcount>1</playcount>
+      <mbid>e25de900-626f-4e69-b31b-3c8ad2d13bbf</mbid>
+      <url>https://www.last.fm/music/KiiiKiii/WhyKiiiKiii</url>
+      <artist>
+        <name>KiiiKiii</name>
+        <mbid>bdbc7927-6ff5-4a64-a2dd-9756323008e1</mbid>
+        <url>https://www.last.fm/music/KiiiKiii</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/15ba787714883aac221031889db8d169.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/15ba787714883aac221031889db8d169.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/15ba787714883aac221031889db8d169.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/15ba787714883aac221031889db8d169.jpg</image>
+    </album>
+    <album rank="37">
+      <name>Midas Touch</name>
+      <playcount>1</playcount>
+      <mbid>83641da9-392e-4a97-a894-ddb16ea475d4</mbid>
+      <url>https://www.last.fm/music/Kiss+of+Life/Midas+Touch</url>
+      <artist>
+        <name>Kiss of Life</name>
+        <mbid>cbe629e3-fbbd-4071-9e12-4c5074c2231b</mbid>
+        <url>https://www.last.fm/music/Kiss+of+Life</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/516a5ae4e5f0eb1eddc8072873765cb5.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/516a5ae4e5f0eb1eddc8072873765cb5.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/516a5ae4e5f0eb1eddc8072873765cb5.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/516a5ae4e5f0eb1eddc8072873765cb5.jpg</image>
+    </album>
+    <album rank="38">
+      <name>Color</name>
+      <playcount>1</playcount>
+      <mbid>2d94991f-14a7-452c-8e2d-aad48d88c55a</mbid>
+      <url>https://www.last.fm/music/KWON+EUNBI/Color</url>
+      <artist>
+        <name>KWON EUNBI</name>
+        <mbid>508a7f4b-d153-400d-8e79-a2dba1421a11</mbid>
+        <url>https://www.last.fm/music/KWON+EUNBI</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/cdbe05a697e0ca8cf253e8a2f6ec018a.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/cdbe05a697e0ca8cf253e8a2f6ec018a.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/cdbe05a697e0ca8cf253e8a2f6ec018a.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/cdbe05a697e0ca8cf253e8a2f6ec018a.jpg</image>
+    </album>
+    <album rank="39">
+      <name>Mista Thug Isolation</name>
+      <playcount>1</playcount>
+      <mbid>01858e25-4cba-4b9e-8907-34d319cd0c7b</mbid>
+      <url>https://www.last.fm/music/Lil+Ugly+Mane/Mista+Thug+Isolation</url>
+      <artist>
+        <name>Lil Ugly Mane</name>
+        <mbid>5f1adfe1-4d07-4141-b181-79e5d379d539</mbid>
+        <url>https://www.last.fm/music/Lil+Ugly+Mane</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/fca5ea56d8dfc707040deb81cbefa1cc.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/fca5ea56d8dfc707040deb81cbefa1cc.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/fca5ea56d8dfc707040deb81cbefa1cc.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/fca5ea56d8dfc707040deb81cbefa1cc.jpg</image>
+    </album>
+    <album rank="40">
+      <name>[+ +]</name>
+      <playcount>1</playcount>
+      <mbid></mbid>
+      <url>https://www.last.fm/music/Loona/%5B%252B+%252B%5D</url>
+      <artist>
+        <name>Loona</name>
+        <mbid>8d46a79b-760d-4f82-8019-463bbe7b77a7</mbid>
+        <url>https://www.last.fm/music/Loona</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/ad2f42cfa70d7fe14ca91ae784cc38b8.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/ad2f42cfa70d7fe14ca91ae784cc38b8.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/ad2f42cfa70d7fe14ca91ae784cc38b8.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/ad2f42cfa70d7fe14ca91ae784cc38b8.jpg</image>
+    </album>
+    <album rank="41">
+      <name>Love &amp; Live</name>
+      <playcount>1</playcount>
+      <mbid></mbid>
+      <url>https://www.last.fm/music/LOO%CE%A0%CE%94+1%2F3/Love+&amp;+Live</url>
+      <artist>
+        <name>LOOΠΔ 1/3</name>
+        <mbid></mbid>
+        <url>https://www.last.fm/music/LOO%CE%A0%CE%94+1%2F3</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/4edc7b321d7138d0c0e33690f7c5c3e8.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/4edc7b321d7138d0c0e33690f7c5c3e8.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/4edc7b321d7138d0c0e33690f7c5c3e8.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/4edc7b321d7138d0c0e33690f7c5c3e8.jpg</image>
+    </album>
+    <album rank="42">
+      <name>HER</name>
+      <playcount>1</playcount>
+      <mbid></mbid>
+      <url>https://www.last.fm/music/Minnie/HER</url>
+      <artist>
+        <name>Minnie</name>
+        <mbid>50259c88-f747-4279-8d97-694cabde390f</mbid>
+        <url>https://www.last.fm/music/Minnie</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/120a0f0d5fd90449767d9546f8465fc7.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/120a0f0d5fd90449767d9546f8465fc7.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/120a0f0d5fd90449767d9546f8465fc7.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/120a0f0d5fd90449767d9546f8465fc7.jpg</image>
+    </album>
+    <album rank="43">
+      <name>PLAY</name>
+      <playcount>1</playcount>
+      <mbid>1f4bff21-f591-4484-9320-d068e959cdfe</mbid>
+      <url>https://www.last.fm/music/MISAMO/PLAY</url>
+      <artist>
+        <name>MISAMO</name>
+        <mbid>e148e786-f078-49e2-a9fb-fd044bd68905</mbid>
+        <url>https://www.last.fm/music/MISAMO</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/042a7bfcf289b2bf3a611c98c7bd06d5.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/042a7bfcf289b2bf3a611c98c7bd06d5.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/042a7bfcf289b2bf3a611c98c7bd06d5.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/042a7bfcf289b2bf3a611c98c7bd06d5.jpg</image>
+    </album>
+    <album rank="44">
+      <name>Can&apos;t Touch This</name>
+      <playcount>1</playcount>
+      <mbid></mbid>
+      <url>https://www.last.fm/music/Molly+Santana/Can%27t+Touch+This</url>
+      <artist>
+        <name>Molly Santana</name>
+        <mbid>7c2fd839-62ca-4787-b687-8a4067c48e24</mbid>
+        <url>https://www.last.fm/music/Molly+Santana</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/ea95cb178becb2cd8636ae2c1a243a75.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/ea95cb178becb2cd8636ae2c1a243a75.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/ea95cb178becb2cd8636ae2c1a243a75.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/ea95cb178becb2cd8636ae2c1a243a75.jpg</image>
+    </album>
+    <album rank="45">
+      <name>How Sweet &amp; Bubble Gum</name>
+      <playcount>1</playcount>
+      <mbid>3b19053e-ba0e-4be1-9d94-9763dcaf3809</mbid>
+      <url>https://www.last.fm/music/NewJeans/How+Sweet+&amp;+Bubble+Gum</url>
+      <artist>
+        <name>NewJeans</name>
+        <mbid>49204a7a-ed85-407a-828f-6fd46f1d8126</mbid>
+        <url>https://www.last.fm/music/NewJeans</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/8c39fec74322752193be40f5f75ce475.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/8c39fec74322752193be40f5f75ce475.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/8c39fec74322752193be40f5f75ce475.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/8c39fec74322752193be40f5f75ce475.jpg</image>
+    </album>
+    <album rank="46">
+      <name>Heavy Serenade</name>
+      <playcount>1</playcount>
+      <mbid>0afecd4f-31e8-42fa-ae1a-441e7224be78</mbid>
+      <url>https://www.last.fm/music/NMIXX/Heavy+Serenade</url>
+      <artist>
+        <name>NMIXX</name>
+        <mbid>2d623e82-73e2-4179-9c44-e963980f2d58</mbid>
+        <url>https://www.last.fm/music/NMIXX</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2d89ced3067c9c224832231ca6e3a8a5.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2d89ced3067c9c224832231ca6e3a8a5.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2d89ced3067c9c224832231ca6e3a8a5.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2d89ced3067c9c224832231ca6e3a8a5.jpg</image>
+    </album>
+    <album rank="47">
+      <name>Isetan</name>
+      <playcount>1</playcount>
+      <mbid>ef544ebb-3160-473c-84b4-fe8f394f3cde</mbid>
+      <url>https://www.last.fm/music/pinponpanpon/Isetan</url>
+      <artist>
+        <name>pinponpanpon</name>
+        <mbid>36c557c3-d149-491e-90ed-46d69d978f9a</mbid>
+        <url>https://www.last.fm/music/pinponpanpon</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/a549a564b84f0e6e1a603746658de4c1.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/a549a564b84f0e6e1a603746658de4c1.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/a549a564b84f0e6e1a603746658de4c1.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/a549a564b84f0e6e1a603746658de4c1.jpg</image>
+    </album>
+    <album rank="48">
+      <name>PinPonDash</name>
+      <playcount>1</playcount>
+      <mbid></mbid>
+      <url>https://www.last.fm/music/pinponpanpon/PinPonDash</url>
+      <artist>
+        <name>pinponpanpon</name>
+        <mbid>36c557c3-d149-491e-90ed-46d69d978f9a</mbid>
+        <url>https://www.last.fm/music/pinponpanpon</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/e732b143f48242e9215b6e06bf6ea88e.png</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/e732b143f48242e9215b6e06bf6ea88e.png</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/e732b143f48242e9215b6e06bf6ea88e.png</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/e732b143f48242e9215b6e06bf6ea88e.png</image>
+    </album>
+    <album rank="49">
+      <name>Perfect Velvet - The 2nd Album</name>
+      <playcount>1</playcount>
+      <mbid></mbid>
+      <url>https://www.last.fm/music/Red+Velvet/Perfect+Velvet+-+The+2nd+Album</url>
+      <artist>
+        <name>Red Velvet</name>
+        <mbid>4f0cb3b7-6c06-4317-ae35-ddf3106a17ee</mbid>
+        <url>https://www.last.fm/music/Red+Velvet</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/2aa1266215542d3c6bf77576150ff211.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/2aa1266215542d3c6bf77576150ff211.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/2aa1266215542d3c6bf77576150ff211.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2aa1266215542d3c6bf77576150ff211.jpg</image>
+    </album>
+    <album rank="50">
+      <name>So What If I&apos;m A Freak</name>
+      <playcount>1</playcount>
+      <mbid></mbid>
+      <url>https://www.last.fm/music/Snow+Strippers/So+What+If+I%27m+A+Freak</url>
+      <artist>
+        <name>Snow Strippers</name>
+        <mbid>33243fef-ce1a-4ba7-a81e-ec72e4c5029a</mbid>
+        <url>https://www.last.fm/music/Snow+Strippers</url>
+      </artist>
+      <image size="small">https://lastfm-img.freetls.fastly.net/i/u/34s/7541aa80852aa65ffacf961a63049d6e.jpg</image>
+      <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/7541aa80852aa65ffacf961a63049d6e.jpg</image>
+      <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/7541aa80852aa65ffacf961a63049d6e.jpg</image>
+      <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/7541aa80852aa65ffacf961a63049d6e.jpg</image>
+    </album>
+  </topalbums>
+</lfm>

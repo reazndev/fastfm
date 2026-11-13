@@ -1,0 +1,3 @@
+# Ignore rules for the multi-user suite (scripts/conformance-multi.sh); same format as
+# ignore.toml. Empty on purpose: every case there was a mirror bug, so every difference should
+# go away, and the single-user rules (counts of one account, flapping MBIDs) do not apply.

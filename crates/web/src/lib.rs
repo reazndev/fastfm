@@ -29,7 +29,7 @@ use std::sync::Arc;
 
 use axum::Router;
 use axum::routing::get;
-use lfm_api::{AccountServices, StoreKeys};
+use lfm_api::{AccountServices, CallerKeys, StoreKeys};
 use lfm_store::Store;
 use lfm_sync::SyncService;
 use lfm_upstream::Client;
@@ -101,6 +101,13 @@ impl Web {
     /// [`lfm_api::methods::with_accounts`].
     #[must_use]
     pub fn accounts(&self) -> Arc<dyn AccountServices> {
+        Arc::new(Accounts(self.state.clone()))
+    }
+
+    /// The own Last.fm keys of accounts, for a pass-through without a key pool; pass it to
+    /// [`lfm_api::Passthrough::without_pool`].
+    #[must_use]
+    pub fn caller_keys(&self) -> Arc<dyn CallerKeys> {
         Arc::new(Accounts(self.state.clone()))
     }
 

@@ -16,13 +16,24 @@ pub(crate) fn paging(params: &Params) -> Page {
     Page::new(paging.page, paging.limit)
 }
 
-/// JSON key orders of a list's `@attr`. Last.fm's order changes with the request, as below; the
-/// cause is unknown, so these copy what the 2026-11-12 fixtures show.
-const USUAL_ORDER: &[&str] = &["user", "totalPages", "page", "perPage", "total"];
-/// Every list method with `limit=200`.
-const LIMIT_200_ORDER: &[&str] = &["perPage", "totalPages", "page", "user", "total"];
-/// Recent tracks above 200 per page; loved tracks and friends when page 1 holds the whole list.
-const TOTAL_FIRST_ORDER: &[&str] = &["user", "totalPages", "page", "total", "perPage"];
+/// JSON key orders of a list's `@attr`. Last.fm picks one by the number of items in the list
+/// (now-playing included), whatever the method, `limit`, page or range; XML keeps one order.
+const USUAL: &[&str] = &["user", "totalPages", "page", "perPage", "total"];
+const TOTAL_FIRST: &[&str] = &["user", "totalPages", "page", "total", "perPage"];
+const PER_PAGE_FIRST: &[&str] = &["perPage", "totalPages", "page", "user", "total"];
+const USER_LAST: &[&str] = &["perPage", "totalPages", "page", "total", "user"];
+
+/// The order for `items` items. From live `user.getRecentTracks` answers with `limit` 1 to 200
+/// (every value) and 41 values up to 1000, cross-checked against 450 list answers of six
+/// methods and ten users (2026-11-12/13). Ranges past 200 are sampled, not exhaustive.
+fn attr_order(items: usize) -> &'static [&'static str] {
+    match items {
+        3..=5 | 8 | 20..=35 | 68..=131 | 516.. => TOTAL_FIRST,
+        10 | 11 | 259 => USER_LAST,
+        132..=258 => PER_PAGE_FIRST,
+        _ => USUAL,
+    }
+}
 
 /// The `@attr` of a paged list.
 #[derive(Debug, Clone, Copy)]
@@ -32,41 +43,18 @@ pub(crate) struct ListAttrs<'a> {
     per_page: u32,
     total_pages: u64,
     total: u64,
-    json_order: &'static [&'static str],
 }
 
 impl<'a> ListAttrs<'a> {
     /// The attributes of one page of a list that belongs to `user`.
     pub(crate) fn of<T>(user: &'a str, listing: &Listing<T>) -> Self {
-        let per_page = listing.page.limit;
         Self {
             user,
             page: listing.page.page,
-            per_page,
+            per_page: listing.page.limit,
             total_pages: listing.total_pages(),
             total: listing.total,
-            json_order: if per_page == 200 {
-                LIMIT_200_ORDER
-            } else {
-                USUAL_ORDER
-            },
         }
-    }
-
-    /// The JSON key order recent tracks use.
-    pub(crate) fn recent(mut self) -> Self {
-        if self.per_page > 200 {
-            self.json_order = TOTAL_FIRST_ORDER;
-        }
-        self
-    }
-
-    /// The JSON key order loved tracks use.
-    pub(crate) fn loved(mut self) -> Self {
-        if self.page == 1 && self.total <= u64::from(self.per_page) {
-            self.json_order = TOTAL_FIRST_ORDER;
-        }
-        self
     }
 }
 
@@ -89,8 +77,9 @@ pub(crate) fn list_root_collapsing(
     attrs: ListAttrs<'_>,
     items: impl IntoIterator<Item = Node>,
 ) -> Node {
+    let items: Vec<Node> = items.into_iter().collect();
     Node::new(name)
-        .json_order(attrs.json_order)
+        .json_order(attr_order(items.len()))
         .attr("user", attrs.user.to_owned())
         .attr("page", attrs.page)
         .attr("perPage", attrs.per_page)
@@ -163,4 +152,29 @@ pub(crate) fn chart_root(
         .attr("from", range.from.clone())
         .attr("to", range.to.clone())
         .children(items)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn attr_order_follows_the_item_count() {
+        let samples = [
+            (0, USUAL),
+            (3, TOTAL_FIRST),
+            (9, USUAL),
+            (10, USER_LAST),
+            (34, TOTAL_FIRST),
+            (50, USUAL),
+            (129, TOTAL_FIRST),
+            (200, PER_PAGE_FIRST),
+            (259, USER_LAST),
+            (300, USUAL),
+            (1000, TOTAL_FIRST),
+        ];
+        for (items, order) in samples {
+            assert_eq!(attr_order(items), order, "{items} items");
+        }
+    }
 }

@@ -1,0 +1,44 @@
+{
+ "method": "user.getTopTracks",
+ "variant": "baddayhaver.TopTracks.overall",
+ "http_method": "GET",
+ "recorded_at": 1794600726,
+ "responses": {
+  "json": {
+   "params": [
+    [
+     "method",
+     "user.getTopTracks"
+    ],
+    [
+     "api_key",
+     "REDACTED"
+    ],
+    [
+     "user",
+     "baddayhaver"
+    ],
+    [
+     "period",
+     "overall"
+    ],
+    [
+     "limit",
+     "50"
+    ],
+    [
+     "format",
+     "json"
+    ]
+   ],
+   "status": 200,
+   "content_type": "application/json",
+   "headers": {
+    "access-control-allow-methods": "POST, GET, OPTIONS",
+    "access-control-allow-origin": "*",
+    "access-control-max-age": "86400",
+    "content-type": "application/json"
+   }
+  }
+ }
+}

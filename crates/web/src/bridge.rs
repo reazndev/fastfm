@@ -1,13 +1,15 @@
-//! [`AccountServices`] for the Last.fm API's account methods.
+//! [`AccountServices`] for the Last.fm API's account methods, and [`CallerKeys`] for its
+//! pass-through.
 
 use async_trait::async_trait;
-use lfm_api::AccountServices;
+use lfm_api::{AccountServices, CallerKeys};
 use lfm_core::{ApiError, ErrorCode};
 use lfm_store::{AccountId, AccountStatus, fold};
-use lfm_upstream::{ScrobbleItem, ScrobbleOutcome, TrackItem};
+use lfm_upstream::{ApiKey, ScrobbleItem, ScrobbleOutcome, TrackItem};
 
 use crate::attempts::Origin;
 use crate::forward::{self, failed};
+use crate::link::Linked;
 use crate::password::MAX_PASSWORD;
 use crate::state::{AppState, unix_now};
 
@@ -21,12 +23,13 @@ impl AccountServices for Accounts {
     /// here, API logins share one ceiling and lock out per username apart from the web.
     async fn check_password(
         &self,
+        api_key: &str,
         name: &str,
         password: &str,
     ) -> Result<Option<AccountId>, ApiError> {
         let state = &self.0;
-        let (key, now) = (fold(name), unix_now());
-        if !state.attempts.admit(&key, Origin::Api, now).await {
+        let (key, now, origin) = (fold(name), unix_now(), Origin::Api(api_key));
+        if !state.attempts.admit(&key, origin, now).await {
             return Err(ErrorCode::RateLimitExceeded.into());
         }
         let account = state.store.account_by_name(name).await.map_err(failed)?;
@@ -34,11 +37,19 @@ impl AccountServices for Accounts {
         let verified =
             password.len() <= MAX_PASSWORD && state.passwords.verify(hash, password).await;
         let Some(account) = account.filter(|_| verified) else {
-            state.attempts.failed(&key, Origin::Api, now);
+            state.attempts.failed(&key, origin, now);
             return Ok(None);
         };
-        state.attempts.succeeded(&key, Origin::Api);
+        state.attempts.succeeded(&key, origin);
         Ok((account.status == AccountStatus::Active).then_some(account.id))
+    }
+
+    async fn admit_token(&self, api_key: &str) -> Result<(), ApiError> {
+        if self.0.attempts.admit_token(api_key, unix_now()) {
+            Ok(())
+        } else {
+            Err(ErrorCode::RateLimitExceeded.into())
+        }
     }
 
     async fn scrobble(
@@ -65,5 +76,27 @@ impl AccountServices for Accounts {
         loved: bool,
     ) -> Result<(), ApiError> {
         forward::set_love(&self.0, account, artist, track, loved).await
+    }
+}
+
+/// The own Last.fm key of an active account, for pass-through calls on an instance without a
+/// key pool.
+#[async_trait]
+impl CallerKeys for Accounts {
+    async fn lastfm_key(&self, account_id: i64) -> Option<ApiKey> {
+        let state = &self.0;
+        let account = match state.store.account(AccountId(account_id)).await {
+            Ok(account) => account?,
+            Err(error) => {
+                tracing::warn!(%error, account = account_id, "reading the account failed");
+                return None;
+            }
+        };
+        if account.status != AccountStatus::Active {
+            return None;
+        }
+        Linked::open(&state.vault, &account)
+            .own_app
+            .map(|app| app.api_key)
     }
 }

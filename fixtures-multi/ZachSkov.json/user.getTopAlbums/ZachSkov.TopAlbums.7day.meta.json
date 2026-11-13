@@ -1,0 +1,44 @@
+{
+ "method": "user.getTopAlbums",
+ "variant": "ZachSkov.TopAlbums.7day",
+ "http_method": "GET",
+ "recorded_at": 1794600496,
+ "responses": {
+  "json": {
+   "params": [
+    [
+     "method",
+     "user.getTopAlbums"
+    ],
+    [
+     "api_key",
+     "REDACTED"
+    ],
+    [
+     "user",
+     "ZachSkov"
+    ],
+    [
+     "period",
+     "7day"
+    ],
+    [
+     "limit",
+     "50"
+    ],
+    [
+     "format",
+     "json"
+    ]
+   ],
+   "status": 200,
+   "content_type": "application/json",
+   "headers": {
+    "access-control-allow-methods": "POST, GET, OPTIONS",
+    "access-control-allow-origin": "*",
+    "access-control-max-age": "86400",
+    "content-type": "application/json"
+   }
+  }
+ }
+}

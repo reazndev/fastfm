@@ -36,7 +36,7 @@ pub(crate) struct Lists {
 }
 
 /// Folded artist and title.
-type Key = (String, String);
+pub(super) type Key = (String, String);
 
 /// Scrobbled artist names the lists do not explain and that have no stored target among them:
 /// the ones to ask `artist.getCorrection` about.
@@ -64,7 +64,7 @@ pub(crate) fn library(
     let artists = artist_targets(inputs, lists, corrections);
     let moves = artist_moves(inputs, &artists)
         .chain(album_moves(inputs, lists, &artists))
-        .chain(track_moves(inputs, lists))
+        .chain(super::tracks::moves(inputs, lists))
         .collect();
     Library {
         artists: lists.artists.iter().map(lib_artist).collect(),
@@ -245,46 +245,7 @@ fn plays(count: u64) -> i128 {
     i128::from(count)
 }
 
-fn track_moves(inputs: &LibraryInputs, lists: &Lists) -> Vec<LibMove> {
-    let scrobbled: HashMap<Key, &Scrobbled> = inputs
-        .tracks
-        .iter()
-        .map(|track| (key(&track.artist, &track.name), track))
-        .collect();
-    let listed: HashMap<Key, &TopTrack> = lists
-        .tracks
-        .iter()
-        .map(|track| (key(&track.artist.name, &track.name), track))
-        .collect();
-    let mut unmatched: HashMap<String, (Vec<&Scrobbled>, Vec<&TopTrack>)> = HashMap::new();
-    for (key, track) in &scrobbled {
-        if !listed.contains_key(key) {
-            unmatched.entry(key.1.clone()).or_default().0.push(track);
-        }
-    }
-    for (key, track) in &listed {
-        if !scrobbled.contains_key(key) {
-            unmatched.entry(key.1.clone()).or_default().1.push(track);
-        }
-    }
-    unmatched
-        .into_values()
-        .filter_map(
-            |(ours, theirs)| match (ours.as_slice(), theirs.as_slice()) {
-                ([ours], [theirs]) if ours.plays == theirs.playcount => Some(LibMove {
-                    raw: ours.id,
-                    to: Lookup::Track {
-                        artist: theirs.artist.name.clone(),
-                        name: theirs.name.clone(),
-                    },
-                }),
-                _ => None,
-            },
-        )
-        .collect()
-}
-
-fn key(artist: &str, name: &str) -> Key {
+pub(super) fn key(artist: &str, name: &str) -> Key {
     (fold(artist), fold(name))
 }
 

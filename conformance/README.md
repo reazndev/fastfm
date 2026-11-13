@@ -112,3 +112,44 @@ recording already disagree), `geo.getTopArtists` (the default and lowercase vari
 seconds apart, disagree), and the `artist.search` and `track.search` results with close
 listener counts. No rule can cover them without ignoring every name in the list, and a
 re-recording goes stale within the hour, so they stay as failures.
+
+## The multi-user suite
+
+`fixtures` holds one account recorded at one moment, so it missed bugs that only other histories
+show (a live comparison of 533 answers for ten users on 2026-11-13 found 49% byte-identical
+while this suite scored 90%). `fixtures-multi/` keeps the answers from that comparison whose
+every difference was a mirror bug, replayed offline against a copy of the database the
+comparison ran on:
+
+```sh
+scripts/conformance-multi.sh prepare      # once: builds data/conformance-multi.db
+scripts/conformance-multi.sh              # 137 cases in 12 groups
+scripts/conformance-multi.sh --only user.getTopAlbums --expect conformance/expected-multi.txt
+```
+
+Each `fixtures-multi/<user>.<format>/` group runs against its own server start with `LFM_NOW`
+at the group's first request (its `now` file), in clock order on one copy of the database.
+Reports go to `target/conformance-multi/<group>.json`, and the script prints a total. Ignore
+rules come from `conformance/ignore-multi.toml`, which is empty: none of these differences is
+expected to stay.
+
+**The database.** `prepare` copies `lfm.db` out of the Docker volume `lfm-load-data` (set
+`LFM_MULTI_VOLUME` for another) with a throwaway `alpine` container, without starting anything
+that uses the volume, then removes each user's scrobbles newer than the newest one Last.fm
+showed during the comparison (`fixtures-multi/cutoffs.txt`; the track playing at the time was
+scrobbled afterwards). `data/` is not committed; without the volume the suite cannot run.
+
+**What was left out.** `scripts/import-qa-fixtures.py` built the cases from the saved
+comparison (`resp/` and `classified_*.json`) and the database copy. Answers that need a track
+playing (the now-playing bugs) are not taken: an offline server has none. Of the other 174
+answers whose causes were all mirror bugs it dropped 37:
+
+- period lists whose window would gain or lose a scrobble between the group's clock and the
+  request's own time (2);
+- answers whose range reaches scrobbles Last.fm had and the copy lacks, because they reached
+  Last.fm late with an older time and sync never fetched them: every history-wide answer of
+  `amhkk`, `elijah0705` and `syntiiix` (35).
+
+To rebuild the cases from a new comparison, run
+`python3 -I scripts/import-qa-fixtures.py <qa dir> <database copy> fixtures-multi`. No API key
+is stored: requests carry `REDACTED`, which the harness replaces.

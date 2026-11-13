@@ -100,8 +100,10 @@ impl<'c> Resolver<'c> {
     /// Resolves a track of `artist_id`, creating it if needed.
     ///
     /// `artist` is the artist as Last.fm showed it with this track: its MBID may be empty even
-    /// when the artist has one (recent and loved tracks repeat it per track), and its spelling
-    /// is kept with a new track when it differs from the artist row's.
+    /// when the artist has one (recent and loved tracks repeat it per track). Its exact
+    /// spelling is part of the track's key, since Last.fm keeps tracks of artist spellings that
+    /// differ only in case apart, and is shown with the track when it differs from the artist
+    /// row's.
     pub(crate) fn track(&mut self, artist_id: i64, track: &Named, artist: &Named) -> Result<i64> {
         let name_fold = fold(&track.name);
         let (mbid, url) = (opt(track.mbid.as_ref()), opt(track.url.as_ref()));
@@ -109,13 +111,13 @@ impl<'c> Resolver<'c> {
         let key = (
             Kind::Track,
             artist_id,
-            name_fold.clone(),
+            format!("{name_fold}\u{1f}{}", artist.name),
             owned([mbid, url, artist_mbid]),
         );
         let sql = "INSERT INTO tracks (artist_id, name, name_fold, mbid, url, artist_mbid, \
-                   artist_name) VALUES (?1, ?2, ?3, ?4, ?5, ?6, \
-                   nullif(?7, (SELECT name FROM artists WHERE id = ?1))) \
-                   ON CONFLICT (artist_id, name_fold) DO UPDATE \
+                   artist_name, artist_spelling) VALUES (?1, ?2, ?3, ?4, ?5, ?6, \
+                   nullif(?7, (SELECT name FROM artists WHERE id = ?1)), ?7) \
+                   ON CONFLICT (artist_id, name_fold, artist_spelling) DO UPDATE \
                    SET mbid = coalesce(excluded.mbid, mbid), url = coalesce(excluded.url, url), \
                    artist_mbid = coalesce(excluded.artist_mbid, artist_mbid) RETURNING id";
         let values = params![
@@ -194,7 +196,7 @@ pub(crate) fn entity_sql(kind: Kind) -> &'static str {
              FROM artists WHERE id = ?1"
         }
         Kind::Album => {
-            "SELECT al.id, al.name, al.mbid, al.url, al.image, coalesce(ar.lib_name, ar.name), \
+            "SELECT al.id, al.name, al.mbid, al.url, al.image, coalesce(al.artist_name, ar.lib_name, ar.name), \
              coalesce(al.artist_mbid, ar.mbid), ar.url, NULL \
              FROM albums al JOIN artists ar ON ar.id = al.artist_id WHERE al.id = +?1"
         }
@@ -211,7 +213,7 @@ pub(crate) fn name_sql(kind: Kind) -> &'static str {
     match kind {
         Kind::Artist => "SELECT NULL, coalesce(lib_name, name) FROM artists WHERE id = ?1",
         Kind::Album => {
-            "SELECT coalesce(ar.lib_name, ar.name), al.name \
+            "SELECT coalesce(al.artist_name, ar.lib_name, ar.name), al.name \
              FROM albums al JOIN artists ar ON ar.id = al.artist_id WHERE al.id = +?1"
         }
         Kind::Track => {
@@ -246,15 +248,20 @@ pub(crate) fn entity_at(row: &Row<'_>, at: usize) -> rusqlite::Result<Entity> {
     })
 }
 
-/// The artist URL Last.fm shows next to an album or track: the item URL's artist part, without
-/// `+noredirect`. Last.fm never takes it from the artist itself, whose URL can differ in
-/// spelling (about 7,800 items checked on 2026-11-13, no exception).
+/// The artist URL Last.fm shows next to an album or track: the item URL's artist part, with
+/// its `+noredirect` if it has one. Last.fm never takes it from the artist itself, whose URL can
+/// differ in spelling. Of about 7,800 items checked on 2026-11-13, one did not follow this: a
+/// `+noredirect` track URL with a plain artist URL, against eight that kept it.
 fn artist_url_of(item_url: &str) -> Option<String> {
     const MUSIC: &str = "/music/";
+    const NOREDIRECT: &str = "+noredirect/";
     let (base, path) = item_url.split_once(MUSIC)?;
-    let path = path.strip_prefix("+noredirect/").unwrap_or(path);
+    let (prefix, path) = match path.strip_prefix(NOREDIRECT) {
+        Some(rest) => (NOREDIRECT, rest),
+        None => ("", path),
+    };
     let artist = path.split('/').next().filter(|artist| !artist.is_empty())?;
-    Some(format!("{base}{MUSIC}{artist}"))
+    Some(format!("{base}{MUSIC}{prefix}{artist}"))
 }
 
 #[cfg(test)]
@@ -264,12 +271,18 @@ mod tests {
     #[test]
     fn artist_url_is_the_item_urls_artist_part() {
         let cases = [
-            ("https://www.last.fm/music/tripleS/ASSEMBLE", "https://www.last.fm/music/tripleS"),
             (
-                "https://www.last.fm/music/+noredirect/Jorge+Ben/_/%C3%89+S%C3%B3+Sambar",
-                "https://www.last.fm/music/Jorge+Ben",
+                "https://www.last.fm/music/tripleS/ASSEMBLE",
+                "https://www.last.fm/music/tripleS",
             ),
-            ("https://www.last.fm/music/Cher/_/Believe", "https://www.last.fm/music/Cher"),
+            (
+                "https://www.last.fm/music/+noredirect/Jeezy/_/Seen+It+All",
+                "https://www.last.fm/music/+noredirect/Jeezy",
+            ),
+            (
+                "https://www.last.fm/music/Cher/_/Believe",
+                "https://www.last.fm/music/Cher",
+            ),
         ];
         for (item, artist) in cases {
             assert_eq!(artist_url_of(item).as_deref(), Some(artist), "{item}");

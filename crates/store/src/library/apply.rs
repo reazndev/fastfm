@@ -210,10 +210,10 @@ fn write_album(conn: &Connection, resolver: &mut Resolver<'_>, lib: &LibAlbum) -
         .and_then(image_key)
         .unwrap_or_default();
     let sql = "INSERT INTO albums (artist_id, name, name_fold, mbid, image, variant, url, \
-               artist_mbid) VALUES (?1, ?2, ?3, ?4, ?5, '', ?6, ?7) \
+               artist_mbid, artist_name) VALUES (?1, ?2, ?3, ?4, ?5, '', ?6, ?7, ?8) \
                ON CONFLICT (artist_id, name_fold, variant) DO UPDATE SET name = excluded.name, \
                mbid = excluded.mbid, image = excluded.image, url = excluded.url, \
-               artist_mbid = excluded.artist_mbid";
+               artist_mbid = excluded.artist_mbid, artist_name = excluded.artist_name";
     let album = &lib.album;
     let values = params![
         artist,
@@ -222,7 +222,8 @@ fn write_album(conn: &Connection, resolver: &mut Resolver<'_>, lib: &LibAlbum) -
         given(album.mbid.as_ref()),
         image,
         given(album.url.as_ref()),
-        given(lib.artist.mbid.as_ref()).unwrap_or_default()
+        given(lib.artist.mbid.as_ref()).unwrap_or_default(),
+        lib.artist.name
     ];
     conn.prepare_cached(sql)?.execute(values)?;
     Ok(())

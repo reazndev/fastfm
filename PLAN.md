@@ -55,8 +55,8 @@ This file is the design record. User documentation is in `README.md` and `docs/`
   the import's error message suggests connecting Last.fm.
 - Losing `secrets.key` leaves accounts with sealed Last.fm credentials unable to open or reset
   them from the UI.
-- No recorded Last.fm example yet for a successful scrobble, the session response, or the
-  now-playing item; the default range of `getWeekly*Chart` without `from`/`to` is not pinned
+- No recorded Last.fm example yet for a successful scrobble or the session response (the
+  now-playing item was seen live, see `fixtures/NOTES.md`); the default range of `getWeekly*Chart` without `from`/`to` is not pinned
   down.
 - 11 albums of the fixture user get no plays locally (album count 6,187 against 6,198).
 - Deep top-list pages need a stored collation key to get faster.
@@ -170,10 +170,20 @@ Last.fm has no webhooks, so the bridge polls. One request per user per tick:
 
 ### Reconciliation
 
-Users delete and edit scrobbles on Last.fm. A daily pass per user compares `@attr.total` for 32
-slices of the history (`limit=1` with `from`/`to`) against local counts, bisects any slice that
-differs, and replaces the smallest differing window. A full check costs a few dozen requests.
-An edit that keeps a slice's count the same is not detected.
+Users delete and edit scrobbles on Last.fm. A daily pass per user compares `@attr.total` for up
+to 32 slices of the history (`limit=1` with `from`/`to`) against local counts, bisects any slice
+that differs, and replaces the smallest differing window. Slices sit on a power-of-two grid, so
+the same ranges come back on every pass. The schedule counts from the last pass, stored per
+user, so restarts do not postpone it. A full check costs a few dozen requests. An edit that
+keeps a slice's count the same is not detected.
+
+Scrobbles sent late (offline scrobbling) arrive with times below the sync cursor, where live
+polls never look. Live sync compares the 14 days below the cursor the same way, every 10 minutes
+for users who scrobbled within a day and hourly otherwise: one request while nothing differs.
+
+Last.fm's totals are not always additive (a range of 20,894 whose halves report 14,361 and
+6,526). A range whose halves both match, or whose listing does not reach its total, is stored in
+`upstream_mismatches` with both numbers and left alone for a week.
 
 ## 5. Storage
 
@@ -185,7 +195,11 @@ artists(id, name, name_fold, mbid, url, lib_name)
 albums(id, artist_id, name, name_fold, mbid, image_hash, variant, url, artist_mbid)
     UNIQUE (artist_id, name_fold, variant): variant is spelling + cover when scrobbled, '' for
     a library album
-tracks(id, artist_id, name, name_fold, mbid, url, duration, artist_mbid, artist_name)
+albums.artist_name: the album artist as the top-albums list spells it (library albums)
+tracks(id, artist_id, name, name_fold, mbid, url, duration, artist_mbid, artist_name,
+       artist_spelling)
+    UNIQUE (artist_id, name_fold, artist_spelling): Last.fm keeps tracks of artist spellings
+    that differ only in case apart
 scrobbles(user_id, uts, seq, track_id, album_id, artist_id)
     PRIMARY KEY (user_id, uts, seq) WITHOUT ROWID
     INDEX (user_id, artist_id, uts), INDEX (user_id, track_id, uts)
@@ -203,8 +217,10 @@ Why this is fast:
 
 - `user.getRecentTracks` is a range scan on the primary key. No sort.
 - Overall top lists walk the `plays DESC` index, so page 500 costs the same as page 1.
-- Period top lists (`7day` to `12month`) and weekly charts aggregate a range scan of a covering
-  index. That is a few milliseconds for a year of scrobbles.
+- Period top lists (`7day` to `12month`) are rolling windows, the N × 86,400 seconds before
+  the request. Per-period totals start on the window's first whole UTC day and move forward
+  daily; a read adds the plays of the partial day before that from the scrobbles table and
+  corrects the play-count histogram for them. Weekly charts merge the time rollups.
 - A response cache holds the rendered bytes per (user, method, params, format). Each ingest bumps
   a per-user version number, which invalidates that user's entries. Repeat requests skip the
   database and the renderer.
@@ -444,6 +460,11 @@ boundaries, and which single-item lists collapse to an object in JSON.
 As built, the fixtures hold 210 requests, each in XML and JSON (420 cases), and
 `conformance/expected.txt` lists the 381 that pass exactly or with an ignore rule.
 `conformance/README.md` explains how to run the harness and why the rest differ.
+
+One user and a frozen clock hide bugs that only other histories show. A second, offline suite
+(`fixtures-multi/`, `scripts/conformance-multi.sh`) replays Last.fm answers saved during a live
+comparison for ten users against a copy of the database that comparison ran on, one server
+start per user and format with the clock at its requests.
 
 Known source of small differences: Last.fm's own period charts lag and are sometimes
 inconsistent with its scrobble list. Ours are computed from the scrobbles, so they can be more

@@ -1,0 +1,40 @@
+{
+ "method": "user.getTopArtists",
+ "variant": "papimotomami.TopArtists.1month",
+ "http_method": "GET",
+ "recorded_at": 1794600914,
+ "responses": {
+  "xml": {
+   "params": [
+    [
+     "method",
+     "user.getTopArtists"
+    ],
+    [
+     "api_key",
+     "REDACTED"
+    ],
+    [
+     "user",
+     "papimotomami"
+    ],
+    [
+     "period",
+     "1month"
+    ],
+    [
+     "limit",
+     "50"
+    ]
+   ],
+   "status": 200,
+   "content_type": "text/xml; charset=UTF-8",
+   "headers": {
+    "access-control-allow-methods": "POST, GET, OPTIONS",
+    "access-control-allow-origin": "*",
+    "access-control-max-age": "86400",
+    "content-type": "text/xml; charset=UTF-8"
+   }
+  }
+ }
+}

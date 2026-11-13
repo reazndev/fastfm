@@ -135,7 +135,8 @@ shared secret of the API key. This is Last.fm's scheme; use the secret shown on 
 
 **Mobile flow.** `auth.getMobileSession` takes `username` and `password`, signed. These are the
 mirror account's name and password, not the Last.fm ones. A wrong pair is error 4. Failed
-attempts are rate limited per username together with web logins.
+attempts are rate limited per username together with web logins, and each API key may check
+10 passwords a minute and get 30 tokens a minute; past that the answer is error 29.
 
 Session keys do not expire. Revoking the API key, or an admin disabling the account, ends them
 at once; the key then answers error 10.

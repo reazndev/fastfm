@@ -1,5 +1,5 @@
-//! The now-playing item of `user.getRecentTracks`: first on page 1, beyond `limit`, without a
-//! date, and never served from the response cache once it changes.
+//! The now-playing item of `user.getRecentTracks`: first on every page and in every range,
+//! beyond `limit`, without a date, and never served from the response cache once it changes.
 #![allow(
     clippy::unwrap_used,
     clippy::indexing_slicing,
@@ -8,6 +8,9 @@
 
 #[allow(dead_code, reason = "this binary uses only part of the shared helpers")]
 mod support;
+
+#[path = "support/key_order.rs"]
+mod key_order;
 
 use std::sync::{Arc, Mutex};
 
@@ -66,7 +69,7 @@ fn tracks(body: &[u8]) -> Vec<Value> {
 }
 
 #[tokio::test]
-async fn now_playing_comes_first_on_page_one_only() {
+async fn now_playing_comes_first_on_every_page_and_range() {
     let (store, _) = support::store().await;
     let playing = Arc::new(Playing::default());
     let d = support::dispatcher(store).with_now_playing(Arc::clone(&playing) as _);
@@ -88,8 +91,34 @@ async fn now_playing_comes_first_on_page_one_only() {
     let xml = d.dispatch(&recent("1", "0").with("format", "xml")).await;
     let xml = String::from_utf8_lossy(&xml.body).into_owned();
     assert!(xml.contains("<track nowplaying=\"true\">"), "{xml}");
-    assert_eq!(tracks(&d.dispatch(&recent("2", "0")).await.body).len(), 2);
+    let page_2 = tracks(&d.dispatch(&recent("2", "0")).await.body);
+    assert_eq!(page_2.len(), 3);
+    assert_eq!(page_2[0]["@attr"]["nowplaying"], "true");
+    let past = recent("1", "0").with("from", "1").with("to", "2");
+    let past = tracks(&d.dispatch(&past).await.body);
+    assert_eq!(past.len(), 1);
+    assert_eq!(past[0]["@attr"]["nowplaying"], "true");
 
     *playing.0.lock().unwrap() = None;
     assert_eq!(tracks(&d.dispatch(&recent("1", "0")).await.body), before);
+}
+
+#[tokio::test]
+async fn now_playing_keys_follow_last_fm_order() {
+    let (store, _) = support::store().await;
+    let playing = Arc::new(Playing(Mutex::new(Some(recent_track_of(&track())))));
+    let d = support::dispatcher(store).with_now_playing(playing);
+    let orders = [
+        ("0", "artist,streamable,image,mbid,album,name,@attr,url"),
+        (
+            "1",
+            "artist,mbid,name,image,streamable,album,url,@attr,loved",
+        ),
+    ];
+    for (extended, order) in orders {
+        let reply = d.dispatch(&recent("1", extended)).await;
+        let body = String::from_utf8_lossy(&reply.body);
+        let keys = key_order::key_order(&body, r#""track":["#);
+        assert_eq!(keys, order, "extended={extended}");
+    }
 }

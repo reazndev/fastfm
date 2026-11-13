@@ -78,7 +78,7 @@ impl Store {
     /// Bumps every user's version when a length changed, since top lists show it.
     pub async fn set_track_durations(&self, durations: Vec<TrackDuration>) -> Result<()> {
         self.write(move |tx| {
-            let sql = "UPDATE tracks SET duration = ?3 WHERE id = (SELECT t.id FROM tracks t \
+            let sql = "UPDATE tracks SET duration = ?3 WHERE id IN (SELECT t.id FROM tracks t \
                        JOIN artists ar ON ar.id = t.artist_id \
                        WHERE ar.name_fold = +?1 AND t.name_fold = +?2) \
                        AND duration IS NOT ?3";
@@ -169,10 +169,7 @@ pub(crate) fn find(conn: &Connection, lookup: &Lookup) -> Result<Option<i64>> {
                 .query_row([fold(artist), fold(name)], get)
         }
         Lookup::Track { artist, name } => {
-            let sql = "SELECT t.id FROM tracks t JOIN artists ar ON ar.id = t.artist_id \
-                       WHERE ar.name_fold = +?1 AND t.name_fold = +?2";
-            conn.prepare_cached(sql)?
-                .query_row([fold(artist), fold(name)], get)
+            return Ok(known_track(conn, artist, name)?.map(|(id, _)| id));
         }
         Lookup::Mbid { kind, mbid } => {
             let sql = format!(
@@ -183,4 +180,23 @@ pub(crate) fn find(conn: &Connection, lookup: &Lookup) -> Result<Option<i64>> {
         }
     };
     Ok(found.optional()?)
+}
+
+/// The stored track named `name` by `artist`, ignoring case, with the artist spelling it was
+/// scrobbled with: the one with this exact spelling first, then the oldest other one.
+pub(crate) fn known_track(
+    conn: &Connection,
+    artist: &str,
+    name: &str,
+) -> Result<Option<(i64, String)>> {
+    let sql = "SELECT t.id, t.artist_spelling FROM tracks t JOIN artists ar ON ar.id = t.artist_id \
+               WHERE ar.name_fold = +?1 AND t.name_fold = +?2 \
+               ORDER BY t.artist_spelling != ?3, t.id LIMIT 1";
+    let found = conn
+        .prepare_cached(sql)?
+        .query_row(params![fold(artist), fold(name), artist], |row| {
+            Ok((row.get(0)?, row.get(1)?))
+        })
+        .optional()?;
+    Ok(found)
 }

@@ -5,7 +5,11 @@
 //!   weekly chart list. It saves its cursors after every window and resumes after a restart.
 //! - **Live sync** polls each followed user for new scrobbles and the now-playing track, more
 //!   often the more recently they scrobbled, with jitter so users do not poll in lockstep.
-//! - **Reconciliation** compares counts with Last.fm and repairs the ranges that differ.
+//! - **Reconciliation** compares counts with Last.fm and repairs the ranges that differ: the
+//!   whole history once per interval, counted from the last pass across restarts, and the last
+//!   14 days below the sync cursor every 10 minutes for active users and hourly for idle ones,
+//!   where late (offline) scrobbles land. Ranges where Last.fm's own totals disagree are
+//!   recorded and left alone for a week.
 //! - **Enrichment** reads the user's all-time top lists to learn which artists, albums and
 //!   tracks Last.fm counts the scrobbles under, so local top lists and charts match.
 //!

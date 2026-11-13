@@ -99,9 +99,13 @@ Flags are strings: `"0"`/`"1"` (`loved`, `subscriber`, `streamable`), `"true"` f
 - Date: `"date":{"uts":"1794516558","#text":"12 Nov 2026, 20:49"}` (UTC, `%d %b %Y, %H:%M`).
 - Empty result in XML: `<recenttracks user="Syntiiix" page="1" perPage="50" totalPages="0"
   total="0" />`.
-- Now playing: **not captured**, the user was not playing during the run. Re-run
-  `--force --only user.getRecentTracks` while a track plays to capture it. The documented shape is
-  an extra first item with `"@attr":{"nowplaying":"true"}` and no `date`, beyond `limit`.
+- Now playing: not in these fixtures (nothing was playing), but seen live on 2026-11-13: an
+  extra first item beyond `limit` with `"@attr":{"nowplaying":"true"}` and no `date`, on
+  **every** page and in every `from`/`to` range, even one that ended the day before. JSON keys:
+  `artist,streamable,image,mbid,album,name,@attr,url`, with `extended=1`
+  `artist,mbid,name,image,streamable,album,url,@attr,loved`.
+- A scrobble without an album has `""` for all four images (128 of 128 seen live); the
+  placeholder only appears for an album without a cover.
 - `@attr.user` is the canonical name (`Syntiiix`) even when the request says `syntiiix`.
   `library.getArtists` is the exception: it echoes the request's casing.
 - Images: 4 sizes (`small` 34s, `medium` 64s, `large` 174s, `extralarge` 300x300). Top artists
@@ -145,9 +149,32 @@ X-Cache-Date, Content-Type, X-Atmosphere-Transport, *` to both formats. `tag.get
 
 ## Key order
 
+The JSON `@attr` of a paged user list (`user`, `page`, `perPage`, `totalPages`, `total`) comes in
+one of four orders, chosen by the number of items in the list (now-playing included), whatever
+the method, `limit`, page or range. XML keeps one order. Measured on 2026-11-13 with
+`user.getRecentTracks` `limit` 1 to 200 and 41 values up to 1000, and consistent with 450 other
+list answers of ten users (repeated requests give the same order):
+
+| Items | Order |
+|---|---|
+| 0-2, 6-7, 9, 12-19, 36-67, 260-515 | `user,totalPages,page,perPage,total` |
+| 3-5, 8, 20-35, 68-131, 516-1000 | `user,totalPages,page,total,perPage` |
+| 132-258 | `perPage,totalPages,page,user,total` |
+| 10-11, 259 | `perPage,totalPages,page,total,user` |
+
+Past 200 the ranges are sampled (201, 230, 240, 250, 254-263, 270, 280, 300, ... 1000), not
+every value.
+
+An album's or track's `artist.url` is the leading part of the item's own `url`, `+noredirect/`
+included when the item URL has it (one exception in about 7,800 items), never the URL the artist
+has in artist lists.
+
 JSON key order differs from XML element order and is not alphabetical; `user.getInfo` JSON starts
 with `spotify_expiry_estimate`, `playcount`, `playlists`. Copy each method's order from its
 fixture. `user.getInfo` also has undocumented `spotify_expiry_estimate` and `corrections`.
+Last.fm leaves `spotify_expiry_estimate` out for some users, and the other keys then come in
+another order (`playcount,playlists,album_count,bootstrap,url,country,name,artist_count,age,
+track_count,subscriber,image,registered,realname,gender,corrections,type`).
 
 ## Rate limit
 

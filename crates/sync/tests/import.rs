@@ -83,7 +83,7 @@ async fn import_with_cutoff_stops_before_until() {
 #[tokio::test]
 async fn failed_import_resumes_where_it_stopped() {
     let config = SyncConfig::default().page_limit(5).import_concurrency(1);
-    let h = Harness::with_config(config).await;
+    let h = Harness::with_config(&config).await;
     add_all(&h, &crowded_history());
     // Planning takes one call with a single worker; let four windows through, then fail.
     h.fake.with(|d| d.fail_after = Some(5));
@@ -115,7 +115,7 @@ async fn failed_import_resumes_where_it_stopped() {
 #[tokio::test]
 async fn start_resumes_an_interrupted_import() {
     let config = SyncConfig::default().page_limit(5).import_concurrency(3);
-    let h = Harness::with_config(config).await;
+    let h = Harness::with_config(&config).await;
     add_all(&h, &crowded_history());
     let until = REGISTERED + 10_000;
     h.fake.with(|d| d.fail_after = Some(6));

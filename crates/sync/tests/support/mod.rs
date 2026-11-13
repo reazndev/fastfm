@@ -44,6 +44,9 @@ pub struct Data {
     pub extended: Vec<String>,
     /// Hide the recent tracks, as a private profile does (error 17).
     pub private: bool,
+    /// `(point, span, extra)`: ranges of at least `span` seconds around `point` report `extra`
+    /// more in `@attr.total` than they list, as Last.fm's non-additive totals do.
+    pub inflated: Option<(i64, i64, i64)>,
 }
 
 /// A fake Last.fm whose data tests change while it runs.
@@ -130,7 +133,11 @@ fn recent(data: &Data, query: &HashMap<String, String>) -> Value {
     let range = TimeRange::new(number(query, "from", 0), number(query, "to", i64::MAX));
     let (limit, page) = (number(query, "limit", 50), number(query, "page", 1));
     let rows = sorted(&data.scrobbles, range);
-    let total = i64::try_from(rows.len()).unwrap();
+    let extra = data.inflated.map_or(0, |(point, span, extra)| {
+        let around = (range.from..range.to).contains(&point) && range.to - range.from >= span;
+        if around { extra } else { 0 }
+    });
+    let total = i64::try_from(rows.len()).unwrap() + extra;
     let skip = usize::try_from((page - 1) * limit).unwrap();
     let mut tracks: Vec<Value> = rows
         .iter()
@@ -218,10 +225,10 @@ pub struct Harness {
 
 impl Harness {
     pub async fn new(page_limit: u32) -> Self {
-        Self::with_config(SyncConfig::default().page_limit(page_limit)).await
+        Self::with_config(&SyncConfig::default().page_limit(page_limit)).await
     }
 
-    pub async fn with_config(config: SyncConfig) -> Self {
+    pub async fn with_config(config: &SyncConfig) -> Self {
         let server = MockServer::start().await;
         let fake = Fake::default();
         wiremock::Mock::given(wiremock::matchers::any())

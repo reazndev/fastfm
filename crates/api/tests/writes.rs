@@ -18,8 +18,17 @@ struct Unreached;
 
 #[async_trait]
 impl AccountServices for Unreached {
-    async fn check_password(&self, _: &str, _: &str) -> Result<Option<AccountId>, ApiError> {
+    async fn check_password(
+        &self,
+        _: &str,
+        _: &str,
+        _: &str,
+    ) -> Result<Option<AccountId>, ApiError> {
         unreachable!("an unsigned request never checks a password")
+    }
+
+    async fn admit_token(&self, _: &str) -> Result<(), ApiError> {
+        Ok(())
     }
 
     async fn scrobble(

@@ -7,6 +7,7 @@ use rusqlite::{Connection, OptionalExtension, params};
 
 use crate::dims::{Resolver, entity_sql};
 use crate::error::Result;
+use crate::lookup::known_track;
 use crate::names::fold;
 use crate::pool::Store;
 use crate::types::{Entity, Kind, Listing, Named, Page, UserId, count};
@@ -66,7 +67,8 @@ impl Store {
     pub async fn unlove(&self, user: UserId, artist: &str, track: &str) -> Result<bool> {
         let (artist, track) = (fold(artist), fold(track));
         self.write(move |tx| {
-            let sql = "DELETE FROM loved WHERE user_id = ?1 AND track_id = \
+            // Every artist spelling of the track: the request names it ignoring case.
+            let sql = "DELETE FROM loved WHERE user_id = ?1 AND track_id IN \
                        (SELECT t.id FROM tracks t JOIN artists ar ON ar.id = t.artist_id \
                         WHERE ar.name_fold = +?2 AND t.name_fold = +?3)";
             let removed = tx
@@ -93,8 +95,16 @@ fn insert(
     user: UserId,
     (love, seq): (&Love, i64),
 ) -> Result<()> {
+    // A love names the track ignoring case, so it goes to the track as scrobbled with any
+    // artist spelling, and creates one with its own spelling only for a track never seen.
+    let spelling = known_track(conn, &love.artist.name, &love.track.name)?
+        .map_or_else(|| love.artist.name.clone(), |(_, spelling)| spelling);
+    let shown = Named {
+        name: spelling,
+        ..love.artist.clone()
+    };
     let artist = resolver.artist(&love.artist)?;
-    let track = resolver.track(artist, &love.track, &love.artist)?;
+    let track = resolver.track(artist, &love.track, &shown)?;
     let sql = "INSERT INTO loved (user_id, track_id, uts, seq) VALUES (?1, ?2, ?3, ?4) \
                ON CONFLICT DO UPDATE SET uts = excluded.uts, seq = excluded.seq";
     conn.prepare_cached(sql)?

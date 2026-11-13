@@ -1,0 +1,48 @@
+{
+ "method": "user.getRecentTracks",
+ "variant": "papimotomami.recent.day",
+ "http_method": "GET",
+ "recorded_at": 1794600605,
+ "responses": {
+  "json": {
+   "params": [
+    [
+     "method",
+     "user.getRecentTracks"
+    ],
+    [
+     "api_key",
+     "REDACTED"
+    ],
+    [
+     "user",
+     "papimotomami"
+    ],
+    [
+     "limit",
+     "200"
+    ],
+    [
+     "from",
+     "1793923200"
+    ],
+    [
+     "to",
+     "1794009600"
+    ],
+    [
+     "format",
+     "json"
+    ]
+   ],
+   "status": 200,
+   "content_type": "application/json",
+   "headers": {
+    "access-control-allow-methods": "POST, GET, OPTIONS",
+    "access-control-allow-origin": "*",
+    "access-control-max-age": "86400",
+    "content-type": "application/json"
+   }
+  }
+ }
+}

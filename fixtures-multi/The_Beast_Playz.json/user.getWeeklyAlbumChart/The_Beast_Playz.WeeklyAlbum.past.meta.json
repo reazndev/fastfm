@@ -1,0 +1,44 @@
+{
+ "method": "user.getWeeklyAlbumChart",
+ "variant": "The_Beast_Playz.WeeklyAlbum.past",
+ "http_method": "GET",
+ "recorded_at": 1794600672,
+ "responses": {
+  "json": {
+   "params": [
+    [
+     "method",
+     "user.getWeeklyAlbumChart"
+    ],
+    [
+     "api_key",
+     "REDACTED"
+    ],
+    [
+     "user",
+     "The_Beast_Playz"
+    ],
+    [
+     "from",
+     "1790510400"
+    ],
+    [
+     "to",
+     "1791115200"
+    ],
+    [
+     "format",
+     "json"
+    ]
+   ],
+   "status": 200,
+   "content_type": "application/json",
+   "headers": {
+    "access-control-allow-methods": "POST, GET, OPTIONS",
+    "access-control-allow-origin": "*",
+    "access-control-max-age": "86400",
+    "content-type": "application/json"
+   }
+  }
+ }
+}

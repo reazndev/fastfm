@@ -175,7 +175,7 @@ async fn live_scrobbles_follow_the_map_and_enrichment_reuses_corrections() {
         )
         .idle_interval(Duration::from_millis(30))
         .periods_interval(Duration::from_millis(50));
-    let h = Harness::with_config(config).await;
+    let h = Harness::with_config(&config).await;
     catalogue(&h);
     h.service.follow(USER).await.unwrap();
     eventually(|| async {

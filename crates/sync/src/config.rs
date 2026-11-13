@@ -12,6 +12,7 @@ pub struct SyncConfig {
     pub(crate) nudge_after: Duration,
     pub(crate) periods_interval: Duration,
     pub(crate) reconcile_interval: Duration,
+    pub(crate) trailing: TrailingCheck,
     pub(crate) enrich_interval: Duration,
     pub(crate) private_interval: Duration,
     pub(crate) import_retry: Duration,
@@ -36,6 +37,18 @@ pub(crate) struct PollTiers {
     pub(crate) jitter_percent: u32,
 }
 
+/// How often live sync compares the last days below the sync cursor with Last.fm, which is
+/// where scrobbles sent late (offline scrobbling) land.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) struct TrailingCheck {
+    /// How far below the cursor the check reaches.
+    pub(crate) window: Duration,
+    /// For users who scrobbled within the day window.
+    pub(crate) active: Duration,
+    /// For everyone else.
+    pub(crate) idle: Duration,
+}
+
 /// Background requests per second each key may take: Last.fm allows about 5 per key, the
 /// upstream client's buckets default to 4, and the rest stays free for pass-through reads.
 const DEFAULT_BUDGET: NonZeroU32 = NonZeroU32::MIN.saturating_add(2);
@@ -57,6 +70,11 @@ impl Default for SyncConfig {
             nudge_after: Duration::from_secs(60),
             periods_interval: Duration::from_secs(300),
             reconcile_interval: Duration::from_secs(86_400),
+            trailing: TrailingCheck {
+                window: Duration::from_secs(14 * 86_400),
+                active: Duration::from_secs(600),
+                idle: Duration::from_secs(3_600),
+            },
             enrich_interval: Duration::from_secs(86_400),
             // A private profile is retried daily, in case its owner makes it public.
             private_interval: Duration::from_secs(86_400),
@@ -199,7 +217,23 @@ impl SyncConfig {
         }
     }
 
-    /// How often each followed user is reconciled. Defaults to one day.
+    /// How far below the sync cursor live sync looks for late scrobbles (default 14 days),
+    /// and how often: for users who scrobbled within the day window (default 10 minutes) and
+    /// for the others (default one hour). Each check costs one request while nothing differs.
+    #[must_use]
+    pub fn trailing_check(self, window: Duration, active: Duration, idle: Duration) -> Self {
+        Self {
+            trailing: TrailingCheck {
+                window,
+                active,
+                idle: idle.max(active),
+            },
+            ..self
+        }
+    }
+
+    /// How often each followed user is reconciled, counted from the last pass even across
+    /// restarts. Defaults to one day.
     #[must_use]
     pub fn reconcile_interval(self, reconcile_interval: Duration) -> Self {
         Self {

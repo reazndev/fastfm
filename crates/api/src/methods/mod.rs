@@ -22,7 +22,7 @@ use crate::registry::Registry;
 pub fn registry() -> Registry {
     Registry::new()
         .with(auth::GetSession)
-        .with(auth::GetToken)
+        .with(auth::GetToken::default())
         .with(user::GetInfo)
         .with(user::GetLovedTracks)
         .with(user::GetRecentTracks)
@@ -37,11 +37,13 @@ pub fn registry() -> Registry {
 }
 
 /// `registry` plus the methods that act for a local account: `auth.getMobileSession` and the
-/// `track.*` writes, which reach accounts and Last.fm through `accounts`.
+/// `track.*` writes, which reach accounts and Last.fm through `accounts`, and `auth.getToken`
+/// limited per API key.
 #[must_use]
 pub fn with_accounts(registry: Registry, accounts: &Arc<dyn AccountServices>) -> Registry {
     registry
         .with(auth::GetMobileSession::new(Arc::clone(accounts)))
+        .with(auth::GetToken::limited(Arc::clone(accounts)))
         .with(track::Love::new(Arc::clone(accounts)))
         .with(track::Scrobble::new(Arc::clone(accounts)))
         .with(track::Unlove::new(Arc::clone(accounts)))

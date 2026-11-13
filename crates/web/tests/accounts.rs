@@ -493,3 +493,24 @@ async fn account_id(h: &Harness, cookie: &str) -> lfm_store::AccountId {
     let me = h.call("GET", "/app/api/me").cookie(cookie).send().await;
     lfm_store::AccountId(me.json["account"]["id"].as_i64().unwrap())
 }
+
+#[tokio::test]
+async fn tokens_are_limited_per_api_key() {
+    let h = Harness::new().await;
+    let admin = h.signup("admin").await;
+    let (busy, _) = key(&h, &admin, "read").await;
+    let (other, _) = key(&h, &admin, "read").await;
+    let token = |api_key: String| {
+        let h = &h;
+        async move {
+            h.api(&[("method", "auth.getToken"), ("api_key", api_key.as_str())])
+                .await
+                .1
+        }
+    };
+    for _ in 0..30 {
+        assert!(token(busy.clone()).await["token"].is_string());
+    }
+    assert_eq!(token(busy).await["error"], 29);
+    assert!(token(other).await["token"].is_string());
+}

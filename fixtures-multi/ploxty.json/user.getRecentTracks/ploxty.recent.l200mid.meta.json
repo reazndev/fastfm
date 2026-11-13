@@ -1,0 +1,44 @@
+{
+ "method": "user.getRecentTracks",
+ "variant": "ploxty.recent.l200mid",
+ "http_method": "GET",
+ "recorded_at": 1794600682,
+ "responses": {
+  "json": {
+   "params": [
+    [
+     "method",
+     "user.getRecentTracks"
+    ],
+    [
+     "api_key",
+     "REDACTED"
+    ],
+    [
+     "user",
+     "ploxty"
+    ],
+    [
+     "limit",
+     "200"
+    ],
+    [
+     "page",
+     "65"
+    ],
+    [
+     "format",
+     "json"
+    ]
+   ],
+   "status": 200,
+   "content_type": "application/json",
+   "headers": {
+    "access-control-allow-methods": "POST, GET, OPTIONS",
+    "access-control-allow-origin": "*",
+    "access-control-max-age": "86400",
+    "content-type": "application/json"
+   }
+  }
+ }
+}

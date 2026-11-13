@@ -32,7 +32,7 @@ impl Method for GetLovedTracks {
             .loved_tracks(user.id, paging(ctx.params))
             .await
             .or_failed()?;
-        let attrs = ListAttrs::of(&user.name, &listing).loved();
+        let attrs = ListAttrs::of(&user.name, &listing);
         let items = listing.items.iter().map(loved_track);
         let root = list_root("lovedtracks", "track", attrs, items);
         Ok(Response::new(root).escape_slashes())

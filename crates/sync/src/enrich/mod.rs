@@ -11,12 +11,13 @@
 //! tracks by name and play count, and stores the result with `Store::apply_library`.
 
 mod plan;
+mod tracks;
 
 use std::collections::HashMap;
 use std::future::Future;
 
-use lfm_store::{UserId, fold};
-use lfm_upstream::{PageInfo, TopPage};
+use lfm_store::{TimeRange, UserId, fold};
+use lfm_upstream::{PageInfo, Priority, TopPage};
 use tracing::info;
 
 use crate::context::Context;
@@ -47,7 +48,10 @@ pub(crate) async fn enrich(ctx: &Context, user: UserId) -> Result<EnrichReport> 
         albums: all_pages(|page| up.top_albums(&name, page)).await?,
         tracks: all_pages(|page| up.top_tracks(&name, page)).await?,
     };
-    let inputs = ctx.store.library_inputs(user).await?;
+    let mut inputs = ctx.store.library_inputs(user).await?;
+    if reread_merged(ctx, (user, &name), &tracks::merged(&inputs, &lists)).await? > 0 {
+        inputs = ctx.store.library_inputs(user).await?;
+    }
     let asked = plan::needs_correction(&inputs, &lists);
     let mut corrections = HashMap::new();
     for artist in &asked {
@@ -65,6 +69,37 @@ pub(crate) async fn enrich(ctx: &Context, user: UserId) -> Result<EnrichReport> 
     ctx.store.apply_library(user, library).await?;
     info!(user = %name, ?report, "library enriched");
     Ok(report)
+}
+
+/// Scrobbles one pass reads again at most, one request each.
+const REREAD_CAP: usize = 100;
+
+/// Reads the scrobbles of `tracks` again, one second each, so the store splits them by artist
+/// spelling as Last.fm does. Returns how many seconds were read.
+async fn reread_merged(
+    ctx: &Context,
+    (user, name): (UserId, &str),
+    tracks: &[i64],
+) -> Result<usize> {
+    let mut seconds = Vec::new();
+    for track in tracks {
+        seconds.extend(ctx.store.track_scrobble_times(user, *track).await?);
+        if seconds.len() >= REREAD_CAP {
+            break;
+        }
+    }
+    seconds.sort_unstable();
+    seconds.dedup();
+    seconds.truncate(REREAD_CAP);
+    let walker = ctx.walker(name, Priority::Prewarm);
+    for second in &seconds {
+        let range = TimeRange::new(*second, second + 1);
+        walker.copy(&ctx.store, user, range).await?;
+    }
+    if !seconds.is_empty() {
+        info!(user = %name, scrobbles = seconds.len(), "read tracks merged by artist case again");
+    }
+    Ok(seconds.len())
 }
 
 /// Every page of a list, fetched one after another.

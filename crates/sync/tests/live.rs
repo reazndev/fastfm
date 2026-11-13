@@ -39,7 +39,7 @@ async fn settle(h: &Harness) {
 
 #[tokio::test]
 async fn live_sync_appends_without_loss_or_doubling() {
-    let h = Harness::with_config(fast(1000)).await;
+    let h = Harness::with_config(&fast(1000)).await;
     h.fake
         .add(&[(REGISTERED, "old"), (REGISTERED + 1, "older")]);
     h.service.follow(USER).await.unwrap();
@@ -63,7 +63,7 @@ async fn live_sync_appends_without_loss_or_doubling() {
 
 #[tokio::test]
 async fn live_sync_catches_up_on_more_than_one_page() {
-    let h = Harness::with_config(fast(3)).await;
+    let h = Harness::with_config(&fast(3)).await;
     h.fake.add(&[(REGISTERED, "old")]);
     h.service.follow(USER).await.unwrap();
     settle(&h).await;
@@ -83,7 +83,7 @@ async fn live_sync_catches_up_on_more_than_one_page() {
 
 #[tokio::test]
 async fn now_playing_follows_the_last_poll() {
-    let h = Harness::with_config(fast(1000)).await;
+    let h = Harness::with_config(&fast(1000)).await;
     h.fake.add(&[(REGISTERED, "old")]);
     let user = h.service.follow(USER).await.unwrap();
     let now_playing = h.service.now_playing();
@@ -109,7 +109,7 @@ async fn now_playing_follows_the_last_poll() {
 
 #[tokio::test]
 async fn follow_skips_the_import_when_one_finished() {
-    let h = Harness::with_config(fast(1000)).await;
+    let h = Harness::with_config(&fast(1000)).await;
     h.fake.add(&[(REGISTERED, "old")]);
     h.import(None).await;
     let planned = h.fake.calls("user.getInfo");
@@ -130,7 +130,7 @@ fn tiered() -> SyncConfig {
 
 #[tokio::test]
 async fn an_idle_user_is_polled_rarely_until_nudged() {
-    let h = Harness::with_config(tiered().nudge_after(Duration::ZERO)).await;
+    let h = Harness::with_config(&tiered().nudge_after(Duration::ZERO)).await;
     h.fake.add(&[(REGISTERED, "old")]);
     let user = h.service.follow(USER).await.unwrap();
     eventually(|| mirrors(&h)).await;
@@ -146,7 +146,7 @@ async fn an_idle_user_is_polled_rarely_until_nudged() {
 
 #[tokio::test]
 async fn a_recent_poll_ignores_nudges() {
-    let h = Harness::with_config(tiered()).await;
+    let h = Harness::with_config(&tiered()).await;
     h.fake.add(&[(REGISTERED, "old")]);
     let user = h.service.follow(USER).await.unwrap();
     eventually(|| mirrors(&h)).await;
@@ -159,7 +159,7 @@ async fn a_recent_poll_ignores_nudges() {
 
 #[tokio::test]
 async fn now_playing_moves_an_idle_user_to_the_fast_tier() {
-    let h = Harness::with_config(tiered().nudge_after(Duration::ZERO)).await;
+    let h = Harness::with_config(&tiered().nudge_after(Duration::ZERO)).await;
     h.fake.add(&[(REGISTERED, "old")]);
     let user = h.service.follow(USER).await.unwrap();
     eventually(|| async { h.fake.calls("user.getRecentTracks") >= 3 }).await;
@@ -172,7 +172,7 @@ async fn now_playing_moves_an_idle_user_to_the_fast_tier() {
 
 #[tokio::test]
 async fn a_profile_that_turns_private_is_reported_and_retried_on_request() {
-    let h = Harness::with_config(fast(1000)).await;
+    let h = Harness::with_config(&fast(1000)).await;
     h.fake.add(&[(REGISTERED, "old")]);
     let user = h.service.follow(USER).await.unwrap();
     settle(&h).await;
@@ -185,5 +185,35 @@ async fn a_profile_that_turns_private_is_reported_and_retried_on_request() {
     assert!(h.service.retry(user));
     settle(&h).await;
     assert!(!h.service.is_private(user));
+    h.service.shutdown().await;
+}
+
+/// A scrobble sent late, with a time below the sync cursor, as offline scrobbling does: syntiiix
+/// had a `13 Nov 16:50` scrobble on Last.fm that the mirror, cursor at 20:10, never fetched.
+#[tokio::test]
+async fn the_trailing_check_finds_late_scrobbles_below_the_cursor() {
+    let quick = Duration::from_millis(30);
+    let config = fast(1000).trailing_check(Duration::from_secs(14 * 86_400), quick, quick);
+    let h = Harness::with_config(&config).await;
+    let base = now() - 3_600;
+    h.fake.add(&[(base, "a"), (base + 600, "b")]);
+    h.service.follow(USER).await.unwrap();
+    settle(&h).await;
+
+    h.fake.add(&[(base + 300, "sent late")]);
+    eventually(|| mirrors(&h)).await;
+    h.service.shutdown().await;
+}
+
+#[tokio::test]
+async fn reconcile_runs_on_schedule_across_restarts() {
+    let config = fast(1000).reconcile_interval(Duration::from_secs(3_600));
+    let h = Harness::with_config(&config).await;
+    h.fake.add(&[(REGISTERED, "old")]);
+    let user = h.store.ensure_user(USER).await.unwrap();
+    let last = now() - 7_200;
+    h.store.set_reconciled_at(user, last).await.unwrap();
+    h.service.follow(USER).await.unwrap();
+    eventually(|| async { h.store.reconciled_at(user).await.unwrap() > Some(last) }).await;
     h.service.shutdown().await;
 }

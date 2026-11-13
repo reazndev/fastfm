@@ -1,0 +1,44 @@
+{
+ "method": "user.getTopTracks",
+ "variant": "ploxty.TopTracks.6month",
+ "http_method": "GET",
+ "recorded_at": 1794600700,
+ "responses": {
+  "json": {
+   "params": [
+    [
+     "method",
+     "user.getTopTracks"
+    ],
+    [
+     "api_key",
+     "REDACTED"
+    ],
+    [
+     "user",
+     "ploxty"
+    ],
+    [
+     "period",
+     "6month"
+    ],
+    [
+     "limit",
+     "50"
+    ],
+    [
+     "format",
+     "json"
+    ]
+   ],
+   "status": 200,
+   "content_type": "application/json",
+   "headers": {
+    "access-control-allow-methods": "POST, GET, OPTIONS",
+    "access-control-allow-origin": "*",
+    "access-control-max-age": "86400",
+    "content-type": "application/json"
+   }
+  }
+ }
+}

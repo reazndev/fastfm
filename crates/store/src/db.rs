@@ -4,7 +4,7 @@ use std::path::Path;
 
 use rusqlite::{Connection, OpenFlags, OptionalExtension};
 
-use crate::error::Result;
+use crate::error::{Result, StoreError};
 
 /// Numbered migrations, applied in order. `PRAGMA user_version` holds how many have run.
 const MIGRATIONS: &[&str] = &[
@@ -15,6 +15,9 @@ const MIGRATIONS: &[&str] = &[
     include_str!("../../../migrations/0005_write_through.sql"),
     include_str!("../../../migrations/0006_library.sql"),
     include_str!("../../../migrations/0007_unique_lastfm_link.sql"),
+    include_str!("../../../migrations/0008_track_artist_spelling.sql"),
+    include_str!("../../../migrations/0009_album_artist_spelling.sql"),
+    include_str!("../../../migrations/0010_reconcile_state.sql"),
 ];
 
 /// Prepared statements kept per connection. The store uses fewer than this.
@@ -49,8 +52,8 @@ pub(crate) fn open_writer(path: &Path, tuning: Tuning) -> Result<Connection> {
     let mut conn = Connection::open(path)?;
     conn.pragma_update_and_check(None, "journal_mode", "WAL", |row| row.get::<_, String>(0))?;
     configure(&conn, tuning)?;
-    conn.pragma_update(None, "foreign_keys", true)?;
     migrate(&mut conn)?;
+    conn.pragma_update(None, "foreign_keys", true)?;
     Ok(conn)
 }
 
@@ -67,8 +70,8 @@ pub(crate) fn open_reader(path: &Path, tuning: Tuning) -> Result<Connection> {
 pub(crate) fn open_memory() -> Result<Connection> {
     let mut conn = Connection::open_in_memory()?;
     configure(&conn, Tuning::default())?;
-    conn.pragma_update(None, "foreign_keys", true)?;
     migrate(&mut conn)?;
+    conn.pragma_update(None, "foreign_keys", true)?;
     Ok(conn)
 }
 
@@ -86,11 +89,23 @@ fn configure(conn: &Connection, tuning: Tuning) -> Result<()> {
     Ok(())
 }
 
+/// Runs with foreign keys off, as SQLite's procedure for rebuilding a table requires, and
+/// checks them before each commit instead. The bundled SQLite turns them on by default.
 fn migrate(conn: &mut Connection) -> Result<()> {
+    conn.pragma_update(None, "foreign_keys", false)?;
     let applied: usize = conn.pragma_query_value(None, "user_version", |row| row.get(0))?;
     for (index, sql) in MIGRATIONS.iter().enumerate().skip(applied) {
         let tx = conn.transaction()?;
         tx.execute_batch(sql)?;
+        let broken: Option<String> = tx
+            .query_row("PRAGMA foreign_key_check", [], |row| row.get(0))
+            .optional()?;
+        if let Some(table) = broken {
+            return Err(StoreError::InvalidValue(format!(
+                "migration {} broke a foreign key in {table}",
+                index + 1
+            )));
+        }
         tx.pragma_update(None, "user_version", index + 1)?;
         tx.commit()?;
         tracing::info!(migration = index + 1, "applied database migration");

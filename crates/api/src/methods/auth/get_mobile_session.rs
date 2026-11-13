@@ -5,7 +5,7 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use lfm_core::{ApiError, ErrorCode, Response};
 
-use super::new_session;
+use super::{api_key, new_session};
 use crate::accounts::AccountServices;
 use crate::method::{Access, Context, Method};
 use crate::methods::shared::OrFailed;
@@ -40,7 +40,7 @@ impl Method for GetMobileSession {
         let password = ctx.params.required("password")?;
         let account = self
             .accounts
-            .check_password(name, password)
+            .check_password(api_key(ctx)?, name, password)
             .await?
             .ok_or(ErrorCode::AuthenticationFailed)?;
         let account = ctx

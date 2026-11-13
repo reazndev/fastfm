@@ -115,7 +115,7 @@ async fn poll_live(
 ) {
     let tiers = ctx.config.tiers;
     let mut last = newest_scrobble(ctx, user).await;
-    let mut maintenance = Maintenance::new(ctx);
+    let mut maintenance = Maintenance::new(ctx, user).await;
     // Users followed together at start-up begin at different times.
     if !signal
         .pause(tiers::jitter(tiers.playing / 2, 100), stop)
@@ -145,7 +145,8 @@ async fn poll_live(
             }
         };
         if !ctx.is_private(user) {
-            maintenance.run_due(ctx, user, name).await;
+            let active = last.is_some_and(|l| active_since(&tiers, l, clock::now()));
+            maintenance.run_due(ctx, (user, name), active).await;
         }
         if !signal
             .pause(tiers::jitter(wait, tiers.jitter_percent), stop)
@@ -163,27 +164,72 @@ async fn newest_scrobble(ctx: &Context, user: UserId) -> Option<i64> {
     listing.ok()?.items.first().map(|t| t.uts)
 }
 
-/// When the follow loop next reconciles and enriches.
+/// Whether a user whose newest scrobble is at `last` counts as active for the trailing check.
+fn active_since(tiers: &crate::config::PollTiers, last: i64, now: i64) -> bool {
+    let age = u64::try_from(now.saturating_sub(last)).unwrap_or(0);
+    Duration::from_secs(age) <= tiers.day_window
+}
+
+/// When the follow loop next reconciles, checks the trailing window, and enriches.
 struct Maintenance {
-    next_reconcile: Instant,
-    next_enrich: Instant,
+    reconcile: Instant,
+    trailing_check: Instant,
+    enrichment: Instant,
 }
 
 impl Maintenance {
-    fn new(ctx: &Context) -> Self {
+    /// Schedules the next reconcile pass from the last one stored, so restarts do not postpone
+    /// it. A user never reconciled counts from now.
+    async fn new(ctx: &Context, user: UserId) -> Self {
+        let now = clock::now();
+        let last = match ctx.store.reconciled_at(user).await {
+            Ok(Some(at)) => at,
+            Ok(None) => {
+                if let Err(err) = ctx.store.set_reconciled_at(user, now).await {
+                    warn!(user = user.0, error = %err, "storing the reconcile time failed");
+                }
+                now
+            }
+            Err(err) => {
+                warn!(user = user.0, error = %err, "reading the reconcile time failed");
+                now
+            }
+        };
+        let since = Duration::from_secs(u64::try_from(now.saturating_sub(last)).unwrap_or(0));
+        let start = Instant::now();
         Self {
-            next_reconcile: Instant::now() + ctx.config.reconcile_interval,
-            next_enrich: Instant::now() + ctx.config.enrich_interval,
+            reconcile: start + ctx.config.reconcile_interval.saturating_sub(since),
+            trailing_check: start + ctx.config.trailing.active,
+            enrichment: start + ctx.config.enrich_interval,
         }
     }
 
-    async fn run_due(&mut self, ctx: &Context, user: UserId, name: &str) {
-        if Instant::now() >= self.next_reconcile {
-            self.next_reconcile = Instant::now() + ctx.config.reconcile_interval;
+    async fn run_due(&mut self, ctx: &Context, (user, name): (UserId, &str), active: bool) {
+        let trailing = &ctx.config.trailing;
+        if Instant::now() >= self.reconcile {
+            self.reconcile = Instant::now() + ctx.config.reconcile_interval;
+            // A full pass covers the trailing window too.
+            self.trailing_check = Instant::now() + trailing.active;
             run_reconcile(ctx, user, name).await;
         }
-        if Instant::now() >= self.next_enrich {
-            self.next_enrich = Instant::now() + ctx.config.enrich_interval;
+        if Instant::now() >= self.trailing_check {
+            let every = if active {
+                trailing.active
+            } else {
+                trailing.idle
+            };
+            self.trailing_check = Instant::now() + every;
+            let window = i64::try_from(trailing.window.as_secs()).unwrap_or(i64::MAX);
+            match reconcile::trailing(ctx, (user, name), window).await {
+                Ok(report) if !report.repaired.is_empty() => {
+                    info!(user = %name, repaired = report.repaired.len(), "late scrobbles");
+                }
+                Ok(_) => {}
+                Err(err) => warn!(user = %name, error = %err, "trailing check failed"),
+            }
+        }
+        if Instant::now() >= self.enrichment {
+            self.enrichment = Instant::now() + ctx.config.enrich_interval;
             if let Err(err) = enrich::enrich(ctx, user).await {
                 warn!(user = %name, error = %err, "enrichment failed");
             }
@@ -200,6 +246,7 @@ async fn run_reconcile(ctx: &Context, user: UserId, name: &str) {
         Ok(report) => info!(
             user = %name,
             repaired = report.repaired.len(),
+            inconsistent = report.inconsistent.len(),
             requests = report.requests,
             "reconciled"
         ),

@@ -136,7 +136,8 @@ async fn append_numbers_after_existing_rows() {
     let before = db.store.user(alice).await.unwrap().unwrap().version;
     let live = vec![
         scrobble(T0, "A", "X", "One"),
-        scrobble(T0 + 50, "a", "x", "ONE"),
+        // Titles match ignoring case; artist spellings that differ in case would not.
+        scrobble(T0 + 50, "A", "x", "ONE"),
     ];
     db.store.append_scrobbles(alice, live).await.unwrap();
 
@@ -222,4 +223,46 @@ async fn a_remembered_user_is_read_again_after_a_write() {
     assert_eq!(db.store.user_by_name("nobody").await.unwrap(), None);
     db.store.ensure_user("nobody").await.unwrap();
     assert!(db.store.user_by_name("nobody").await.unwrap().is_some());
+}
+
+/// Last.fm lists `João Bosco & Vinícius / Chora, me liga - Ao vivo` (2 plays) and
+/// `JOÃO BOSCO & VINÍCIUS / Chora, me liga - Ao vivo` (1 play) as two tracks of one artist.
+#[tokio::test]
+async fn tracks_keep_artist_spellings_that_differ_in_case_apart() {
+    let db = TestDb::new();
+    let alice = user(&db.store, "alice").await;
+    let title = "Chora, me liga - Ao vivo";
+    let plays = vec![
+        scrobble(T0 + 3, "JOÃO BOSCO & VINÍCIUS", "Curtição (Ao Vivo)", title),
+        scrobble(T0 + 2, "João Bosco & Vinícius", "Curtição (Ao Vivo)", title),
+        scrobble(
+            T0 + 1,
+            "João Bosco & Vinícius",
+            "Curtição (Ao Vivo)",
+            "CHORA, ME LIGA - AO VIVO",
+        ),
+    ];
+    let window = TimeRange::new(T0, T0 + 10);
+    db.store.replace_window(alice, window, plays).await.unwrap();
+    let stats = db.store.user(alice).await.unwrap().unwrap().stats;
+    assert_eq!((stats.artists, stats.albums, stats.tracks), (1, 1, 2));
+    let query = lfm_store::TopQuery {
+        kind: lfm_store::Kind::Track,
+        period: lfm_store::Period::Overall,
+        now: T0 + 10,
+    };
+    let top = db.store.top(alice, query, Page::new(1, 10)).await.unwrap();
+    let rows: Vec<(String, u64)> = top
+        .items
+        .iter()
+        .map(|r| (r.entity.artist.clone().unwrap().name, r.plays))
+        .collect();
+    assert_eq!(
+        rows,
+        [
+            ("João Bosco & Vinícius".to_owned(), 2),
+            ("JOÃO BOSCO & VINÍCIUS".to_owned(), 1)
+        ]
+    );
+    assert_aggregates_match(&db.raw());
 }
