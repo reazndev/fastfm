@@ -4,6 +4,8 @@ use std::path::PathBuf;
 
 use lfm_upstream::AppCredentials;
 
+use crate::demo::DemoConfig;
+
 /// When the session cookie gets the `Secure` flag.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum CookiePolicy {
@@ -23,9 +25,12 @@ pub struct WebConfig {
     pub(crate) data_dir: PathBuf,
     pub(crate) cookies: CookiePolicy,
     pub(crate) trust_proxy: bool,
+    pub(crate) proxy_hops: usize,
+    pub(crate) setup_token: Option<String>,
     pub(crate) public_url: Option<String>,
     pub(crate) lastfm_app: Option<AppCredentials>,
     pub(crate) key_pool_size: usize,
+    pub(crate) demo: Option<DemoConfig>,
 }
 
 impl WebConfig {
@@ -36,9 +41,12 @@ impl WebConfig {
             data_dir: data_dir.into(),
             cookies: CookiePolicy::Auto,
             trust_proxy: false,
+            proxy_hops: 1,
+            setup_token: None,
             public_url: None,
             lastfm_app: None,
             key_pool_size: 0,
+            demo: None,
         }
     }
 
@@ -54,6 +62,27 @@ impl WebConfig {
     pub fn trust_proxy(self, trust_proxy: bool) -> Self {
         Self {
             trust_proxy,
+            ..self
+        }
+    }
+
+    /// How many trusted proxies stand in front of the server, each adding one
+    /// `X-Forwarded-For` entry. Defaults to 1.
+    #[must_use]
+    pub fn proxy_hops(self, proxy_hops: usize) -> Self {
+        Self {
+            proxy_hops: proxy_hops.max(1),
+            ..self
+        }
+    }
+
+    /// A token the first sign-up must give, so whoever reaches a fresh instance first cannot
+    /// claim its admin account. Without one the first account becomes the admin as before.
+    #[must_use]
+    pub fn setup_token(self, setup_token: impl Into<String>) -> Self {
+        let token = setup_token.into();
+        Self {
+            setup_token: (!token.trim().is_empty()).then(|| token.trim().to_owned()),
             ..self
         }
     }
@@ -83,6 +112,15 @@ impl WebConfig {
     pub fn key_pool_size(self, key_pool_size: usize) -> Self {
         Self {
             key_pool_size,
+            ..self
+        }
+    }
+
+    /// Turns on the speed comparison at `/demo`. Off by default: it needs a Last.fm key.
+    #[must_use]
+    pub fn demo(self, demo: DemoConfig) -> Self {
+        Self {
+            demo: Some(demo),
             ..self
         }
     }

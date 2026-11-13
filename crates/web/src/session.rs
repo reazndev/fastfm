@@ -37,6 +37,26 @@ pub(crate) fn session_id(headers: &HeaderMap) -> Option<String> {
         .map(|(_, value)| value.to_owned())
 }
 
+/// The key a session is stored under: the SHA-256 of the cookie value, so a leaked database
+/// does not hand out logins.
+pub(crate) fn stored_id(cookie_value: &str) -> String {
+    use sha2::Digest;
+    use std::fmt::Write;
+    sha2::Sha256::digest(cookie_value.as_bytes()).iter().fold(
+        String::with_capacity(64),
+        |mut hex, byte| {
+            // Writing to a String cannot fail.
+            let _ = write!(hex, "{byte:02x}");
+            hex
+        },
+    )
+}
+
+/// The stored key of the request's session, if it has a cookie.
+pub(crate) fn stored_session(headers: &HeaderMap) -> Option<String> {
+    session_id(headers).map(|id| stored_id(&id))
+}
+
 /// `Set-Cookie` for a new session, or one that clears it when `id` is `None`.
 pub(crate) fn cookie(id: Option<&str>, secure: bool) -> Result<HeaderValue, WebError> {
     let (value, age) = id.map_or(("", 0), |id| (id, SESSION_LIFETIME));
@@ -90,7 +110,7 @@ impl FromRequestParts<AppState> for Viewer {
     type Rejection = WebError;
 
     async fn from_request_parts(parts: &mut Parts, state: &AppState) -> Result<Self, WebError> {
-        let id = session_id(&parts.headers).ok_or_else(WebError::not_logged_in)?;
+        let id = stored_session(&parts.headers).ok_or_else(WebError::not_logged_in)?;
         let session = state
             .store
             .session(&id, unix_now())
@@ -142,8 +162,9 @@ impl FromRequestParts<AppState> for Admin {
     }
 }
 
-/// The client's IP, for the login rate limit. Needs the server to run with connect info; the
-/// first `X-Forwarded-For` entry wins when the proxy is trusted.
+/// The client's IP, for the login rate limit. Needs the server to run with connect info. When
+/// the proxy is trusted, the `X-Forwarded-For` entry its last trusted hop added wins: entries
+/// left of it come from the client, which can write anything there.
 #[derive(Debug)]
 pub(crate) struct ClientIp(pub(crate) String);
 
@@ -159,8 +180,7 @@ impl FromRequestParts<AppState> for ClientIp {
             .trust_proxy
             .then(|| header_text(&parts.headers, "x-forwarded-for"))
             .flatten()
-            .and_then(|list| list.split(',').next())
-            .map(|ip| ip.trim().to_owned());
+            .and_then(|list| forwarded_client(list, state.config.proxy_hops));
         let direct = parts
             .extensions
             .get::<ConnectInfo<SocketAddr>>()
@@ -168,6 +188,18 @@ impl FromRequestParts<AppState> for ClientIp {
         let ip = forwarded.or(direct).unwrap_or_else(|| "unknown".to_owned());
         std::future::ready(Ok(Self(ip)))
     }
+}
+
+/// The address `hops` trusted proxies saw: the `hops`-th entry from the right, or the leftmost
+/// when the list is shorter.
+fn forwarded_client(list: &str, hops: usize) -> Option<String> {
+    let entries: Vec<&str> = list
+        .split(',')
+        .map(str::trim)
+        .filter(|e| !e.is_empty())
+        .collect();
+    let index = entries.len().saturating_sub(hops.max(1));
+    entries.get(index).map(|ip| (*ip).to_owned())
 }
 
 /// Proof that the request carries the CSRF header, for the one `GET` that changes state.
@@ -209,4 +241,26 @@ fn csrf_missing() -> WebError {
         "csrf_header_missing",
         "Send the X-Requested-With header with this request.",
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn the_client_address_is_the_one_the_trusted_proxy_added() {
+        let list = "6.6.6.6, 10.0.0.7, 192.0.2.1";
+        assert_eq!(forwarded_client(list, 1).as_deref(), Some("192.0.2.1"));
+        assert_eq!(forwarded_client(list, 2).as_deref(), Some("10.0.0.7"));
+        assert_eq!(forwarded_client(list, 9).as_deref(), Some("6.6.6.6"));
+        assert_eq!(forwarded_client(" ", 1), None);
+    }
+
+    #[test]
+    fn sessions_are_stored_hashed() {
+        let stored = stored_id("abc");
+        assert_eq!(stored.len(), 64);
+        assert_ne!(stored, "abc");
+        assert_eq!(stored, stored_id("abc"));
+    }
 }

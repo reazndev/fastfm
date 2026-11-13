@@ -103,8 +103,10 @@ fn newest_bucket_reaching(
     (level, first, end): (usize, i64, i64),
     left: u64,
 ) -> Result<(Option<i64>, u64)> {
+    // `+?N` keeps the bound values out of planning; with plain `?N` this ordered range scan
+    // was re-planned on every use (see `recent::PAGE_SQL`).
     let sql = "SELECT bucket, plays FROM user_scrobble_rollup \
-               WHERE user_id = ?1 AND lvl = ?2 AND bucket >= ?3 AND bucket < ?4 \
+               WHERE user_id = +?1 AND lvl = +?2 AND bucket >= +?3 AND bucket < +?4 \
                ORDER BY bucket DESC";
     let mut stmt = conn.prepare_cached(sql)?;
     let mut rows = stmt.query(params![user, level, first, end])?;

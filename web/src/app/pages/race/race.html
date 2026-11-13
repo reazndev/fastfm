@@ -1,0 +1,38 @@
+<div class="page">
+  <div class="stack">
+    <app-demo-tabs />
+    <h1>Live race</h1>
+    <p class="muted">
+      The whole history, page by page, from Last.fm and from this mirror at the same time.
+    </p>
+  </div>
+
+  <form class="ask" (ngSubmit)="toggle()">
+    <label class="field grow">
+      Last.fm username
+      <input
+        name="username"
+        required
+        autocapitalize="off"
+        spellcheck="false"
+        [disabled]="runner.running()"
+        [(ngModel)]="username"
+      />
+    </label>
+    <button type="submit" class="button primary" [disabled]="!username().trim()">
+      {{ runner.running() ? 'Stop' : 'Start race' }}
+    </button>
+  </form>
+
+  @if (runner.started()) {
+    <section class="lanes" aria-label="Race">
+      <app-race-lane title="Last.fm" [lane]="runner.lastfm()" />
+      <app-race-lane title="This mirror" [lane]="runner.mirror()" />
+    </section>
+    <p class="small muted">
+      Both sides fetch 200 scrobbles per request, timed on this server with one Last.fm API key.
+      Last.fm requests are spaced at least 250 ms apart. Each side shows the oldest scrobbles it has
+      reached. The user must be mirrored here first; import them under Benchmarks.
+    </p>
+  }
+</div>

@@ -20,18 +20,118 @@ reason = "Global play count; moved by about 100,000 between two calls hours apar
 
 [[rule]]
 method = "chart.getTopArtists"
-path = "artists.artist[*].listeners"
+path = "artists.artist*.listeners"
 reason = "Global listener count of each charting artist; all 50 changed between two calls."
 
 [[rule]]
 method = "chart.getTopArtists"
-path = "artists.artist[*].playcount"
+path = "artists.artist*.playcount"
 reason = "Global play count of each charting artist; all 50 changed between two calls."
 
 [[rule]]
 method = "tag.getInfo"
 path = "tag.total"
 reason = "Global tagging count of the tag; grew by 3 within two hours of recording."
+
+# More global counters, seen moving in conformance runs on 2026-11-13. The harness fetches
+# every catalogue method from Last.fm while it runs (data/conformance.db holds no cached
+# answers), so these compare a live count with one recorded a day earlier.
+
+[[rule]]
+method = "album.getInfo"
+path = "album.listeners"
+reason = "Global listener count; moved by about 270 within a day."
+
+[[rule]]
+method = "album.getInfo"
+path = "album.playcount"
+reason = "Global play count; moved by about 3,000 within a day."
+
+[[rule]]
+method = "track.getInfo"
+path = "track.listeners"
+reason = "Global listener count; moved by about 30 within a day."
+
+[[rule]]
+method = "track.getInfo"
+path = "track.playcount"
+reason = "Global play count; moved by about 300 within a day."
+
+[[rule]]
+method = "tag.getInfo"
+path = "tag.reach"
+reason = "Number of users who used the tag; grew by 3 within a day."
+
+[[rule]]
+method = "artist.getTopAlbums"
+path = "topalbums.album*.playcount"
+reason = "Global play count of each album; all 50 moved within a day."
+
+[[rule]]
+method = "artist.getTopAlbums"
+path = "topalbums.**total"
+reason = "Number of albums listed under the artist; grew by 21 within a day."
+
+[[rule]]
+method = "artist.getTopTracks"
+path = "toptracks.track*.playcount"
+reason = "Global play count of each track; all 50 moved within a day."
+
+[[rule]]
+method = "artist.getTopTracks"
+path = "toptracks.track*.listeners"
+reason = "Global listener count of each track; all 50 moved within a day."
+
+[[rule]]
+method = "artist.getTopTracks"
+path = "toptracks.**total*"
+reason = "Number of tracks under the artist (and totalPages from it); grew within a day."
+
+[[rule]]
+method = "chart.getTopTracks"
+path = "tracks.track*.playcount"
+reason = "Global play count of each charting track; moved within an hour."
+
+[[rule]]
+method = "chart.getTopTracks"
+path = "tracks.track*.listeners"
+reason = "Global listener count of each charting track; moved within an hour."
+
+[[rule]]
+method = "geo.getTopArtists"
+path = "topartists.artist*.listeners"
+reason = "Listener count of each artist in the country; all moved within a day."
+
+[[rule]]
+method = "geo.getTopArtists"
+path = "topartists.**total*"
+reason = "Number of artists charting in the country (and totalPages); moved within a day."
+
+[[rule]]
+method = "geo.getTopTracks"
+path = "tracks.track*.listeners"
+reason = "Listener count of each track in the country; all moved within a day."
+
+[[rule]]
+method = "user.getInfo"
+variant = "friend"
+path = "user.playcount"
+reason = "A user this instance does not mirror is fetched from Last.fm live; their count grows."
+
+[[rule]]
+method = "*.search"
+path = "results.opensearch:totalResults"
+reason = "Number of matches in the whole catalogue; grows as Last.fm adds entries."
+
+[[rule]]
+method = "artist.search"
+path = "results.artistmatches.artist*.listeners"
+reason = "Global listener count of each match; moved within a day."
+
+[[rule]]
+method = "track.search"
+path = "results.trackmatches.track*.listeners"
+reason = "Global listener count of each match; moved within a day."
 
 # Tag counters: every tagging on Last.fm moves them. Observed through the pass-through on
 # 2026-11-12, about 90 minutes after recording: reach and taggings of most top tags, and the total

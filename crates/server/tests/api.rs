@@ -7,7 +7,8 @@ use std::time::Duration;
 
 use async_trait::async_trait;
 use axum::body::Body;
-use axum::http::{Request, StatusCode};
+use axum::http::{HeaderMap, Request, StatusCode};
+use bytes::Bytes;
 use http_body_util::BodyExt;
 use lfm_api::methods::example::Echo;
 use lfm_api::{
@@ -42,6 +43,10 @@ impl Method for Love {
 }
 
 fn app() -> axum::Router {
+    app_with(lfm_store::Store::open_in_memory().unwrap())
+}
+
+fn app_with(store: lfm_store::Store) -> axum::Router {
     let key = ApiKey {
         account_id: 1,
         secret: SECRET.into(),
@@ -51,9 +56,10 @@ fn app() -> axum::Router {
     let session = Session {
         account_id: 1,
         user: "syntiiix".into(),
+        api_key: KEY.into(),
     };
     let services = Services {
-        store: lfm_store::Store::open_in_memory().unwrap(),
+        store,
         clock: lfm_api::Clock::System,
         api_keys: Arc::new(InMemoryApiKeys::default().with(KEY, key)),
         sessions: Arc::new(InMemorySessions::default().with(SK, session)),
@@ -86,34 +92,45 @@ async fn send(request: axum::http::Result<Request<Body>>) -> Reply {
         Ok(request) => request,
         Err(error) => return Reply::broken(&error),
     };
-    let Ok(response) = app().oneshot(request).await;
-    let header = |name: &str| {
-        response
-            .headers()
-            .get(name)
-            .and_then(|v| v.to_str().ok())
-            .unwrap_or_default()
-            .to_owned()
-    };
-    let content_type = header("content-type");
-    let cors = [
-        header("access-control-allow-methods"),
-        header("access-control-allow-origin"),
-        header("access-control-max-age"),
-    ];
-    let status = response.status();
-    let bytes = response
-        .into_body()
+    let (status, headers, bytes) = exchange(request).await;
+    let header = |name: &str| header_text(&headers, name);
+    Reply {
+        status,
+        content_type: header("content-type"),
+        cors: [
+            header("access-control-allow-methods"),
+            header("access-control-allow-origin"),
+            header("access-control-max-age"),
+        ],
+        body: String::from_utf8_lossy(&bytes).into_owned(),
+    }
+}
+
+/// Status, headers and raw body bytes of one request.
+async fn exchange(request: Request<Body>) -> (StatusCode, HeaderMap, Bytes) {
+    exchange_with(app(), request).await
+}
+
+async fn exchange_with(
+    app: axum::Router,
+    request: Request<Body>,
+) -> (StatusCode, HeaderMap, Bytes) {
+    let Ok(response) = app.oneshot(request).await;
+    let (parts, body) = response.into_parts();
+    let bytes = body
         .collect()
         .await
         .map(http_body_util::Collected::to_bytes)
         .unwrap_or_default();
-    Reply {
-        status,
-        content_type,
-        cors,
-        body: String::from_utf8_lossy(&bytes).into_owned(),
-    }
+    (parts.status, parts.headers, bytes)
+}
+
+fn header_text(headers: &HeaderMap, name: &str) -> String {
+    headers
+        .get(name)
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or_default()
+        .to_owned()
 }
 
 async fn get(query: &str) -> Reply {
@@ -297,4 +314,117 @@ async fn preflight_and_healthz() {
     let reply = send(Request::get("/healthz").body(Body::empty())).await;
     assert_eq!(reply.status, StatusCode::OK);
     assert_eq!(reply.body, "ok");
+}
+
+/// An echo long enough to be worth compressing.
+fn long_echo() -> String {
+    format!(
+        "/2.0/?method=example.echo&text={}&api_key={KEY}&format=json",
+        "abc".repeat(800)
+    )
+}
+
+#[tokio::test]
+async fn without_negotiation_headers_only_an_etag_is_added() {
+    let request = Request::get(long_echo()).body(Body::empty()).unwrap();
+    let (status, headers, body) = exchange(request).await;
+    assert_eq!(status, StatusCode::OK);
+    assert!(body.starts_with(br#"{"echo":{"text":"abcabc"#));
+    let etag = header_text(&headers, "etag");
+    assert!(etag.starts_with('"') && etag.ends_with('"'), "{etag}");
+    for absent in ["content-encoding", "vary"] {
+        assert_eq!(header_text(&headers, absent), "", "{absent}");
+    }
+}
+
+#[tokio::test]
+async fn accepted_codings_are_served_with_vary_and_decode_to_the_body() {
+    let plain = exchange(Request::get(long_echo()).body(Body::empty()).unwrap()).await;
+    for (accept, coding) in [("gzip", "gzip"), ("gzip, deflate, br, zstd", "zstd")] {
+        let request = Request::get(long_echo())
+            .header("accept-encoding", accept)
+            .body(Body::empty())
+            .unwrap();
+        let (status, headers, body) = exchange(request).await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(header_text(&headers, "content-encoding"), coding);
+        assert_eq!(header_text(&headers, "vary"), "accept-encoding");
+        assert_eq!(header_text(&headers, "content-type"), JSON);
+        let decoded = match coding {
+            "gzip" => {
+                let mut out = Vec::new();
+                std::io::Read::read_to_end(&mut flate2::read::GzDecoder::new(&body[..]), &mut out)
+                    .unwrap();
+                out
+            }
+            _ => zstd::decode_all(&body[..]).unwrap(),
+        };
+        assert_eq!(decoded, plain.2);
+        assert_ne!(header_text(&headers, "etag"), header_text(&plain.1, "etag"));
+    }
+}
+
+#[tokio::test]
+async fn a_matching_if_none_match_gets_304_without_a_body() {
+    let first = exchange(Request::get(long_echo()).body(Body::empty()).unwrap()).await;
+    let etag = header_text(&first.1, "etag");
+    let request = Request::get(long_echo())
+        .header("if-none-match", &etag)
+        .body(Body::empty())
+        .unwrap();
+    let (status, headers, body) = exchange(request).await;
+    assert_eq!(status, StatusCode::NOT_MODIFIED);
+    assert!(body.is_empty());
+    assert_eq!(header_text(&headers, "etag"), etag);
+    assert_eq!(header_text(&headers, "access-control-allow-origin"), "*");
+    let stale = Request::get(long_echo())
+        .header("if-none-match", "\"0000000000000000\"")
+        .body(Body::empty())
+        .unwrap();
+    assert_eq!(exchange(stale).await.0, StatusCode::OK);
+}
+
+#[tokio::test]
+async fn errors_carry_no_etag() {
+    let request = Request::get(format!("/2.0/?method=user.nosuch&api_key={KEY}"))
+        .body(Body::empty())
+        .unwrap();
+    let (status, headers, _) = exchange(request).await;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+    assert_eq!(header_text(&headers, "etag"), "");
+}
+
+#[tokio::test]
+async fn export_streams_ndjson_and_answers_errors_in_json() {
+    let store = lfm_store::Store::open_in_memory().unwrap();
+    let alice = store.ensure_user("alice").await.unwrap();
+    let plays = (0..3)
+        .map(|n| lfm_store::Scrobble {
+            uts: 1_700_000_000 + n,
+            artist: lfm_store::Named::new("Cher"),
+            album: None,
+            track: lfm_store::Named::new(format!("Song {n}")),
+            image: None,
+        })
+        .collect();
+    store.append_scrobbles(alice, plays).await.unwrap();
+    let get = |query: String| Request::get(format!("/2.0/export?{query}")).body(Body::empty());
+    let ok = get(format!("user=Alice&api_key={KEY}")).unwrap();
+    let (status, headers, body) = exchange_with(app_with(store.clone()), ok).await;
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(
+        header_text(&headers, "content-type"),
+        "application/x-ndjson"
+    );
+    assert_eq!(header_text(&headers, "access-control-allow-origin"), "*");
+    let body = String::from_utf8(body.to_vec()).unwrap();
+    assert_eq!(body.lines().count(), 3);
+    assert!(
+        body.starts_with(r#"{"uts":1700000002,"artist":"Cher","#),
+        "{body}"
+    );
+    let unknown = get(format!("user=bob&api_key={KEY}")).unwrap();
+    let (status, _, body) = exchange_with(app_with(store), unknown).await;
+    assert_eq!(status, StatusCode::NOT_FOUND);
+    assert_eq!(body, r#"{"message":"User not found","error":6}"#);
 }

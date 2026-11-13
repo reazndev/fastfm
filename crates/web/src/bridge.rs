@@ -6,6 +6,7 @@ use lfm_core::{ApiError, ErrorCode};
 use lfm_store::{AccountId, AccountStatus, fold};
 use lfm_upstream::{ScrobbleItem, ScrobbleOutcome, TrackItem};
 
+use crate::attempts::Origin;
 use crate::forward::{self, failed};
 use crate::password::MAX_PASSWORD;
 use crate::state::{AppState, unix_now};
@@ -16,7 +17,8 @@ pub(crate) struct Accounts(pub(crate) AppState);
 
 #[async_trait]
 impl AccountServices for Accounts {
-    /// Shares the web login's per-username limit, so the API is no way around it.
+    /// Shares the web login's limits, so the API is no way around them. Without a client IP
+    /// here, API logins share one ceiling and lock out per username apart from the web.
     async fn check_password(
         &self,
         name: &str,
@@ -24,7 +26,7 @@ impl AccountServices for Accounts {
     ) -> Result<Option<AccountId>, ApiError> {
         let state = &self.0;
         let (key, now) = (fold(name), unix_now());
-        if !state.name_attempts.allows(&key, now) {
+        if !state.attempts.admit(&key, Origin::Api, now).await {
             return Err(ErrorCode::RateLimitExceeded.into());
         }
         let account = state.store.account_by_name(name).await.map_err(failed)?;
@@ -32,10 +34,10 @@ impl AccountServices for Accounts {
         let verified =
             password.len() <= MAX_PASSWORD && state.passwords.verify(hash, password).await;
         let Some(account) = account.filter(|_| verified) else {
-            state.name_attempts.fail(&key, now);
+            state.attempts.failed(&key, Origin::Api, now);
             return Ok(None);
         };
-        state.name_attempts.clear(&key);
+        state.attempts.succeeded(&key, Origin::Api);
         Ok((account.status == AccountStatus::Active).then_some(account.id))
     }
 

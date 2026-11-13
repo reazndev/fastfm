@@ -7,6 +7,7 @@ use lfm_store::{AccountId, AccountStatus, Role, SignupMode};
 use serde::{Deserialize, Serialize};
 
 use crate::error::WebError;
+use crate::routes::lastfm::{OWN_KEY_REQUIRED, own_key_required};
 use crate::session::Admin;
 use crate::state::AppState;
 use crate::views::AccountView;
@@ -127,6 +128,8 @@ pub(crate) async fn set_role(
 #[serde(rename_all = "camelCase")]
 pub(crate) struct Settings {
     signup_mode: &'static str,
+    /// Whether accounts must save their own Last.fm API key before linking a user.
+    require_own_key: bool,
     lastfm_key_pool: KeyPool,
 }
 
@@ -147,11 +150,13 @@ pub(crate) async fn settings(
     current(&state).await.map(Json)
 }
 
-/// `{"signupMode": "approval" | "open" | "closed"}`.
+/// `{"signupMode": "approval" | "open" | "closed", "requireOwnKey": bool}`; either may be
+/// left out to keep it.
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct SettingsBody {
-    signup_mode: String,
+    signup_mode: Option<String>,
+    require_own_key: Option<bool>,
 }
 
 /// `PUT /admin/settings`.
@@ -160,17 +165,23 @@ pub(crate) async fn update_settings(
     _: Admin,
     Json(body): Json<SettingsBody>,
 ) -> Result<Json<Settings>, WebError> {
-    let mode: SignupMode = body
-        .signup_mode
-        .parse()
-        .map_err(|_| WebError::invalid("invalid_signup_mode", "Use approval, open or closed."))?;
-    state.store.set_signup_mode(mode).await?;
+    if let Some(mode) = body.signup_mode {
+        let mode: SignupMode = mode.parse().map_err(|_| {
+            WebError::invalid("invalid_signup_mode", "Use approval, open or closed.")
+        })?;
+        state.store.set_signup_mode(mode).await?;
+    }
+    if let Some(required) = body.require_own_key {
+        let value = if required { "true" } else { "false" };
+        state.store.set_setting(OWN_KEY_REQUIRED, value).await?;
+    }
     current(&state).await.map(Json)
 }
 
 async fn current(state: &AppState) -> Result<Settings, WebError> {
     Ok(Settings {
         signup_mode: state.store.signup_mode().await?.as_str(),
+        require_own_key: own_key_required(&state.store).await?,
         lastfm_key_pool: KeyPool {
             keys: state.config.key_pool_size,
             can_sign: state.config.lastfm_app.is_some(),

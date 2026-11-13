@@ -99,6 +99,20 @@ pub(crate) fn list_root_collapsing(
         .children(items)
 }
 
+/// The `from` and `to` of a history request: `from` inclusive and `to` exclusive, as observed
+/// on recent tracks.
+pub(crate) fn history_range(params: &Params) -> TimeRange {
+    let bound = |name, default| {
+        params
+            .number(name)
+            .map_or(default, |n| i64::try_from(n).unwrap_or(i64::MAX))
+    };
+    TimeRange::new(
+        bound("from", TimeRange::ALL.from),
+        bound("to", TimeRange::ALL.to),
+    )
+}
+
 /// The range of a weekly chart and how `@attr` shows it.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct WeeklyRange {

@@ -31,9 +31,13 @@
     <section class="section" aria-labelledby="key-heading">
       <h2 id="key-heading">Your own Last.fm API key</h2>
       <p class="muted">
-        Optional. With your own key, your import and sync do not share this server's rate limit, and
-        you can connect Last.fm when the server has no shared secret.
+        {{ s.credentials.ownKeyRequired ? 'Required on this server.' : 'Optional.' }} With your own
+        key, your import and sync do not share this server's rate limit, and you can connect Last.fm
+        when the server has no shared secret.
       </p>
+      @if (s.credentials.error; as problem) {
+        <p class="small error" role="alert">{{ problem }}</p>
+      }
       @if (s.ownKey) {
         <div class="row">
           <p class="grow">Your key is in use.</p>

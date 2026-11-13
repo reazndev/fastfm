@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { LinkStatus } from '../../api/models';
@@ -25,6 +25,9 @@ import { formatCount, formatTime } from '../../shared/format';
 })
 export class LinkStatusView {
   readonly status = input.required<LinkStatus>();
+  readonly retrying = input(false);
+  /** Asks to retry an import that a private profile stopped. */
+  readonly retried = output();
   protected readonly count = formatCount;
   protected readonly time = formatTime;
   protected readonly profileUrl = computed(

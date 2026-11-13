@@ -30,7 +30,7 @@ pub struct Target {
 }
 
 impl Target {
-    /// A target at `base_url` (such as `http://127.0.0.1:8080/2.0/`).
+    /// A target at `base_url` (such as `http://127.0.0.1:3055/2.0/`).
     pub fn new(base_url: &str, api_key: &str) -> Result<Self, Error> {
         let base_url = Url::parse(base_url).map_err(|e| Error::BaseUrl(e.to_string()))?;
         // Redirects would hide the status the server really sent.

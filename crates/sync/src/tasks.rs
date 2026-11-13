@@ -1,59 +1,192 @@
 //! The loops the service runs in the background.
 
+use std::sync::{Mutex, PoisonError};
 use std::time::Duration;
 
-use lfm_store::UserId;
+use lfm_store::{Page, TimeRange, UserId};
+use tokio::sync::Notify;
 use tokio::time::Instant;
 use tokio_util::sync::CancellationToken;
 use tracing::{info, warn};
 
-use crate::clock;
 use crate::context::Context;
 use crate::error::{Result, SyncError};
-use crate::{enrich, import, live, reconcile};
+use crate::{clock, enrich, import, live, reconcile, tiers};
+
+/// How the service reaches a follow loop: a wake-up for an early poll, and when it last polled.
+#[derive(Debug, Default)]
+pub(crate) struct Signal {
+    wake: Notify,
+    last_poll: Mutex<Option<Instant>>,
+}
+
+impl Signal {
+    /// Ends the loop's current pause, or the next one if it is busy.
+    pub(crate) fn wake(&self) {
+        self.wake.notify_one();
+    }
+
+    /// Whether the loop has not polled within `age`.
+    pub(crate) fn stale(&self, age: Duration) -> bool {
+        self.last_poll
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner)
+            .is_none_or(|at| at.elapsed() >= age)
+    }
+
+    fn polled(&self) {
+        *self
+            .last_poll
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner) = Some(Instant::now());
+    }
+
+    /// Sleeps for `duration` or until woken. Returns `false` if `stop` fired first.
+    async fn pause(&self, duration: Duration, stop: &CancellationToken) -> bool {
+        tokio::select! {
+            () = stop.cancelled() => false,
+            () = self.wake.notified() => true,
+            () = tokio::time::sleep(duration) => true,
+        }
+    }
+}
 
 /// Follows one user until `stop` fires: import first, then live polling with a reconcile pass
 /// every `reconcile_interval` and an enrichment pass every `enrich_interval`.
-pub(crate) async fn follow(ctx: &Context, user: UserId, stop: &CancellationToken) {
+pub(crate) async fn follow(ctx: &Context, user: UserId, signal: &Signal, stop: &CancellationToken) {
     let Ok(name) = ctx.user_name(user).await else {
         warn!(user = user.0, "cannot follow a user missing from the store");
         return;
     };
-    loop {
-        match import::ensure(ctx, &name, stop).await {
-            Ok(()) => break,
-            Err(SyncError::Stopped) => return,
-            Err(err) => warn!(user = %name, error = %err, "import failed; retrying later"),
+    if import_first(ctx, (user, &name), signal, stop).await {
+        poll_live(ctx, (user, &name), signal, stop).await;
+    }
+    ctx.now_playing.set(user, None, 0);
+}
+
+/// Runs the import until it finishes. A private profile is tried again once per
+/// `private_interval`, counted from the last attempt even across restarts, or when woken.
+/// Returns `false` if `stop` fired.
+async fn import_first(
+    ctx: &Context,
+    (user, name): (UserId, &str),
+    signal: &Signal,
+    stop: &CancellationToken,
+) -> bool {
+    match import::private_wait(ctx, user).await {
+        Ok(Some(wait)) => {
+            ctx.set_private(user, true);
+            if !signal.pause(wait, stop).await {
+                return false;
+            }
         }
-        if !pause(ctx.config.idle_interval, stop).await {
+        Ok(None) => {}
+        Err(err) => warn!(user = %name, error = %err, "reading the last import failed"),
+    }
+    loop {
+        let retry = match import::ensure(ctx, name, stop).await {
+            Ok(()) => {
+                ctx.set_private(user, false);
+                return true;
+            }
+            Err(SyncError::Stopped) => return false,
+            // The job shows why; asking again soon would only repeat the refusal.
+            Err(err) if err.is_private_profile() => {
+                ctx.set_private(user, true);
+                ctx.config.private_interval
+            }
+            Err(err) => {
+                warn!(user = %name, error = %err, "import failed; retrying later");
+                ctx.config.import_retry
+            }
+        };
+        if !signal.pause(retry, stop).await {
+            return false;
+        }
+    }
+}
+
+/// Polls at the user's tier interval with jitter, until `stop` fires.
+async fn poll_live(
+    ctx: &Context,
+    (user, name): (UserId, &str),
+    signal: &Signal,
+    stop: &CancellationToken,
+) {
+    let tiers = ctx.config.tiers;
+    let mut last = newest_scrobble(ctx, user).await;
+    let mut maintenance = Maintenance::new(ctx);
+    // Users followed together at start-up begin at different times.
+    if !signal
+        .pause(tiers::jitter(tiers.playing / 2, 100), stop)
+        .await
+    {
+        return;
+    }
+    loop {
+        signal.polled();
+        let wait = match live::poll(ctx, user, name).await {
+            Ok(poll) => {
+                ctx.set_private(user, false);
+                let fresh = poll.newest.is_some_and(|n| last.is_none_or(|l| n > l));
+                last = last.max(poll.newest);
+                tiers::interval(&tiers, poll.playing || fresh, last, clock::now())
+            }
+            Err(err) if err.is_private_profile() => {
+                if !ctx.is_private(user) {
+                    info!(user = %name, "the Last.fm profile turned private; polling daily");
+                }
+                ctx.set_private(user, true);
+                ctx.config.private_interval
+            }
+            Err(err) => {
+                warn!(user = %name, error = %err, "live poll failed");
+                tiers.recent
+            }
+        };
+        if !ctx.is_private(user) {
+            maintenance.run_due(ctx, user, name).await;
+        }
+        if !signal
+            .pause(tiers::jitter(wait, tiers.jitter_percent), stop)
+            .await
+        {
             return;
         }
     }
-    let mut interval = ctx.config.live_interval;
-    let mut next_reconcile = Instant::now() + ctx.config.reconcile_interval;
-    let mut next_enrich = Instant::now() + ctx.config.enrich_interval;
-    loop {
-        interval = match live::poll(ctx, user, &name).await {
-            Ok(true) => ctx.config.live_interval,
-            Ok(false) => (interval * 2).min(ctx.config.idle_interval),
-            Err(err) => {
-                warn!(user = %name, error = %err, "live poll failed");
-                ctx.config.idle_interval
-            }
-        };
-        if Instant::now() >= next_reconcile {
-            next_reconcile = Instant::now() + ctx.config.reconcile_interval;
-            run_reconcile(ctx, user, &name).await;
+}
+
+/// The newest stored scrobble of `user`, in Unix seconds.
+async fn newest_scrobble(ctx: &Context, user: UserId) -> Option<i64> {
+    let all = TimeRange::new(0, i64::MAX);
+    let listing = ctx.store.recent_tracks(user, all, Page::new(1, 1)).await;
+    listing.ok()?.items.first().map(|t| t.uts)
+}
+
+/// When the follow loop next reconciles and enriches.
+struct Maintenance {
+    next_reconcile: Instant,
+    next_enrich: Instant,
+}
+
+impl Maintenance {
+    fn new(ctx: &Context) -> Self {
+        Self {
+            next_reconcile: Instant::now() + ctx.config.reconcile_interval,
+            next_enrich: Instant::now() + ctx.config.enrich_interval,
         }
-        if Instant::now() >= next_enrich {
-            next_enrich = Instant::now() + ctx.config.enrich_interval;
+    }
+
+    async fn run_due(&mut self, ctx: &Context, user: UserId, name: &str) {
+        if Instant::now() >= self.next_reconcile {
+            self.next_reconcile = Instant::now() + ctx.config.reconcile_interval;
+            run_reconcile(ctx, user, name).await;
+        }
+        if Instant::now() >= self.next_enrich {
+            self.next_enrich = Instant::now() + ctx.config.enrich_interval;
             if let Err(err) = enrich::enrich(ctx, user).await {
                 warn!(user = %name, error = %err, "enrichment failed");
             }
-        }
-        if !pause(interval, stop).await {
-            ctx.now_playing.set(user, None, 0);
-            return;
         }
     }
 }
@@ -80,8 +213,9 @@ pub(crate) async fn advance_periods(ctx: &Context, stop: &CancellationToken) {
         if let Err(err) = ctx.store.advance_periods(clock::now()).await {
             warn!(error = %err, "advancing period totals failed");
         }
-        if !pause(ctx.config.periods_interval, stop).await {
-            return;
+        tokio::select! {
+            () = stop.cancelled() => return,
+            () = tokio::time::sleep(ctx.config.periods_interval) => {}
         }
     }
 }
@@ -91,14 +225,6 @@ pub(crate) async fn sync_cursor(ctx: &Context, user: UserId) -> Result<i64> {
     ctx.store
         .user(user)
         .await?
-        .map(|u| u.sync_cursor)
         .ok_or_else(|| SyncError::UnknownUser(format!("id {}", user.0)))
-}
-
-/// Sleeps for `duration`. Returns `false` if `stop` fired first.
-async fn pause(duration: Duration, stop: &CancellationToken) -> bool {
-    tokio::select! {
-        () = stop.cancelled() => false,
-        () = tokio::time::sleep(duration) => true,
-    }
+        .map(|u| u.sync_cursor)
 }

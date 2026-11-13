@@ -84,15 +84,19 @@ fn dispatcher(cache: Arc<MemoryCache>) -> Dispatcher {
         .with("rw", key(Scope::ReadWrite, true))
         .with("ro", key(Scope::Read, true))
         .with("off", key(Scope::ReadWrite, false));
-    let session = Session {
+    let session = |api_key: &str| Session {
         account_id: 1,
         user: "syntiiix".into(),
+        api_key: api_key.into(),
     };
+    let sessions = InMemorySessions::default()
+        .with("sk", session("rw"))
+        .with("sk-ro", session("ro"));
     let services = Services {
         store: lfm_store::Store::open_in_memory().unwrap(),
         clock: lfm_api::Clock::System,
         api_keys: Arc::new(keys),
-        sessions: Arc::new(InMemorySessions::default().with("sk", session)),
+        sessions: Arc::new(sessions),
         cache,
     };
     let registry = Registry::new()
@@ -134,17 +138,26 @@ async fn inactive_key_is_suspended() {
 #[tokio::test]
 async fn write_needs_write_scope_and_gets_the_session() {
     let d = dispatcher(new_cache());
-    let base = |key: &str| {
+    let base = |key: &str, sk: &str| {
         Params::new()
             .with("method", "test.write")
             .with("api_key", key)
-            .with("sk", "sk")
+            .with("sk", sk)
     };
-    let (status, allowed) = body(&d, &signed(base("rw")).with("format", "json")).await;
+    let call = |key, sk| {
+        let params = signed(base(key, sk)).with("format", "json");
+        let d = &d;
+        async move { body(d, &params).await }
+    };
+    let (status, allowed) = call("rw", "sk").await;
     assert_eq!((status, allowed.as_str()), (200, r#"{"user":"syntiiix"}"#));
-    let (status, refused) = body(&d, &signed(base("ro")).with("format", "json")).await;
+    let (status, refused) = call("ro", "sk-ro").await;
     assert_eq!(status, 403);
     assert!(refused.ends_with(r#","error":4}"#), "{refused}");
+    // A session key works only with the API key it was issued to.
+    let (status, stolen) = call("ro", "sk").await;
+    assert_eq!(status, 403);
+    assert!(stolen.ends_with(r#","error":9}"#), "{stolen}");
 }
 
 #[tokio::test]
@@ -168,10 +181,33 @@ async fn cache_serves_repeats_until_the_user_is_invalidated() {
         .with("format", "json");
     assert_eq!(body(&d, &params).await.1, r#"{"count":"1"}"#);
     assert_eq!(body(&d, &params).await.1, r#"{"count":"1"}"#);
+    // The cache holds final bytes, so a JSONP callback is an entry of its own.
     let jsonp = params.clone().with("callback", "cb");
-    assert_eq!(body(&d, &jsonp).await.1, r#"cb({"count":"1"});"#);
+    assert_eq!(body(&d, &jsonp).await.1, r#"cb({"count":"2"});"#);
+    assert_eq!(body(&d, &jsonp).await.1, r#"cb({"count":"2"});"#);
     let xml = params.clone().with("format", "xml");
-    assert!(body(&d, &xml).await.1.contains("<count>2</count>"));
+    assert!(body(&d, &xml).await.1.contains("<count>3</count>"));
     cache.invalidate_user("syntiiix");
-    assert_eq!(body(&d, &params).await.1, r#"{"count":"3"}"#);
+    assert_eq!(body(&d, &params).await.1, r#"{"count":"4"}"#);
+}
+
+#[tokio::test]
+async fn jsonp_takes_any_callback_name_and_forbids_sniffing() {
+    let d = dispatcher(new_cache());
+    let params = Params::new()
+        .with("method", "test.count")
+        .with("api_key", "rw")
+        .with("format", "json")
+        .with("callback", "bad name!");
+    let reply = d.dispatch(&params).await;
+    assert_eq!(&*reply.body, br#"bad name!({"count":"1"});"#);
+    assert_eq!(reply.content_type, "text/javascript; charset=utf-8");
+    assert!(
+        reply
+            .headers
+            .iter()
+            .any(|(name, value)| name == "x-content-type-options" && value == "nosniff")
+    );
+    let plain = d.dispatch(&params.clone().with("callback", "")).await;
+    assert_eq!(plain.headers.len(), 0);
 }

@@ -1,0 +1,47 @@
+:host {
+  display: block;
+  --bar-lastfm: var(--brand);
+  --bar-mirror: var(--focus);
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+}
+
+.swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: var(--space-2);
+  border-radius: 3px;
+  vertical-align: -1px;
+}
+
+.swatch.lastfm {
+  background: var(--bar-lastfm);
+}
+
+.swatch.first {
+  background: var(--bar-mirror);
+}
+
+.swatch.cached {
+  background: var(--bar-mirror);
+  opacity: 0.5;
+}
+
+.total {
+  font-weight: 600;
+}
+
+progress {
+  width: 100%;
+}

@@ -9,6 +9,11 @@ use crate::pool::Store;
 use crate::types::{Listing, Page, RecentTrack, TimeRange, UserId};
 
 /// The page is cut from the scrobbles table first, so names are joined for its rows only.
+///
+/// `LIMIT +?4 OFFSET +?5`: with a bare `?N` there, `SQLite` plans with the bound value and marks
+/// the statement stale whenever the statement cache clears the bindings, so every request
+/// re-parsed and re-planned the whole statement. That cost about a millisecond a request and,
+/// through `SQLite`'s global allocator lock, serialised the reader threads under load.
 const PAGE_SQL: &str = concat!(
     "SELECT s.uts, t.id, t.name, t.mbid, t.url, NULL, ",
     track_artist_columns!(),
@@ -17,7 +22,7 @@ const PAGE_SQL: &str = concat!(
         l.uts IS NOT NULL \
     FROM (SELECT uts, seq, track_id, album_id, artist_id FROM scrobbles \
           WHERE user_id = +?1 AND uts >= ?2 AND uts < ?3 \
-          ORDER BY uts DESC, seq DESC LIMIT ?4 OFFSET ?5) s \
+          ORDER BY uts DESC, seq DESC LIMIT +?4 OFFSET +?5) s \
     JOIN tracks t ON t.id = s.track_id \
     JOIN artists ar ON ar.id = s.artist_id \
     LEFT JOIN albums al ON al.id = s.album_id \
@@ -69,4 +74,25 @@ fn recent_from_row(row: &Row<'_>) -> rusqlite::Result<RecentTrack> {
         album: album_id.map(|_| entity_at(row, 10)).transpose()?,
         loved: row.get(19)?,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use rusqlite::{StatementStatus, params};
+
+    use super::PAGE_SQL;
+
+    #[test]
+    fn the_page_statement_is_planned_once() {
+        let conn = crate::db::open_memory().unwrap();
+        for (limit, offset) in [(50, 0), (200, 400), (1000, 7)] {
+            let mut stmt = conn.prepare_cached(PAGE_SQL).unwrap();
+            let mut rows = stmt
+                .query(params![1, 0, 1_i64 << 40, limit, offset])
+                .unwrap();
+            while rows.next().unwrap().is_some() {}
+        }
+        let stmt = conn.prepare_cached(PAGE_SQL).unwrap();
+        assert_eq!(stmt.get_status(StatementStatus::RePrepare), 0);
+    }
 }

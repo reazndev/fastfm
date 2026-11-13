@@ -104,6 +104,7 @@ impl Sessions for StoreSessions {
             .map(|account| Session {
                 account_id: account.id.0,
                 user: account.lastfm_user.unwrap_or(account.name),
+                api_key: session.api_key,
             }))
     }
 }

@@ -60,7 +60,13 @@ impl ImageSize {
 /// The URL of one size of an image file.
 #[must_use]
 pub fn image_url(file: &str, size: ImageSize) -> String {
-    format!("{IMAGE_BASE}{}/{file}", size.path())
+    let path = size.path();
+    let mut url = String::with_capacity(IMAGE_BASE.len() + path.len() + 1 + file.len());
+    url.push_str(IMAGE_BASE);
+    url.push_str(path);
+    url.push('/');
+    url.push_str(file);
+    url
 }
 
 /// `<image size="…">url</image>` nodes; with no file each node has empty text, as Last.fm sends.

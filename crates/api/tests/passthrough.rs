@@ -344,3 +344,79 @@ async fn local_user_methods_forward_only_users_not_mirrored_here() {
     assert_eq!((missing.status, missing.source), (404, Source::Local));
     assert_eq!(calls(&server).await, 1);
 }
+
+#[tokio::test]
+async fn misses_are_limited_per_key_but_cached_answers_are_not() {
+    let server = MockServer::start().await;
+    mount(
+        &server,
+        "artist.getInfo",
+        answer(200, ARTIST_JSON, Duration::ZERO),
+    )
+    .await;
+    let store = support::store().await.0;
+    let passthrough = Passthrough::new(store.clone(), client(&server)).miss_rate(1.0);
+    let d = support::dispatcher(store).with_passthrough(passthrough);
+    // A burst of two misses, then error 29; the cached answers keep coming.
+    for artist in ["A", "B"] {
+        assert_eq!(d.dispatch(&artist_info(artist)).await.status, 200);
+    }
+    let refused = d.dispatch(&artist_info("C")).await;
+    assert!(
+        body(&refused).contains(r#""error":29"#),
+        "{}",
+        body(&refused)
+    );
+    assert_eq!(d.dispatch(&artist_info("A")).await.status, 200);
+    assert_eq!(calls(&server).await, 2);
+}
+
+/// Own Last.fm keys: account 1 has one, every other account none.
+#[derive(Debug)]
+struct OwnKeys;
+
+#[async_trait::async_trait]
+impl lfm_api::CallerKeys for OwnKeys {
+    async fn lastfm_key(&self, account_id: i64) -> Option<ApiKey> {
+        (account_id == 1).then(|| ApiKey::new("own-key"))
+    }
+}
+
+#[tokio::test]
+async fn without_a_pool_a_miss_uses_the_callers_own_key_or_fails_with_16() {
+    let server = MockServer::start().await;
+    mount(
+        &server,
+        "artist.getInfo",
+        answer(200, ARTIST_JSON, Duration::ZERO),
+    )
+    .await;
+    let store = support::store().await.0;
+    let passthrough =
+        Passthrough::new(store.clone(), client(&server)).without_pool(Arc::new(OwnKeys));
+    let d = support::dispatcher(store).with_passthrough(passthrough);
+    assert_eq!(d.dispatch(&artist_info("Cher")).await.status, 200);
+    let sent = server.received_requests().await.unwrap();
+    let query = sent.first().unwrap().url.query().unwrap().to_owned();
+    assert!(query.contains("api_key=own-key"), "{query}");
+}
+
+#[tokio::test]
+async fn without_a_pool_or_an_own_key_a_miss_answers_16() {
+    #[derive(Debug)]
+    struct NoKeys;
+    #[async_trait::async_trait]
+    impl lfm_api::CallerKeys for NoKeys {
+        async fn lastfm_key(&self, _: i64) -> Option<ApiKey> {
+            None
+        }
+    }
+    let server = MockServer::start().await;
+    let store = support::store().await.0;
+    let passthrough =
+        Passthrough::new(store.clone(), client(&server)).without_pool(Arc::new(NoKeys));
+    let d = support::dispatcher(store).with_passthrough(passthrough);
+    let reply = d.dispatch(&artist_info("Cher")).await;
+    assert!(body(&reply).contains(r#""error":16"#), "{}", body(&reply));
+    assert_eq!(calls(&server).await, 0);
+}

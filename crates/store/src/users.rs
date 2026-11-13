@@ -80,17 +80,26 @@ impl Store {
         .await
     }
 
-    /// Looks up a user by name, case-insensitively.
+    /// Looks up a user by name, case-insensitively. Repeats are answered from memory until
+    /// the next write.
     pub async fn user_by_name(&self, name: &str) -> Result<Option<MirroredUser>> {
+        let memo = self.user_memo();
+        if let Some(remembered) = memo.get(name) {
+            return Ok(remembered.0);
+        }
+        let generation = memo.generation();
         let name_fold = fold(name);
-        self.read(move |conn| {
-            let sql = format!("SELECT {USER_COLUMNS} FROM users WHERE name_fold = ?1");
-            Ok(conn
-                .prepare_cached(&sql)?
-                .query_row([name_fold], user_from_row)
-                .optional()?)
-        })
-        .await
+        let user = self
+            .read(move |conn| {
+                let sql = format!("SELECT {USER_COLUMNS} FROM users WHERE name_fold = ?1");
+                Ok(conn
+                    .prepare_cached(&sql)?
+                    .query_row([name_fold], user_from_row)
+                    .optional()?)
+            })
+            .await?;
+        memo.put(name, generation, user.clone());
+        Ok(user)
     }
 
     /// Looks up a user by id.

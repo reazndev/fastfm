@@ -54,7 +54,7 @@ pub(crate) async fn reconcile(ctx: &Context, user: UserId, until: i64) -> Result
     while let Some((range, remote)) = pending.pop() {
         let remote = match remote {
             Some(remote) => remote,
-            None => ctx.upstream.total(&name, range, Priority::Import).await?,
+            None => ctx.upstream.total(&name, range, Priority::Prewarm).await?,
         };
         let local = ctx.store.count_range(user, range).await?;
         report.compared += 1;
@@ -63,14 +63,14 @@ pub(crate) async fn reconcile(ctx: &Context, user: UserId, until: i64) -> Result
         }
         if remote <= u64::from(ctx.config.page_limit) || range.to - range.from <= 1 {
             info!(user = %name, from = range.from, to = range.to, remote, local, "repairing");
-            let walker = ctx.walker(&name, Priority::Import);
+            let walker = ctx.walker(&name, Priority::Prewarm);
             report.written += walker.copy(&ctx.store, user, range).await?;
             report.repaired.push(range);
             continue;
         }
         let mid = range.from + (range.to - range.from) / 2;
         let left = TimeRange::new(range.from, mid);
-        let left_remote = ctx.upstream.total(&name, left, Priority::Import).await?;
+        let left_remote = ctx.upstream.total(&name, left, Priority::Prewarm).await?;
         pending.push((
             TimeRange::new(mid, range.to),
             Some(remote.saturating_sub(left_remote)),

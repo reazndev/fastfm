@@ -90,6 +90,12 @@ pub struct ImportProgress {
 }
 
 impl ImportProgress {
+    /// Whether the import stopped because the profile hides its listening history.
+    #[must_use]
+    pub fn is_private(&self) -> bool {
+        self.status == JobStatus::Failed && self.error.as_deref() == Some(super::PRIVATE_MESSAGE)
+    }
+
     pub(crate) fn from_job(job: &Job) -> Result<Self> {
         let state = ImportState::parse(job)?;
         Ok(Self {

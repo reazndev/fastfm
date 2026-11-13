@@ -6,6 +6,8 @@
 
 mod entry;
 mod flight;
+mod keys;
+mod limit;
 mod methods;
 mod overlay;
 
@@ -18,11 +20,16 @@ use lfm_upstream::{Client, Priority, RawRequest};
 use crate::clock::system_now;
 use crate::dispatch::Source;
 use flight::Flights;
+use limit::MissLimiter;
 use methods::EntryId;
 
 pub use entry::Entry;
+pub use keys::{Caller, CallerKeys};
 pub use methods::{Forward, Forwarded, forwarded};
 pub(crate) use overlay::{Overlay, lookup as overlay_lookup, overlay_user};
+
+/// Upstream misses allowed per API key and second, unless set with [`Passthrough::miss_rate`].
+const MISSES_PER_SECOND: f64 = 5.0;
 
 /// Memory budget of the hot layer in front of the store.
 const MEMORY_BYTES: u64 = 64 << 20;
@@ -53,6 +60,9 @@ type Outcome = Result<Arc<Entry>, Unavailable>;
 #[derive(Clone, Debug)]
 pub struct Passthrough {
     inner: Arc<Inner>,
+    misses: Arc<MissLimiter>,
+    /// Set on an instance without a key pool: misses use the caller's own Last.fm key.
+    caller_keys: Option<Arc<dyn CallerKeys>>,
 }
 
 #[derive(Debug)]
@@ -79,19 +89,57 @@ impl Passthrough {
         };
         Self {
             inner: Arc::new(inner),
+            misses: Arc::new(MissLimiter::new(MISSES_PER_SECOND)),
+            caller_keys: None,
         }
     }
 
-    /// Last.fm's answer to `request`, and where it came from.
+    /// For an instance without a Last.fm key pool: a miss calls Last.fm with the own key of
+    /// the account behind the request's API key, from `keys`, and fails with error 16 when
+    /// that account has none.
+    #[must_use]
+    pub fn without_pool(self, keys: Arc<dyn CallerKeys>) -> Self {
+        Self {
+            caller_keys: Some(keys),
+            ..self
+        }
+    }
+
+    /// Lets each API key cause at most `per_second` calls to Last.fm for answers not cached
+    /// (default 5), with bursts of twice that. Past it the key gets error 29. Keys registered
+    /// in code are exempt; see [`Caller::limited`].
+    #[must_use]
+    pub fn miss_rate(self, per_second: f64) -> Self {
+        Self {
+            misses: Arc::new(MissLimiter::new(per_second)),
+            ..self
+        }
+    }
+
+    /// Last.fm's answer to `request` made with the API key `caller`, and where it came from.
     ///
     /// # Errors
-    /// When nothing is cached and Last.fm does not answer.
-    pub async fn get(&self, request: &Forward) -> Result<(Arc<Entry>, Source), Unavailable> {
-        match self.cached(&request.id()).await {
+    /// When nothing is cached and Last.fm does not answer, or `caller` has used up its misses.
+    pub async fn get(
+        &self,
+        request: &Forward,
+        caller: Caller<'_>,
+    ) -> Result<(Arc<Entry>, Source), Unavailable> {
+        let cached = self.cached(&request.id()).await;
+        if cached.as_ref().is_some_and(|entry| entry.is_fresh(now())) {
+            return cached
+                .map(|entry| (entry, Source::Cache))
+                .ok_or(Unavailable::Down);
+        }
+        let request = &self.keyed(request, caller).await?;
+        match cached {
             Some(entry) if entry.is_fresh(now()) => Ok((entry, Source::Cache)),
             Some(entry) => {
                 self.refresh(request);
                 Ok((entry, Source::Stale))
+            }
+            None if caller.limited() && !self.misses.allow(caller.api_key) => {
+                Err(Unavailable::RateLimited)
             }
             None => {
                 let entry = self.fetch(request, Priority::Interactive).await?;
@@ -114,6 +162,26 @@ impl Passthrough {
             return Ok(false);
         }
         self.fetch(request, Priority::Prewarm).await.map(|_| true)
+    }
+
+    /// `request` with the Last.fm key to call it with: the pool's (none set), or the caller's.
+    async fn keyed(&self, request: &Forward, caller: Caller<'_>) -> Result<Forward, Unavailable> {
+        let Some(keys) = &self.caller_keys else {
+            return Ok(request.clone());
+        };
+        let Some(key) = keys.lastfm_key(caller.account_id).await else {
+            tracing::warn!(
+                account = caller.account_id,
+                method = request.method.name,
+                "no Last.fm key for this request: the instance has no key pool and the \
+                 account behind the API key has no own Last.fm key"
+            );
+            return Err(Unavailable::Down);
+        };
+        Ok(Forward {
+            api_key: Some(key),
+            ..request.clone()
+        })
     }
 
     async fn cached(&self, id: &EntryId) -> Option<Arc<Entry>> {
@@ -161,6 +229,10 @@ impl Passthrough {
             .params(request.params.iter().cloned())
             .format(format)
             .priority(priority);
+        let call = match &request.api_key {
+            Some(key) => call.api_key(key.clone()),
+            None => call,
+        };
         let response = self.inner.client.raw(&call).await.map_err(|error| {
             tracing::warn!(%error, method = request.method.name, "Last.fm call failed");
             Unavailable::Down

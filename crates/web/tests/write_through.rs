@@ -8,9 +8,9 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use lfm_store::{AccountId, AuthToken, Page, TimeRange, UserId};
 use serde_json::{Value, json};
-use support::Harness;
 use support::mock::scrobbles;
 use support::mock::{accepted, assert_signed, entry, mount_get, mount_post, mount_profile, ok};
+use support::{Harness, callback_state};
 use wiremock::matchers::body_string_contains;
 use wiremock::{Mock, ResponseTemplate};
 
@@ -77,12 +77,18 @@ async fn link_with_web_auth(h: &Harness, cookie: &str) {
         url.starts_with("https://www.last.fm/api/auth/?api_key=1111"),
         "{url}"
     );
+    let state = callback_state(url);
     assert!(
-        url.ends_with("&cb=http%3A%2F%2Ffm.test%2Flastfm%2Fcallback"),
+        url.ends_with(&format!(
+            "&cb=http%3A%2F%2Ffm.test%2Flastfm%2Fcallback%3Fstate%3D{state}"
+        )),
         "{url}"
     );
     let linked = h
-        .call("GET", "/app/api/lastfm/auth/callback?token=lfm-token")
+        .call(
+            "GET",
+            &format!("/app/api/lastfm/auth/callback?state={state}&token=lfm-token"),
+        )
         .cookie(cookie)
         .send()
         .await;
@@ -482,7 +488,7 @@ async fn love_unlove_and_now_playing() {
 }
 
 #[tokio::test]
-async fn without_a_last_fm_session_key_writes_stay_local() {
+async fn an_unconfirmed_link_cannot_write() {
     let h = Harness::new().await;
     let cookie = h.signup("alice").await;
     let me = h.call("GET", "/app/api/me").cookie(&cookie).send().await;
@@ -499,38 +505,30 @@ async fn without_a_last_fm_session_key_writes_stay_local() {
         ("password", PASSWORD),
     ];
     let (_, session) = h.signed(&mobile, &secret).await;
-    assert_eq!(session["session"]["name"], "LfmAlice");
     let client = Client {
         cookie,
         key,
         secret,
         sk: session["session"]["key"].as_str().unwrap().into(),
     };
-
     let at = now().to_string();
-    let (status, body) = client
+    let scrobble = [
+        ("artist[0]", "Cher"),
+        ("track[0]", "Believe"),
+        ("timestamp[0]", at.as_str()),
+    ];
+    let (status, body) = client.write(&h, "track.scrobble", &scrobble).await;
+    assert_eq!((status, body["error"].as_i64()), (403, Some(4)), "{body}");
+    assert!(body["message"].as_str().unwrap().contains("Connect"));
+    let (_, body) = client
         .write(
             &h,
-            "track.scrobble",
-            &[
-                ("artist[0]", "Cher"),
-                ("track[0]", "Believe"),
-                ("timestamp[0]", &at),
-            ],
+            "track.love",
+            &[("artist", "Cher"), ("track", "Believe")],
         )
         .await;
-    assert_eq!(
-        (status, body["scrobbles"]["@attr"]["accepted"].as_i64()),
-        (200, Some(1)),
-        "{body}"
-    );
-    assert_eq!(stored(&h).await.len(), 1);
+    assert_eq!(body["error"], 4);
+    let mirrored = h.store.user_by_name("LfmAlice").await.unwrap();
+    assert!(mirrored.is_none(), "nothing was written");
     assert_eq!(h.lastfm_calls("track.scrobble").await.len(), 0);
-    let link = h
-        .call("GET", "/app/api/lastfm")
-        .cookie(&client.cookie)
-        .send()
-        .await;
-    assert_eq!(link.json["writes"]["forwarding"], false);
-    assert_eq!(link.json["writes"]["heldLocally"], 1);
 }

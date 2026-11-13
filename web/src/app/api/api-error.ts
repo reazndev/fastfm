@@ -1,9 +1,17 @@
-/** Error codes the web API sends in `{"error": {"code", "message"}}`, plus `network` for no answer. */
+/**
+ * Error codes the web API sends in `{"error": {"code", "message"}}`, plus `network` for no answer
+ * and `import_failed` for an import that stopped.
+ */
 export type ErrorCode =
   | 'account_pending'
   | 'account_disabled'
   | 'admin_only'
   | 'csrf_header_missing'
+  | 'demo_import_running'
+  | 'demo_request_failed'
+  | 'demo_unavailable'
+  | 'history_too_large'
+  | 'import_failed'
   | 'internal'
   | 'invalid_credentials'
   | 'invalid_key'
@@ -13,16 +21,19 @@ export type ErrorCode =
   | 'lastfm_error'
   | 'lastfm_not_configured'
   | 'lastfm_unavailable'
+  | 'lastfm_user_not_found'
   | 'lastfm_user_taken'
   | 'name_taken'
   | 'network'
   | 'not_found'
   | 'not_logged_in'
+  | 'not_mirrored'
   | 'rate_limited'
   | 'signup_closed'
   | 'token_expired'
   | 'token_not_found'
   | 'token_taken'
+  | 'unknown_scenario'
   | 'weak_password';
 
 /** Our wording for codes whose server message needs context in the UI. */

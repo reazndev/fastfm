@@ -3,11 +3,11 @@
 use std::collections::HashMap;
 use std::hash::{BuildHasherDefault, Hasher};
 
-use rusqlite::{Connection, params};
+use rusqlite::{Connection, OptionalExtension, params};
 
 use crate::buckets::{Segment, segments};
-use crate::collate::entity_key;
-use crate::dims::load;
+use crate::collate::tie_key;
+use crate::dims::{entity_at, entity_sql, name_sql};
 use crate::error::Result;
 use crate::types::{Kind, Page, Ranked, TimeRange, UserId, count};
 
@@ -117,34 +117,72 @@ pub(crate) fn take(page: Page) -> usize {
     usize::try_from(page.limit).unwrap_or(usize::MAX)
 }
 
-/// Loads names for a window's rows, orders them by plays and ties by name, and returns the rows
-/// of `page` numbered from its offset; with no page, all rows numbered from 1.
+/// Orders a window's rows by plays and ties by name, and returns the rows of `page` numbered
+/// from its offset; with no page, all rows numbered from 1. Only the names are read for the
+/// whole window: a deep page can sit in a tie group of tens of thousands of entities, of which
+/// only the page's rows need loading and exact ordering.
 pub(crate) fn rank(
     conn: &Connection,
     kind: Kind,
     window: Window,
     page: Option<Page>,
 ) -> Result<Vec<Ranked>> {
-    let mut loaded = window
-        .rows
-        .into_iter()
-        .filter_map(|(id, plays)| {
-            let entity = load(conn, kind, id).transpose()?;
-            Some(entity.map(|entity| (plays, entity_key(&entity), entity)))
-        })
-        .collect::<Result<Vec<_>>>()?;
-    loaded.sort_unstable_by(|a, b| b.0.cmp(&a.0).then_with(|| a.1.cmp(&b.1)));
+    let mut names = conn.prepare_cached(name_sql(kind))?;
+    let mut keyed = Vec::with_capacity(window.rows.len());
+    for (id, plays) in window.rows {
+        let found = names
+            .query_row([id], |row| {
+                Ok((row.get::<_, Option<String>>(0)?, row.get::<_, String>(1)?))
+            })
+            .optional()?;
+        if let Some((artist, name)) = found {
+            keyed.push((plays, tie_key(artist.as_deref(), &name), id));
+        }
+    }
     let offset = page.map_or(0, Page::offset);
     let skip_in_window = usize::try_from(offset.saturating_sub(window.before)).unwrap_or(0);
-    Ok(loaded
-        .into_iter()
-        .skip(skip_in_window)
-        .take(page.map_or(usize::MAX, take))
-        .zip(offset + 1..)
-        .map(|((plays, _, entity), rank)| Ranked {
-            rank,
-            plays: count(plays),
-            entity,
-        })
-        .collect())
+    let rows = page_slice(&mut keyed, skip_in_window, page.map_or(usize::MAX, take));
+    let mut entities = conn.prepare_cached(entity_sql(kind))?;
+    let mut ranked = Vec::with_capacity(rows.len());
+    for ((plays, _, id), rank) in rows.iter().zip(offset + 1..) {
+        let entity = entities
+            .query_row([id], |row| entity_at(row, 0))
+            .optional()?;
+        if let Some(entity) = entity {
+            ranked.push(Ranked {
+                rank,
+                plays: count(*plays),
+                entity,
+            });
+        }
+    }
+    Ok(ranked)
+}
+
+/// A row to rank: plays, tie key and id.
+type Keyed = (i64, (Vec<u32>, Vec<u32>), i64);
+
+/// Rows `skip..skip + take` of `rows` in rank order: more plays first, ties by name. Selects
+/// the slice before sorting it, so the rest of the rows stay unsorted.
+fn page_slice(rows: &mut [Keyed], skip: usize, take: usize) -> &mut [Keyed] {
+    let order = |a: &Keyed, b: &Keyed| b.0.cmp(&a.0).then_with(|| a.1.cmp(&b.1));
+    let end = skip.saturating_add(take).min(rows.len());
+    if skip >= end {
+        return &mut [];
+    }
+    if skip > 0 {
+        rows.select_nth_unstable_by(skip, order);
+    }
+    let Some(tail) = rows.get_mut(skip..) else {
+        return &mut [];
+    };
+    let len = end - skip;
+    if len < tail.len() {
+        tail.select_nth_unstable_by(len, order);
+    }
+    let Some(page) = tail.get_mut(..len) else {
+        return &mut [];
+    };
+    page.sort_unstable_by(order);
+    page
 }

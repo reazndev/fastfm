@@ -168,7 +168,12 @@ async fn history_is_read_from_plain_pages_with_per_track_artist_mbids() {
 #[tokio::test]
 async fn live_scrobbles_follow_the_map_and_enrichment_reuses_corrections() {
     let config = SyncConfig::default()
-        .live_intervals(Duration::from_millis(10), Duration::from_millis(30))
+        .poll_intervals(
+            Duration::from_millis(10),
+            Duration::from_millis(30),
+            Duration::from_millis(30),
+        )
+        .idle_interval(Duration::from_millis(30))
         .periods_interval(Duration::from_millis(50));
     let h = Harness::with_config(config).await;
     catalogue(&h);

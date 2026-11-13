@@ -143,3 +143,55 @@ async fn start_resumes_an_interrupted_import() {
     h.service.shutdown().await;
     h.assert_mirrors(ALL).await;
 }
+
+#[tokio::test]
+async fn a_private_profile_fails_the_import_with_a_clear_reason() {
+    let h = Harness::new(5).await;
+    add_all(&h, &crowded_history());
+    h.fake.with(|data| data.private = true);
+    let error = h.service.import(USER, None).await.unwrap_err();
+    assert!(error.is_private_profile(), "{error}");
+    let progress = h.service.progress(h.user().await).await.unwrap().unwrap();
+    assert_eq!(progress.status, JobStatus::Failed);
+    assert_eq!(progress.error.as_deref(), Some(lfm_sync::PRIVATE_MESSAGE));
+    assert!(progress.is_private());
+}
+
+#[tokio::test]
+async fn a_private_profile_is_retried_on_request_and_not_again_after_a_restart() {
+    let h = Harness::new(5).await;
+    add_all(&h, &crowded_history());
+    h.fake.with(|data| data.private = true);
+    let user = h.service.follow(USER).await.unwrap();
+    eventually(|| async { h.service.is_private(user) }).await;
+    let refused = h.fake.calls("user.getRecentTracks");
+    tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+    assert_eq!(h.fake.calls("user.getRecentTracks"), refused, "waits a day");
+    h.service.shutdown().await;
+
+    // A restart within the day does not ask Last.fm again.
+    let unlimited = std::num::NonZeroU32::new(100_000).unwrap();
+    let config = SyncConfig::default()
+        .page_limit(5)
+        .request_budgets(unlimited, unlimited);
+    let again = lfm_sync::SyncService::new(
+        h.store.clone(),
+        std::sync::Arc::new(support::client(&h.server)),
+        config,
+    );
+    again.follow(USER).await.unwrap();
+    eventually(|| async { again.is_private(user) }).await;
+    tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+    assert_eq!(h.fake.calls("user.getRecentTracks"), refused);
+
+    h.fake.with(|data| data.private = false);
+    assert!(again.retry(user));
+    eventually(|| async {
+        let progress = again.progress(user).await.unwrap().unwrap();
+        progress.status == JobStatus::Done
+    })
+    .await;
+    assert!(!again.is_private(user));
+    again.shutdown().await;
+    h.assert_mirrors(ALL).await;
+}

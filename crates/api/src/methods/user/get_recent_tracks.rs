@@ -2,17 +2,23 @@
 
 use async_trait::async_trait;
 use lfm_core::{ApiError, ErrorCode, ImageSize, Node, Params, Response, date_node, images};
-use lfm_store::{Page, RecentTrack, TimeRange};
+use lfm_store::{Page, RecentTrack};
 
 use crate::method::{Context, Method};
 use crate::methods::shared::{
     ListAttrs, OrFailed, PLACEHOLDER, artist_mbid_attr, artist_of, artist_url, cache_user,
-    list_root, mbid, mirrored_user, now_playing, track_url,
+    history_range, list_root, mbid, mirrored_user, now_playing, track_url,
 };
 
 const DEFAULT_LIMIT: u64 = 50;
 const MAX_LIMIT: u64 = 1000;
 const MAX_PAGE: u64 = 1_000_000;
+
+/// Extension: `bulk=1` raises the `limit` bound to the store's maximum, so a full history
+/// takes a tenth of the requests. Last.fm has no such parameter, so no Last.fm client sends it,
+/// and without it every bound and error stays Last.fm's.
+const BULK_PARAM: &str = "bulk";
+const BULK_MAX_LIMIT: u64 = lfm_store::MAX_LIMIT as u64;
 
 /// `user.getRecentTracks`.
 #[derive(Debug, Clone, Copy, Default)]
@@ -31,7 +37,7 @@ impl Method for GetRecentTracks {
     async fn call(&self, ctx: &Context<'_>) -> Result<Response, ApiError> {
         let user = mirrored_user(ctx)?;
         let page = page(ctx.params)?;
-        let range = range(ctx.params);
+        let range = history_range(ctx.params);
         let listing = ctx
             .services
             .store
@@ -39,10 +45,10 @@ impl Method for GetRecentTracks {
             .await
             .or_failed()?;
         let extended = ctx.params.flag("extended");
-        let items = listing
-            .items
-            .iter()
-            .map(|track| recent_track(track, extended));
+        let items = listing.items.iter().map(|recent| {
+            let date = date_node("date", u64::try_from(recent.uts).unwrap_or(0));
+            recent_track(recent, extended, date)
+        });
         let items = now_playing(ctx, user).into_iter().chain(items);
         let attrs = ListAttrs::of(&user.name, &listing).recent();
         let root = list_root("recenttracks", "track", attrs, items);
@@ -51,38 +57,32 @@ impl Method for GetRecentTracks {
 }
 
 /// Unlike the other lists, recent tracks reject `page` and `limit` out of bounds with error 6.
-/// The documented maximum `limit` of 200 is not enforced; 1000 is.
+/// The documented maximum `limit` of 200 is not enforced; 1000 is, or 10,000 with `bulk=1`.
 fn page(params: &Params) -> Result<Page, ApiError> {
     let page = params.number("page").unwrap_or(1);
     if !(1..=MAX_PAGE).contains(&page) {
-        return Err(out_of_bounds("page param out of bounds (1-1000000)"));
+        return Err(out_of_bounds("page param out of bounds (1-1000000)".into()));
     }
     let limit = params.number("limit").unwrap_or(DEFAULT_LIMIT);
-    if !(1..=MAX_LIMIT).contains(&limit) {
-        return Err(out_of_bounds("limit param out of bounds (1-1000)"));
+    let max = if params.flag(BULK_PARAM) {
+        BULK_MAX_LIMIT
+    } else {
+        MAX_LIMIT
+    };
+    if !(1..=max).contains(&limit) {
+        return Err(out_of_bounds(format!(
+            "limit param out of bounds (1-{max})"
+        )));
     }
     let narrow = |n: u64| u32::try_from(n).unwrap_or(u32::MAX);
     Ok(Page::new(narrow(page), narrow(limit)))
 }
 
-fn out_of_bounds(message: &'static str) -> ApiError {
+fn out_of_bounds(message: String) -> ApiError {
     ApiError::new(ErrorCode::InvalidParameters).with_message(message)
 }
 
-/// `from` is inclusive and `to` exclusive, as observed.
-fn range(params: &Params) -> TimeRange {
-    let bound = |name, default| {
-        params
-            .number(name)
-            .map_or(default, |n| i64::try_from(n).unwrap_or(i64::MAX))
-    };
-    TimeRange::new(
-        bound("from", TimeRange::ALL.from),
-        bound("to", TimeRange::ALL.to),
-    )
-}
-
-fn recent_track(recent: &RecentTrack, extended: bool) -> Node {
+fn recent_track(recent: &RecentTrack, extended: bool, date: Node) -> Node {
     let track = &recent.track;
     let album = recent.album.as_ref();
     let cover = album.and_then(|album| album.image.as_deref());
@@ -126,7 +126,7 @@ fn recent_track(recent: &RecentTrack, extended: bool) -> Node {
             Some(cover.unwrap_or(PLACEHOLDER)),
             ImageSize::STANDARD,
         ))
-        .child(date_node("date", u64::try_from(recent.uts).unwrap_or(0)))
+        .child(date)
 }
 
 /// The artist of `extended=1`: name, mbid, URL and the placeholder image, in JSON ordered

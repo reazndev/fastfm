@@ -2,8 +2,10 @@
 //!
 //! The local write comes first and the client is answered from it if Last.fm cannot be reached.
 //! A transient failure goes to the store's outbox and is retried with backoff by
-//! [`retry_due`]; a permanent one is recorded there as failed. Without a Last.fm session key
-//! the write is applied locally only and recorded as held, which `GET /lastfm` shows.
+//! [`retry_due`]; a permanent one is recorded there as failed. Writes need Last.fm web auth
+//! first, which proves the account owns the linked user; error 4 answers them before that.
+//! When the instance's application is gone after web auth, the write is applied locally only
+//! and recorded as held, which `GET /lastfm` shows.
 //!
 //! Scrobbles are not counted twice. Live sync replaces whole windows from the sync cursor on
 //! with what Last.fm has, so a scrobble that reached Last.fm replaces the local copy rather
@@ -48,10 +50,16 @@ pub(crate) async fn target(state: &AppState, account: AccountId) -> Result<Targe
         ApiError::new(ErrorCode::AuthenticationFailed)
             .with_message("Link a Last.fm user to this account first")
     })?;
+    let linked = Linked::open(&state.vault, &account);
+    if linked.session_key.is_none() {
+        // Without web auth nothing shows the account owns this Last.fm user, and the writes
+        // would land in a mirror that anyone reads as that user's.
+        return Err(ApiError::new(ErrorCode::AuthenticationFailed).with_message(
+            "Connect this account to Last.fm on the mirror's home page before writing",
+        ));
+    }
     let user = state.store.ensure_user(&name).await.map_err(failed)?;
-    let creds = Linked::open(&state.vault, &account)
-        .map_err(failed)?
-        .write_credentials(&state.config);
+    let creds = linked.write_credentials(&state.config);
     Ok(Target {
         account,
         user,

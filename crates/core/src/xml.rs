@@ -111,19 +111,23 @@ fn indent(depth: usize, out: &mut Vec<u8>) {
 
 /// Escapes the five XML special characters. Last.fm writes `'` as `&apos;`.
 fn escape(text: &str, out: &mut Vec<u8>) {
+    let bytes = text.as_bytes();
+    out.reserve(bytes.len());
     let mut start = 0;
-    for (i, byte) in text.bytes().enumerate() {
+    for (i, &byte) in bytes.iter().enumerate() {
+        if !matches!(byte, b'&' | b'<' | b'>' | b'"' | b'\'') {
+            continue;
+        }
         let entity: &[u8] = match byte {
             b'&' => b"&amp;",
             b'<' => b"&lt;",
             b'>' => b"&gt;",
             b'"' => b"&quot;",
-            b'\'' => b"&apos;",
-            _ => continue,
+            _ => b"&apos;",
         };
-        out.extend_from_slice(text.as_bytes().get(start..i).unwrap_or_default());
+        out.extend_from_slice(bytes.get(start..i).unwrap_or_default());
         out.extend_from_slice(entity);
         start = i + 1;
     }
-    out.extend_from_slice(text.as_bytes().get(start..).unwrap_or_default());
+    out.extend_from_slice(bytes.get(start..).unwrap_or_default());
 }

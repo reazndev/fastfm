@@ -109,7 +109,7 @@ fn loved_tracks(conn: &Connection, user: UserId, page: Page) -> Result<Listing<L
             .query_row([user], |row| row.get(0))?,
     );
     let sql = "SELECT track_id, uts FROM loved WHERE user_id = ?1 \
-               ORDER BY uts DESC, seq DESC, track_id LIMIT ?2 OFFSET ?3";
+               ORDER BY uts DESC, seq DESC, track_id LIMIT +?2 OFFSET +?3";
     let mut stmt = conn.prepare_cached(sql)?;
     let rows = stmt.query_map(params![user, page.limit, page.offset()], |row| {
         Ok((row.get::<_, i64>(0)?, row.get::<_, i64>(1)?))

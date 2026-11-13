@@ -205,3 +205,21 @@ async fn in_memory_store_works() {
         .unwrap();
     assert_eq!(store.count_range(alice, TimeRange::ALL).await.unwrap(), 2);
 }
+
+#[tokio::test]
+async fn a_remembered_user_is_read_again_after_a_write() {
+    let db = TestDb::new();
+    let alice = user(&db.store, "alice").await;
+    let by_name = || async { db.store.user_by_name("Alice").await.unwrap().unwrap() };
+    let before = by_name().await;
+    assert_eq!(by_name().await, before, "a repeat is answered from memory");
+    let window = TimeRange::new(T0, T0 + DAY);
+    let plays = random_scrobbles(&mut Rng(2), window.from, window.to, 10);
+    db.store.replace_window(alice, window, plays).await.unwrap();
+    let after = by_name().await;
+    assert!(after.version > before.version);
+    assert!(after.stats.playcount > before.stats.playcount);
+    assert_eq!(db.store.user_by_name("nobody").await.unwrap(), None);
+    db.store.ensure_user("nobody").await.unwrap();
+    assert!(db.store.user_by_name("nobody").await.unwrap().is_some());
+}

@@ -2,7 +2,7 @@
   "method": "chart.getTopArtists",
   "variant": "limit-1",
   "http_method": "GET",
-  "recorded_at": 1794518966,
+  "recorded_at": 1794593992,
   "responses": {
     "json": {
       "params": [
@@ -27,7 +27,7 @@
       "content_type": "application/json",
       "headers": {
         "server": "openresty",
-        "date": "Thu, 12 Nov 2026 21:29:05 GMT",
+        "date": "Fri, 13 Nov 2026 18:19:30 GMT",
         "content-type": "application/json",
         "content-length": "854",
         "access-control-allow-methods": "POST, GET, OPTIONS",
@@ -56,7 +56,7 @@
       "content_type": "text/xml; charset=UTF-8",
       "headers": {
         "server": "openresty",
-        "date": "Thu, 12 Nov 2026 21:29:05 GMT",
+        "date": "Fri, 13 Nov 2026 18:19:31 GMT",
         "content-type": "text/xml; charset=UTF-8",
         "content-length": "946",
         "access-control-allow-methods": "POST, GET, OPTIONS",

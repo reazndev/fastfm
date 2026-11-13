@@ -10,6 +10,8 @@ mod extras;
 mod plan;
 mod state;
 
+use std::time::Duration;
+
 use lfm_store::{JobId, JobStatus, UserId};
 use lfm_upstream::Priority;
 use tokio::sync::mpsc;
@@ -77,6 +79,30 @@ async fn newest_import(
     Ok(None)
 }
 
+/// The job error shown for a private profile, in the web UI's words.
+pub const PRIVATE_MESSAGE: &str = "This Last.fm profile hides its listening history. Make recent \
+     listening public in Last.fm's privacy settings, then retry.";
+
+/// How long until the next automatic attempt, when `user`'s newest full import failed on a
+/// private profile less than `private_interval` ago.
+pub(crate) async fn private_wait(ctx: &Context, user: UserId) -> Result<Option<Duration>> {
+    for job in ctx.store.user_jobs(user).await? {
+        if job.kind != IMPORT || ImportState::parse(&job)?.cutoff {
+            continue;
+        }
+        if job.status != JobStatus::Failed || job.error.as_deref() != Some(PRIVATE_MESSAGE) {
+            return Ok(None);
+        }
+        let since = u64::try_from(clock::now() - job.updated_at).unwrap_or(0);
+        let wait = ctx
+            .config
+            .private_interval
+            .saturating_sub(Duration::from_secs(since));
+        return Ok((!wait.is_zero()).then_some(wait));
+    }
+    Ok(None)
+}
+
 /// Makes sure `name` has a finished full import, running or resuming one if not.
 pub(crate) async fn ensure(ctx: &Context, name: &str, cancel: &CancellationToken) -> Result<()> {
     if let Some(user) = ctx.store.user_by_name(name).await? {
@@ -113,6 +139,14 @@ pub(crate) async fn run(
     match &outcome {
         Ok(()) => state.save(&ctx.store, job, (JobStatus::Done, None)).await?,
         Err(SyncError::Stopped) => info!(job = job.0, "import stopped; it resumes on next start"),
+        Err(err) if err.is_private_profile() => {
+            info!(
+                job = job.0,
+                "the Last.fm profile hides its history; retrying daily"
+            );
+            let failed = (JobStatus::Failed, Some(PRIVATE_MESSAGE.to_owned()));
+            state.save(&ctx.store, job, failed).await?;
+        }
         Err(err) => {
             warn!(job = job.0, error = %err, "import failed");
             let failed = (JobStatus::Failed, Some(err.to_string()));

@@ -7,13 +7,14 @@ use lfm_core::{ApiError, ErrorCode, Output, Params, verify_signature};
 use lfm_store::MirroredUser;
 
 use crate::auth::{ApiKey, Scope, Session};
+use crate::body::Body;
 use crate::cache::CacheKey;
 use crate::method::{Access, Context, Method, Services};
 use crate::methods::shared::OrFailed;
 use crate::now_playing::NowPlayingSource;
 use crate::passthrough::{Forwarded, Passthrough, forwarded};
 use crate::registry::Registry;
-use crate::reply::{CLASSIC, Shape, error_reply, ok_reply};
+use crate::reply::{CLASSIC, Shape, error_reply, text_reply};
 
 pub use crate::reply::{Reply, Source};
 
@@ -82,7 +83,7 @@ impl Dispatcher {
         };
         match target {
             Target::Local(method) => self.local(method.as_ref(), &api_key, params, &output).await,
-            Target::Forward(method) => self.forward(method, params, &output).await,
+            Target::Forward(method) => self.forward(method, &api_key, params, &output).await,
         }
     }
 
@@ -114,6 +115,12 @@ impl Dispatcher {
         output: &Output,
     ) -> Reply {
         let shape = Shape::of(method);
+        if method.access() == Access::Session
+            && params.optional("api_sig").is_none()
+            && let Some(text) = method.unsigned_answer()
+        {
+            return text_reply(text);
+        }
         let session = match self.authorize(method.access(), params, api_key).await {
             Ok(session) => session,
             Err(error) => return error_reply(output, &error, shape),
@@ -127,7 +134,7 @@ impl Dispatcher {
             && user.is_none()
             && let Some(method) = self.forwardable(method.name())
         {
-            return self.forward(method, params, output).await;
+            return self.forward(method, api_key, params, output).await;
         }
         let call = Call {
             method,
@@ -136,7 +143,7 @@ impl Dispatcher {
             user: user.as_ref(),
         };
         match self.run(&call, params, output).await {
-            Ok(body) => ok_reply(output, &body, shape),
+            Ok(body) => shape.reply(output, 200, body),
             Err(error) => error_reply(output, &error, shape),
         }
     }
@@ -146,7 +153,7 @@ impl Dispatcher {
         call: &Call<'_>,
         params: &Params,
         output: &Output,
-    ) -> Result<Bytes, ApiError> {
+    ) -> Result<Body, ApiError> {
         let method = call.method;
         let cache_key = self.cache_key(call, params, output);
         if let Some(body) = cache_key.as_ref().and_then(|k| self.services.cache.get(k)) {
@@ -162,10 +169,14 @@ impl Dispatcher {
             now_playing: self.now_playing.as_deref(),
         };
         let response = method.call(&ctx).await?.style(method.style());
-        let body = Bytes::from(Output::plain(output.format()).render(&response));
-        if let Some(key) = cache_key {
-            self.services.cache.insert(key, body.clone());
-        }
+        let bytes = Bytes::from(output.render(&response));
+        // The key names the user's data version and the whole request, so it tags the body
+        // without hashing it.
+        let Some(key) = cache_key else {
+            return Ok(Body::hashed(bytes));
+        };
+        let body = Body::tagged(bytes, &key);
+        self.services.cache.insert(key, body.clone());
         Ok(body)
     }
 
@@ -183,7 +194,7 @@ impl Dispatcher {
             return None;
         }
         let version = call.user.map_or(0, |u| u.version);
-        let key = CacheKey::new(user_name, call.method.name(), params, output.format());
+        let key = CacheKey::new(user_name, call.method.name(), params, output);
         Some(key.at_version(version))
     }
 
@@ -194,7 +205,7 @@ impl Dispatcher {
         }
     }
 
-    async fn api_key(&self, key: &str) -> Result<ApiKey, ApiError> {
+    pub(crate) async fn api_key(&self, key: &str) -> Result<ApiKey, ApiError> {
         match self.services.api_keys.api_key(key).await? {
             Some(record) if record.active => Ok(record),
             Some(_) => Err(ErrorCode::ApiKeySuspended.into()),
@@ -227,7 +238,10 @@ impl Dispatcher {
             return Ok(None);
         };
         let session = self.services.sessions.session(session_key).await?;
-        let session = session.ok_or(ErrorCode::InvalidSessionKey)?;
+        let issued_to = params.optional("api_key");
+        let session = session
+            .filter(|session| issued_to == Some(session.api_key.as_str()))
+            .ok_or(ErrorCode::InvalidSessionKey)?;
         if access == Access::Session && api_key.scope != Scope::ReadWrite {
             return Err(ErrorCode::AuthenticationFailed.into());
         }

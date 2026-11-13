@@ -149,7 +149,8 @@ impl Store {
     ) -> Result<()> {
         let token = token.to_owned();
         self.write(move |tx| {
-            let sql = "UPDATE auth_tokens SET account_id = ?2 WHERE token = ?1 AND expires_at > ?3";
+            let sql = "UPDATE auth_tokens SET account_id = ?2 WHERE token = ?1 AND expires_at > ?3 \
+                       AND (account_id IS NULL OR account_id = ?2)";
             changed(
                 tx.prepare_cached(sql)?
                     .execute(params![token, account, now])?,

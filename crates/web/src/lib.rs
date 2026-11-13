@@ -5,11 +5,14 @@
 //!
 //! Every response is JSON; errors are `{"error": {"code", "message"}}`. Requests other than
 //! `GET`, `HEAD` and `OPTIONS` must carry an `X-Requested-With` header (any value), as must
-//! `GET /lastfm/auth/callback`.
+//! `GET /lastfm/auth/callback`. Session cookies are stored as their SHA-256 hash.
 
+mod attempts;
+mod auth_states;
 mod bridge;
 mod config;
 pub mod crypto;
+mod demo;
 mod error;
 mod forward;
 mod link;
@@ -18,6 +21,7 @@ mod password;
 mod routes;
 mod session;
 mod state;
+mod sweep;
 mod throttle;
 mod views;
 
@@ -31,12 +35,14 @@ use lfm_sync::SyncService;
 use lfm_upstream::Client;
 
 pub use config::{CookiePolicy, WebConfig};
+pub use demo::DemoConfig;
 pub use error::WebError;
 pub use routes::app_auth::AUTHORIZE_ROUTE;
 pub use routes::lastfm_auth::CALLBACK_ROUTE;
 
 use crate::bridge::Accounts;
 use crate::crypto::Vault;
+use crate::demo::Demo;
 use crate::password::Passwords;
 use crate::state::{AppState, Parts};
 
@@ -60,9 +66,10 @@ pub struct Web {
 }
 
 impl Web {
-    /// Opens or creates the secrets key file in the data directory and starts retrying queued
-    /// writes in the background. Needs a tokio runtime.
+    /// Opens or creates the secrets key file in the data directory, and starts retrying queued
+    /// writes and purging expired sessions in the background. Needs a tokio runtime.
     pub async fn start(config: WebConfig, deps: WebDeps) -> Result<Self, WebError> {
+        let demo = config.demo.clone().map(Demo::new).transpose()?;
         let dir = config.data_dir.clone();
         let (vault, passwords) = tokio::task::spawn_blocking(move || {
             let vault = Vault::open_or_create(&dir)?;
@@ -78,8 +85,10 @@ impl Web {
             vault,
             passwords,
             config,
+            demo,
         });
         tokio::spawn(outbox::run(state.clone()));
+        tokio::spawn(sweep::run(state.clone()));
         Ok(Self { state })
     }
 
@@ -100,6 +109,12 @@ impl Web {
     /// import and live sync of their user use it.
     pub async fn linked_users(&self) -> Result<Vec<String>, WebError> {
         link::linked_users(&self.state).await
+    }
+
+    /// Deletes expired web sessions, auth tokens and web auth flows now, as the background
+    /// task does every hour.
+    pub async fn sweep(&self) {
+        sweep::once(&self.state).await;
     }
 
     /// Retries the queued writes that are due now, as the background task does every 30

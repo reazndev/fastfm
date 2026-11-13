@@ -155,7 +155,6 @@ async fn retry_one(state: &AppState, entry: &OutboxEntry) -> Result<(), Retry> {
         .as_deref()
         .ok_or_else(|| never("no Last.fm user is linked"))?;
     let creds = Linked::open(&state.vault, &account)
-        .map_err(|e| Retry::Never(e.to_string()))?
         .write_credentials(&state.config)
         .ok_or_else(|| never("no Last.fm session key"))?;
     let pending: Pending =

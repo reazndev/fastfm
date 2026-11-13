@@ -70,15 +70,13 @@ async fn dev_and_stored_keys_work_and_unknown_keys_do_not() {
     assert_eq!(get(&app, &query("nope")).await.0, 403);
 }
 
+/// Without a key pool, a user mirrored nowhere here is asked of Last.fm with the caller's own
+/// key; the dev key's account has none, so the answer is error 16, not a made-up "not found".
 #[tokio::test]
-async fn unmirrored_user_is_not_found() {
+async fn unmirrored_user_without_any_key_is_unavailable() {
     let (app, _dir) = app().await;
-    let (status, _, body) = get(&app, "method=user.getInfo&user=someone&api_key=dev").await;
-    assert_eq!(status, 404);
-    assert!(
-        body.contains("<error code=\"6\">User not found</error>"),
-        "{body}"
-    );
+    let (_, _, body) = get(&app, "method=user.getInfo&user=someone&api_key=dev").await;
+    assert!(body.contains("<error code=\"16\">"), "{body}");
 }
 
 #[tokio::test]

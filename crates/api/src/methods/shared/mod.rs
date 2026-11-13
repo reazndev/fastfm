@@ -7,7 +7,8 @@ mod top;
 mod user;
 
 pub(crate) use list::{
-    ListAttrs, WeeklyRange, chart_root, list_root, list_root_collapsing, paging, weekly_range,
+    ListAttrs, WeeklyRange, chart_root, history_range, list_root, list_root_collapsing, paging,
+    weekly_range,
 };
 pub(crate) use nodes::{
     PLACEHOLDER, album_url, artist_mbid_attr, artist_of, artist_url, mbid, named_artist,

@@ -33,6 +33,9 @@ pub struct Session {
     pub account_id: i64,
     /// The Last.fm user name of that account.
     pub user: String,
+    /// The API key the session was issued to. Only that key may use it, as on Last.fm, so a
+    /// leaked session key is no use with another key.
+    pub api_key: String,
 }
 
 /// A failure of the backing store, as opposed to "not found".

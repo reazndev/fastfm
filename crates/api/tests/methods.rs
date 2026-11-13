@@ -286,3 +286,53 @@ async fn cached_reply_is_dropped_when_the_user_changes() {
         "{after}"
     );
 }
+
+#[tokio::test]
+async fn bulk_raises_the_recent_tracks_limit_and_nothing_else() {
+    let d = fixture_store().await;
+    let base = [("method", RECENT), ("user", "syntiiix")];
+    let plain = call(&d, &[base[0], base[1], ("limit", "1001")]).await;
+    assert!(
+        plain.contains("<error code=\"6\">limit param out of bounds (1-1000)</error>"),
+        "{plain}"
+    );
+    let bulk = [base[0], base[1], ("limit", "5000"), ("bulk", "1")];
+    let all = call(&d, &bulk).await;
+    assert!(all.contains("perPage=\"5000\" totalPages=\"1\""), "{all}");
+    assert_eq!(all.matches("<track>").count(), 1000);
+    let too_many = call(&d, &[base[0], base[1], ("limit", "10001"), ("bulk", "1")]).await;
+    assert!(
+        too_many.contains("limit param out of bounds (1-10000)"),
+        "{too_many}"
+    );
+}
+
+#[tokio::test]
+async fn export_streams_the_whole_history_newest_first() {
+    let d = fixture_store().await;
+    let params = |user: &str| {
+        lfm_core::Params::new()
+            .with("api_key", KEY)
+            .with("user", user)
+    };
+    let mut export = d.export(&params("SYNTIIIX")).await.unwrap();
+    let mut lines = Vec::new();
+    while let Some(chunk) = export.next_chunk().await {
+        let chunk = String::from_utf8(chunk.unwrap().to_vec()).unwrap();
+        lines.extend(chunk.lines().map(str::to_owned));
+    }
+    assert_eq!(lines.len(), 1000);
+    let rows: Vec<serde_json::Value> = lines
+        .iter()
+        .map(|line| serde_json::from_str(line).unwrap())
+        .collect();
+    let first = rows.first().unwrap();
+    for field in ["artist", "album", "track", "artist_mbid", "image"] {
+        assert!(first[field].is_string(), "{field}: {first}");
+    }
+    assert!(first["uts"].as_i64().unwrap() >= rows.last().unwrap()["uts"].as_i64().unwrap());
+    let unknown = d.export(&params("nobody")).await.unwrap_err();
+    assert_eq!(unknown.status, 404);
+    let keyless = lfm_core::Params::new().with("user", "syntiiix");
+    assert_eq!(d.export(&keyless).await.unwrap_err().status, 400);
+}

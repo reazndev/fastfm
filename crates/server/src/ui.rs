@@ -2,10 +2,14 @@
 //! are not files get `index.html`, so the UI's own routes load on refresh. A server built
 //! without `web/dist` serves a short page that says so.
 
+use std::sync::LazyLock;
+
 use axum::body::Body;
-use axum::http::{HeaderValue, Method, StatusCode, Uri, header};
+use axum::http::{HeaderMap, HeaderValue, Method, StatusCode, Uri, header};
 use axum::response::{IntoResponse, Response};
+use base64::Engine as _;
 use rust_embed::{Embed, EmbeddedFile};
+use sha2::{Digest, Sha256};
 
 #[derive(Embed)]
 #[folder = "../../web/dist/browser"]
@@ -23,8 +27,57 @@ and build the server again. The API at <code>/2.0/</code> works without it.</p>\
 const IMMUTABLE: &str = "public, max-age=31536000, immutable";
 const REVALIDATE: &str = "no-cache";
 
-/// The fallback handler for every path no route matched.
+/// The UI's content security policy. Scripts come from the build, plus the inline scripts of
+/// `index.html` by hash (the Angular build adds one that swaps in the stylesheet); styles may
+/// be inline, as the build inlines critical CSS; covers come from Last.fm's image host.
+static POLICY: LazyLock<HeaderValue> = LazyLock::new(|| {
+    let index = Assets::get("index.html").map(|file| file.data.into_owned());
+    let hashes: Vec<String> = inline_scripts(&String::from_utf8_lossy(&index.unwrap_or_default()))
+        .map(|script| {
+            let digest = Sha256::digest(script.as_bytes());
+            let hash = base64::engine::general_purpose::STANDARD.encode(digest);
+            format!(" 'sha256-{hash}'")
+        })
+        .collect();
+    let hashes = hashes.concat();
+    let policy = format!(
+        "default-src 'self'; script-src 'self'{hashes}; style-src 'self' 'unsafe-inline'; \
+         img-src 'self' data: https://lastfm.freetls.fastly.net \
+         https://lastfm-img.freetls.fastly.net; base-uri 'self'; frame-ancestors 'none'"
+    );
+    HeaderValue::from_str(&policy).unwrap_or(HeaderValue::from_static("default-src 'self'"))
+});
+
+/// The bodies of `<script>` elements without a `src`.
+fn inline_scripts(html: &str) -> impl Iterator<Item = &str> {
+    html.split("<script").skip(1).filter_map(|tag| {
+        let (attributes, rest) = tag.split_once('>')?;
+        let (body, _) = rest.split_once("</script>")?;
+        (!attributes.contains("src=")).then_some(body)
+    })
+}
+
+/// The fallback handler for every path no route matched. Every answer carries the UI's
+/// security headers; the API routes never get here, so their answers stay Last.fm's.
 pub(crate) async fn serve(method: Method, uri: Uri) -> Response {
+    let mut response = route(&method, &uri);
+    secure(response.headers_mut());
+    response
+}
+
+fn secure(headers: &mut HeaderMap) {
+    headers.insert(header::CONTENT_SECURITY_POLICY, POLICY.clone());
+    headers.insert(
+        header::X_CONTENT_TYPE_OPTIONS,
+        HeaderValue::from_static("nosniff"),
+    );
+    headers.insert(
+        header::REFERRER_POLICY,
+        HeaderValue::from_static("no-referrer"),
+    );
+}
+
+fn route(method: &Method, uri: &Uri) -> Response {
     let path = uri.path();
     if RESERVED
         .iter()
@@ -99,7 +152,13 @@ fn is_hashed(name: &str) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::is_hashed;
+    use super::{inline_scripts, is_hashed};
+
+    #[test]
+    fn inline_scripts_are_found_and_loaded_ones_skipped() {
+        let html = "<script src=\"main.js\" type=\"module\"></script><script>a()</script>";
+        assert_eq!(inline_scripts(html).collect::<Vec<_>>(), ["a()"]);
+    }
 
     #[test]
     fn build_output_is_hashed_and_public_files_are_not() {

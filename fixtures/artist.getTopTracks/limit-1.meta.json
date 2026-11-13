@@ -2,7 +2,7 @@
   "method": "artist.getTopTracks",
   "variant": "limit-1",
   "http_method": "GET",
-  "recorded_at": 1794518929,
+  "recorded_at": 1794599011,
   "responses": {
     "json": {
       "params": [
@@ -31,7 +31,7 @@
       "content_type": "application/json",
       "headers": {
         "server": "openresty",
-        "date": "Thu, 12 Nov 2026 21:28:27 GMT",
+        "date": "Fri, 13 Nov 2026 19:43:09 GMT",
         "content-type": "application/json",
         "content-length": "917",
         "access-control-allow-methods": "POST, GET, OPTIONS",
@@ -64,7 +64,7 @@
       "content_type": "text/xml; charset=UTF-8",
       "headers": {
         "server": "openresty",
-        "date": "Thu, 12 Nov 2026 21:28:28 GMT",
+        "date": "Fri, 13 Nov 2026 19:43:10 GMT",
         "content-type": "text/xml; charset=UTF-8",
         "content-length": "1013",
         "access-control-allow-methods": "POST, GET, OPTIONS",

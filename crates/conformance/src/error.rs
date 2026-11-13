@@ -53,7 +53,7 @@ impl Error {
 pub const USAGE: &str = "\
 usage: lfm-conformance run --base-url <url> [--api-key <key>] [options]
 
-  --base-url <url>        API root, e.g. http://127.0.0.1:8080/2.0/
+  --base-url <url>        API root, e.g. http://127.0.0.1:3055/2.0/
   --api-key <key>         key sent where a fixture had the real key
                           (or set LFM_CONFORMANCE_API_KEY, which stays out of `ps`)
   --only <prefix>         run cases whose id (method/variant.format) starts with this;

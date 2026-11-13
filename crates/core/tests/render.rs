@@ -331,15 +331,17 @@ fn jsonp_wraps_success_and_errors_without_newline() {
 }
 
 #[test]
-fn callback_is_ignored_for_xml_and_for_unsafe_names() {
+fn callback_is_ignored_for_xml_and_taken_as_given_for_json() {
     let xml = Params::new().with("callback", "cb");
     assert_eq!(Output::from_params(&xml).unwrap().callback(), None);
-    let unsafe_name = Params::new()
+    // Last.fm wraps any callback name, as the `jsonp-callback-invalid-name` fixture shows.
+    let odd_name = Params::new()
         .with("format", "json")
-        .with("callback", "alert(1)//");
-    let output = Output::from_params(&unsafe_name).unwrap();
-    assert_eq!(output.callback(), None);
-    assert_eq!(output.content_type(), "application/json");
+        .with("callback", "bad name!");
+    let output = Output::from_params(&odd_name).unwrap();
+    assert_eq!(output.callback(), Some("bad name!"));
+    let body = output.render(&Response::new(Node::leaf("a", "b")));
+    assert_eq!(String::from_utf8(body).unwrap(), r#"bad name!({"a":"b"});"#);
 }
 
 #[test]

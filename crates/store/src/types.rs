@@ -69,8 +69,8 @@ impl Kind {
     }
 }
 
-/// A top-list period as Last.fm names them. Every period but `Overall` covers whole UTC days,
-/// ending with the current day.
+/// A top-list period as Last.fm names them. Every period but `Overall` is a rolling window:
+/// the last N times 86,400 seconds before the request, as Last.fm counts them.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Period {
     /// All time.
@@ -111,13 +111,18 @@ impl Period {
         }
     }
 
-    /// The time range the period covers at `now`.
+    /// The time range the period covers at `now`: from `now` minus its days on.
     #[must_use]
     pub fn range(self, now: i64) -> TimeRange {
-        TimeRange::new(self.start(crate::buckets::day_of(now)), TimeRange::ALL.to)
+        let from = self
+            .days()
+            .map_or(0, |days| now.saturating_sub(days * crate::buckets::DAY));
+        TimeRange::new(from.max(0), TimeRange::ALL.to)
     }
 
-    /// The first second the period covers when it ends on UTC day `day`.
+    /// The first second of the stored totals when they end on UTC day `day`: the start of the
+    /// first whole day of the period. Reads add the part of the day before it that the rolling
+    /// window still covers.
     pub(crate) fn start(self, day: i64) -> i64 {
         self.days()
             .map_or(0, |days| (day - days + 1) * crate::buckets::DAY)

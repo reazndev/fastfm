@@ -4,7 +4,7 @@ use axum::Json;
 use axum::extract::State;
 use axum::http::StatusCode;
 use lfm_store::{Account, OutboxSummary};
-use lfm_sync::ImportProgress;
+use lfm_sync::{ImportProgress, PRIVATE_MESSAGE};
 use lfm_upstream::{ApiKey, AppCredentials, Secret};
 use serde::{Deserialize, Serialize};
 
@@ -23,6 +23,8 @@ pub(crate) struct LinkStatus {
     authorized: bool,
     /// Whether the account uses its own Last.fm API key.
     own_key: bool,
+    /// The instance's key rule and the state of the saved credentials.
+    credentials: CredentialsView,
     /// The newest import.
     import: Option<ImportView>,
     /// Live sync: everything before `cursor` (Unix time) is mirrored.
@@ -31,13 +33,24 @@ pub(crate) struct LinkStatus {
     writes: WritesView,
 }
 
+/// `{"ownKeyRequired": bool, "error": "…" | null}`.
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-struct ImportView {
-    status: &'static str,
-    imported: u64,
-    estimated_total: u64,
-    error: Option<String>,
+struct CredentialsView {
+    /// Whether this instance requires an own key before linking.
+    own_key_required: bool,
+    /// Set when saved credentials could not be read and must be entered again.
+    error: Option<&'static str>,
+}
+
+/// Where an import stands, as the UI shows it.
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct ImportView {
+    pub(crate) status: &'static str,
+    pub(crate) imported: u64,
+    pub(crate) estimated_total: u64,
+    pub(crate) error: Option<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -71,13 +84,17 @@ pub(crate) async fn link_status(
     state: &AppState,
     account: &Account,
 ) -> Result<LinkStatus, WebError> {
-    let linked = Linked::open(&state.vault, account)?;
+    let linked = Linked::open(&state.vault, account);
     let user = match &account.lastfm_user {
         Some(name) => state.store.user_by_name(name).await?,
         None => None,
     };
     let import = match &user {
-        Some(user) => state.sync.progress(user.id).await?.map(import_view),
+        Some(user) => state
+            .sync
+            .progress(user.id)
+            .await?
+            .map(|progress| import_view(progress, state.sync.is_private(user.id))),
         None => None,
     };
     let outbox: OutboxSummary = state.store.outbox_summary(account.id).await?;
@@ -85,6 +102,12 @@ pub(crate) async fn link_status(
         username: account.lastfm_user.clone(),
         authorized: linked.session_key.is_some(),
         own_key: linked.own_app.is_some(),
+        credentials: CredentialsView {
+            own_key_required: own_key_required(&state.store).await?,
+            error: linked
+                .unreadable
+                .then_some("Saved Last.fm credentials could not be read; enter them again."),
+        },
         import,
         sync: user.map(|user| SyncView {
             cursor: user.sync_cursor,
@@ -100,7 +123,17 @@ pub(crate) async fn link_status(
     })
 }
 
-fn import_view(progress: ImportProgress) -> ImportView {
+/// The import as the UI shows it. `private` is live sync's latest verdict, which also covers a
+/// profile that hid its history after the import finished.
+pub(crate) fn import_view(progress: ImportProgress, private: bool) -> ImportView {
+    if private || progress.is_private() {
+        return ImportView {
+            status: "private",
+            imported: progress.imported,
+            estimated_total: progress.estimated_total,
+            error: Some(PRIVATE_MESSAGE.to_owned()),
+        };
+    }
     ImportView {
         status: progress.status.as_str(),
         imported: progress.imported,
@@ -122,15 +155,21 @@ pub(crate) async fn link(
     Member(account): Member,
     Json(body): Json<LinkBody>,
 ) -> Result<Json<LinkStatus>, WebError> {
-    let name = body.username.trim();
+    let name = lastfm_username(&body.username)?;
+    let account = relink(&state, account, name).await?;
+    link_status(&state, &account).await.map(Json)
+}
+
+/// The trimmed Last.fm username from a request body.
+pub(crate) fn lastfm_username(raw: &str) -> Result<&str, WebError> {
+    let name = raw.trim();
     if name.is_empty() || name.len() > 64 {
         return Err(WebError::invalid(
             "invalid_username",
             "Enter a Last.fm username.",
         ));
     }
-    let account = relink(&state, account, name).await?;
-    link_status(&state, &account).await.map(Json)
+    Ok(name)
 }
 
 /// Points `account` at `name`: follows the new user, stops the old one, and returns the
@@ -140,10 +179,16 @@ pub(crate) async fn relink(
     account: Account,
     name: &str,
 ) -> Result<Account, WebError> {
-    link::ensure_unclaimed(&state.store, account.id, name).await?;
-    let own_key = Linked::open(&state.vault, &account)?
+    let own_key = Linked::open(&state.vault, &account)
         .own_app
         .map(|app| app.api_key);
+    if own_key.is_none() && own_key_required(&state.store).await? {
+        return Err(WebError::conflict(
+            "own_key_required",
+            "Add your own Last.fm API key in settings first.",
+        ));
+    }
+    link::ensure_unclaimed(&state.store, account.id, name).await?;
     state.sync.use_key(name, own_key);
     let user = state.sync.follow(name).await?;
     let canonical = state
@@ -161,7 +206,14 @@ pub(crate) async fn relink(
             l.session_key = None;
         })
         .await?;
-        state.store.link_lastfm(account.id, Some(canonical)).await?;
+        state
+            .store
+            .link_lastfm(account.id, Some(canonical))
+            .await
+            .map_err(|error| match error {
+                lfm_store::StoreError::NameTaken => link::taken(),
+                other => other.into(),
+            })?;
     }
     state
         .store
@@ -192,6 +244,29 @@ async fn stop_following(state: &AppState, account: &Account) -> Result<(), WebEr
         state.sync.use_key(name, None);
     }
     Ok(())
+}
+
+/// `POST /lastfm/import/retry`: tries the import or live poll again now, after the owner made
+/// a private profile public.
+pub(crate) async fn retry(
+    State(state): State<AppState>,
+    Member(account): Member,
+) -> Result<Json<LinkStatus>, WebError> {
+    let name = account
+        .lastfm_user
+        .as_deref()
+        .ok_or_else(|| WebError::invalid("not_linked", "Link a Last.fm user first."))?;
+    let user = state.sync.follow(name).await?;
+    state.sync.retry(user);
+    link_status(&state, &account).await.map(Json)
+}
+
+/// The setting key of the own-key rule.
+pub(crate) const OWN_KEY_REQUIRED: &str = "require_own_key";
+
+/// Whether accounts must save their own Last.fm API key before linking a user.
+pub(crate) async fn own_key_required(store: &lfm_store::Store) -> Result<bool, WebError> {
+    Ok(store.setting(OWN_KEY_REQUIRED).await?.as_deref() == Some("true"))
 }
 
 /// `{"apiKey": "…", "secret": "…"}`.

@@ -6,6 +6,8 @@ use bytes::Bytes;
 use lfm_store::CachedResponse;
 use lfm_upstream::RawResponse;
 
+use crate::body::Body;
+
 /// Last.fm's answer to one request: everything needed to replay it byte for byte.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Entry {
@@ -15,8 +17,8 @@ pub struct Entry {
     pub content_type: String,
     /// Last.fm's `access-control-*` headers, in the order received.
     pub headers: Vec<(String, String)>,
-    /// The body, without a JSONP wrapper.
-    pub body: Bytes,
+    /// The body, without a JSONP wrapper, tagged by its hash.
+    pub body: Body,
     /// When the answer was fetched, in Unix seconds.
     pub fetched_at: i64,
     /// When it goes stale, in Unix seconds.
@@ -38,7 +40,7 @@ impl Entry {
             status: response.status,
             content_type: response.content_type.unwrap_or_default(),
             headers,
-            body: response.body,
+            body: Body::hashed(response.body),
             fetched_at: now,
             expires_at: now.saturating_add(ttl),
         }
@@ -52,7 +54,7 @@ impl Entry {
 
     /// The bytes the entry takes in memory, for the cache's size bound.
     pub(crate) fn weight(&self) -> u32 {
-        u32::try_from(self.body.len().saturating_add(256)).unwrap_or(u32::MAX)
+        self.body.weight().saturating_add(256)
     }
 }
 
@@ -68,7 +70,7 @@ impl From<CachedResponse> for Entry {
             status: cached.status,
             content_type: cached.content_type,
             headers,
-            body: Bytes::from(cached.body),
+            body: Body::hashed(Bytes::from(cached.body)),
             fetched_at: cached.fetched_at,
             expires_at: cached.expires_at,
         }
@@ -109,7 +111,7 @@ mod tests {
                     "POST, GET, OPTIONS".into(),
                 ),
             ],
-            body: Bytes::from_static(b"{}"),
+            body: Body::hashed(Bytes::from_static(b"{}")),
             fetched_at: 1,
             expires_at: 2,
         };

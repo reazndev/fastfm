@@ -72,3 +72,42 @@ async fn ingest_and_days_passing_keep_periods_exact() {
     db.store.advance_periods(now - 20 * DAY).await.unwrap();
     assert_periods_match(&conn);
 }
+
+/// Last.fm's `7day` is the 604,800 seconds before the request, not seven UTC days: QA found
+/// plays at 20:09 to 20:26 counted in a `6month` list requested at 20:08 the next day.
+#[tokio::test]
+async fn periods_are_rolling_windows_ending_at_the_request() {
+    let db = TestDb::new();
+    let alice = common::user(&db.store, "alice").await;
+    let now = T0 + 300 * DAY + 72_000;
+    let week = now - 7 * DAY;
+    let plays = vec![
+        common::scrobble(week + 600, "Early", "", "Inside"),
+        common::scrobble(week + 60, "Early", "", "Inside"),
+        common::scrobble(week, "Edge", "", "First second"),
+        common::scrobble(week - 1, "Gone", "", "Just outside"),
+        common::scrobble(now - 60, "Late", "", "Today"),
+    ];
+    let range = TimeRange::new(week - 10, now);
+    db.store.replace_window(alice, range, plays).await.unwrap();
+    let names = |listing: Listing<Ranked>| -> Vec<(String, u64)> {
+        let rows = listing.items.into_iter();
+        rows.map(|r| (r.entity.name, r.plays)).collect()
+    };
+    let want = [("Early", 2), ("Edge", 1), ("Late", 1)].map(|(n, p)| (n.to_owned(), p));
+    let query = TopQuery {
+        kind: Kind::Artist,
+        period: Period::Days7,
+        now,
+    };
+    let fallback = db.store.top(alice, query, Page::new(1, 10)).await.unwrap();
+    assert_eq!(names(fallback), want);
+    db.store.advance_periods(now).await.unwrap();
+    for page in [Page::new(1, 10), Page::new(2, 2)] {
+        let got = db.store.top(alice, query, page).await.unwrap();
+        assert_eq!(got.total, 3);
+        let skip = usize::try_from(page.offset()).unwrap();
+        let expected: Vec<_> = want.iter().skip(skip).take(10).cloned().collect();
+        assert_eq!(names(got), expected);
+    }
+}

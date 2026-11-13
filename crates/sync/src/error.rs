@@ -23,5 +23,21 @@ pub enum SyncError {
     Stopped,
 }
 
+/// Last.fm's code for a profile that hides its recent tracks: "Login: User required to be
+/// logged in".
+const PRIVATE_PROFILE: u32 = 17;
+
+impl SyncError {
+    /// Whether Last.fm refused because the profile hides its listening history. Retrying soon
+    /// cannot help: only the owner can make it public again.
+    #[must_use]
+    pub fn is_private_profile(&self) -> bool {
+        matches!(
+            self,
+            Self::Upstream(lfm_upstream::Error::LastFm { code, .. }) if *code == PRIVATE_PROFILE
+        )
+    }
+}
+
 /// Result type of this crate.
 pub type Result<T, E = SyncError> = std::result::Result<T, E>;

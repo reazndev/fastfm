@@ -26,10 +26,10 @@ COPY --from=server /usr/local/bin/lfm-mirror /usr/local/bin/lfm-mirror
 USER lfm
 WORKDIR /data
 ENV LFM_DATA_DIR=/data \
-    LFM_BIND=0.0.0.0:8080 \
+    LFM_BIND=0.0.0.0:3055 \
     RUST_LOG=info
 VOLUME /data
-EXPOSE 8080
+EXPOSE 3055
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s \
-    CMD curl -fsS http://127.0.0.1:8080/healthz || exit 1
+    CMD curl -fsS http://127.0.0.1:3055/healthz || exit 1
 ENTRYPOINT ["/usr/local/bin/lfm-mirror"]

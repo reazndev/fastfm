@@ -6,7 +6,11 @@ import { LastfmService } from '../api/lastfm.service';
 import { ErrorNotice } from '../shared/error-notice';
 import { Loading } from '../shared/loading';
 
-/** Where last.fm sends the browser back with `?token=` after the user approved this server. */
+/**
+ * Where last.fm sends the browser back with `?state=…&token=…` after the user approved this
+ * server. It acts on load, which is safe because the server accepts only a state this session
+ * started moments before.
+ */
 @Component({
   selector: 'app-lastfm-callback-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,13 +38,15 @@ import { Loading } from '../shared/loading';
 })
 export class LastfmCallbackPage {
   private readonly lastfm = inject(LastfmService);
+  /** From `?state=`, as the server put it in the callback URL. */
+  readonly state = input<string>();
   /** From `?token=`. */
   readonly token = input<string>();
   protected readonly result = resource({
-    params: () => this.token() ?? '',
+    params: () => ({ state: this.state() ?? '', token: this.token() ?? '' }),
     loader: ({ params }) =>
-      params
-        ? this.lastfm.finishAuth(params)
+      params.token
+        ? this.lastfm.finishAuth(params.state, params.token)
         : Promise.reject(new ApiError('token_not_found', 'Last.fm sent no token.', 400)),
   });
 }

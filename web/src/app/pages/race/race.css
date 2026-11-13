@@ -1,0 +1,14 @@
+:host {
+  display: block;
+}
+
+/* Wider than the app's column: two lanes of covers and titles need the room. */
+.lanes {
+  position: relative;
+  left: 50%;
+  width: min(960px, calc(100vw - 2 * var(--space-4)));
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+}

@@ -2,8 +2,10 @@
 
 use lfm_core::{ApiError, ErrorCode, Output, Params};
 
+use crate::auth::ApiKey;
+use crate::body::Body;
 use crate::dispatch::Dispatcher;
-use crate::passthrough::{Forward, Forwarded, Overlay, overlay_lookup, overlay_user};
+use crate::passthrough::{Caller, Forward, Forwarded, Overlay, overlay_lookup, overlay_user};
 use crate::reply::{CLASSIC, Reply, error_reply};
 
 impl Dispatcher {
@@ -12,6 +14,7 @@ impl Dispatcher {
     pub(crate) async fn forward(
         &self,
         method: &'static Forwarded,
+        api_key: &ApiKey,
         params: &Params,
         output: &Output,
     ) -> Reply {
@@ -19,12 +22,18 @@ impl Dispatcher {
             return error_reply(output, &ErrorCode::InvalidMethod.into(), CLASSIC);
         };
         let request = Forward::new(method, params, output.format());
-        let (entry, source) = match passthrough.get(&request).await {
+        let caller = Caller {
+            api_key: params.optional("api_key").unwrap_or_default(),
+            account_id: api_key.account_id,
+        };
+        let (entry, source) = match passthrough.get(&request, caller).await {
             Ok(found) => found,
             Err(failure) => return error_reply(output, &ApiError::from(failure), CLASSIC),
         };
         let body = match self.overlay(method, params).await {
-            Some(overlay) if entry.status == 200 => overlay.apply(&entry.body, output.format()),
+            Some(overlay) if entry.status == 200 => {
+                Body::hashed(overlay.apply(entry.body.bytes(), output.format()))
+            }
             _ => entry.body.clone(),
         };
         Reply::replay(&entry, body, output, source)

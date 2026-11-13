@@ -2,6 +2,7 @@
 #![allow(
     clippy::unwrap_used,
     clippy::indexing_slicing,
+    clippy::panic,
     clippy::missing_panics_doc,
     reason = "test helpers fail the test the same way the tests do"
 )]
@@ -18,14 +19,16 @@ use std::time::Duration;
 
 use axum::Router;
 use axum::body::Body;
+use axum::extract::RawQuery;
 use axum::http::{HeaderMap, Request, header};
+use axum::response::IntoResponse;
 use http_body_util::BodyExt;
-use lfm_api::{Clock, Dispatcher, MemoryCache, Services, StoreKeys, StoreSessions};
+use lfm_api::{Clock, Dispatcher, MemoryCache, ResponseCache, Services, StoreKeys, StoreSessions};
 use lfm_core::{Params, api_signature};
 use lfm_store::Store;
 use lfm_sync::{SyncConfig, SyncService};
 use lfm_upstream::{ApiKey, AppCredentials, Client, ClientConfig, RetryPolicy, Secret};
-use lfm_web::{Web, WebConfig, WebDeps};
+use lfm_web::{DemoConfig, Web, WebConfig, WebDeps};
 use serde_json::{Value, json};
 use tempfile::TempDir;
 use tower::ServiceExt;
@@ -33,9 +36,16 @@ use wiremock::MockServer;
 
 pub mod mock;
 
+/// A request budget the tests never reach.
+const UNLIMITED: NonZeroU32 = NonZeroU32::new(100_000).unwrap();
+
 /// The instance's Last.fm application, as the mock knows it.
 pub const LASTFM_KEY: &str = "1111111111111111111111111111111a";
 pub const LASTFM_SECRET: &str = "2222222222222222222222222222222b";
+/// The key the speed comparison sends to the mirror.
+pub const INTERNAL_KEY: &str = "3333333333333333333333333333333c";
+/// The demo import's history cap in these tests.
+pub const DEMO_MAX_SCROBBLES: u64 = 1000;
 
 /// Everything a test drives.
 pub struct Harness {
@@ -50,34 +60,43 @@ pub struct Harness {
 
 impl Harness {
     pub async fn new() -> Self {
+        Self::build(false, None).await
+    }
+
+    /// With a setup token that the first sign-up must give.
+    pub async fn with_setup_token(token: &str) -> Self {
+        Self::build(false, Some(token)).await
+    }
+
+    /// With the speed comparison on, timing the mock Last.fm and the dispatcher served over
+    /// loopback.
+    pub async fn with_demo() -> Self {
+        Self::build(true, None).await
+    }
+
+    async fn build(demo: bool, setup_token: Option<&str>) -> Self {
         let lastfm = MockServer::start().await;
         let dir = tempfile::tempdir().unwrap();
         let store = Store::open_in_memory().unwrap();
-        let client = ClientConfig::new([ApiKey::new(LASTFM_KEY)])
-            .base_url(format!("{}/2.0/", lastfm.uri()))
-            .requests_per_second(NonZeroU32::new(1000).unwrap())
-            .retry(RetryPolicy {
-                max_attempts: 2,
-                base_delay: Duration::from_millis(5),
-                max_delay: Duration::from_millis(10),
-            });
-        let client = Arc::new(Client::new(client).unwrap());
+        let client = lastfm_client(&lastfm);
         let sync = Arc::new(SyncService::new(
             store.clone(),
             Arc::clone(&client),
-            SyncConfig::default(),
+            SyncConfig::default().request_budgets(UNLIMITED, UNLIMITED),
         ));
         let keys = Arc::new(
-            StoreKeys::load(store.clone(), HashMap::new())
+            StoreKeys::load(store.clone(), internal_key())
                 .await
                 .unwrap(),
         );
-        let config = WebConfig::new(dir.path())
-            .lastfm_app(AppCredentials {
-                api_key: ApiKey::new(LASTFM_KEY),
-                secret: Secret::new(LASTFM_SECRET),
-            })
-            .key_pool_size(1);
+        let cache: Arc<dyn ResponseCache> =
+            Arc::new(MemoryCache::new(1 << 20, Duration::from_secs(60)));
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let mut config = web_config(&dir, setup_token);
+        if demo {
+            let mirror = listener.local_addr().unwrap();
+            config = config.demo(demo_config(&lastfm, mirror, Arc::clone(&cache)));
+        }
         let deps = WebDeps {
             store: store.clone(),
             sync: Arc::clone(&sync),
@@ -90,19 +109,21 @@ impl Harness {
             clock: Clock::System,
             api_keys: keys,
             sessions: Arc::new(StoreSessions::new(store.clone())),
-            cache: Arc::new(MemoryCache::new(1 << 20, Duration::from_secs(60))),
+            cache,
         };
         let registry =
             lfm_api::methods::with_accounts(lfm_api::methods::registry(), &web.accounts());
         let app = Router::new()
             .nest("/app/api", web.router())
             .merge(lfm_web::auth_page_redirect());
+        let dispatcher = Dispatcher::new(registry, services);
+        tokio::spawn(serve_api(listener, dispatcher.clone()));
         Self {
             web,
             sync,
             app,
             store,
-            dispatcher: Dispatcher::new(registry, services),
+            dispatcher,
             lastfm,
             _dir: dir,
         }
@@ -171,6 +192,86 @@ impl Harness {
             .filter(|pairs| pairs.get("method").map(String::as_str) == Some(method))
             .collect()
     }
+}
+
+/// The `state` in the callback URL of a Last.fm approval URL from `GET /lastfm/auth/start`.
+pub fn callback_state(approval_url: &str) -> String {
+    let query = approval_url.split_once('?').unwrap().1;
+    let cb = form_urlencoded::parse(query.as_bytes())
+        .find(|(name, _)| name == "cb")
+        .unwrap()
+        .1
+        .into_owned();
+    let cb_query = cb.split_once('?').unwrap().1;
+    form_urlencoded::parse(cb_query.as_bytes())
+        .find(|(name, _)| name == "state")
+        .unwrap()
+        .1
+        .into_owned()
+}
+
+/// The web API's settings: the instance application, one pool key, and the setup token.
+fn web_config(dir: &TempDir, setup_token: Option<&str>) -> WebConfig {
+    let config = WebConfig::new(dir.path())
+        .lastfm_app(AppCredentials {
+            api_key: ApiKey::new(LASTFM_KEY),
+            secret: Secret::new(LASTFM_SECRET),
+        })
+        .key_pool_size(1);
+    match setup_token {
+        Some(token) => config.setup_token(token),
+        None => config,
+    }
+}
+
+/// The Last.fm client, pointed at the mock, fast and with short retries.
+fn lastfm_client(lastfm: &MockServer) -> Arc<Client> {
+    let client = ClientConfig::new([ApiKey::new(LASTFM_KEY)])
+        .base_url(format!("{}/2.0/", lastfm.uri()))
+        .requests_per_second(NonZeroU32::new(1000).unwrap())
+        .retry(RetryPolicy {
+            max_attempts: 2,
+            base_delay: Duration::from_millis(5),
+            max_delay: Duration::from_millis(10),
+        });
+    Arc::new(Client::new(client).unwrap())
+}
+
+/// The comparison timing the mock Last.fm and the mirror at `mirror`.
+fn demo_config(
+    lastfm: &MockServer,
+    mirror: std::net::SocketAddr,
+    cache: Arc<dyn ResponseCache>,
+) -> DemoConfig {
+    let mirror_url = format!("http://{mirror}/2.0/");
+    DemoConfig::new(ApiKey::new(LASTFM_KEY), mirror_url, INTERNAL_KEY, cache)
+        .lastfm_url(format!("{}/2.0/", lastfm.uri()))
+        .max_scrobbles(DEMO_MAX_SCROBBLES)
+}
+
+/// [`INTERNAL_KEY`], registered in code as the server registers its own.
+fn internal_key() -> HashMap<String, lfm_api::ApiKey> {
+    let record = lfm_api::ApiKey {
+        account_id: 0,
+        secret: INTERNAL_KEY.to_owned(),
+        scope: lfm_api::Scope::Read,
+        active: true,
+    };
+    HashMap::from([(INTERNAL_KEY.to_owned(), record)])
+}
+
+/// `/2.0/` over HTTP, with the `X-Mirror-Source` header, as the server crate serves it.
+async fn serve_api(listener: tokio::net::TcpListener, dispatcher: Dispatcher) {
+    let dispatcher = Arc::new(dispatcher);
+    let api = |RawQuery(query): RawQuery| async move {
+        let params = Params::new().with_urlencoded(query.unwrap_or_default().as_bytes());
+        let reply = dispatcher.dispatch(&params).await;
+        let status = axum::http::StatusCode::from_u16(reply.status).unwrap();
+        let source = [("x-mirror-source", reply.source.as_str())];
+        (status, source, reply.body.bytes().clone()).into_response()
+    };
+    let app = Router::new().route("/2.0/", axum::routing::get(api));
+    axum::serve(listener, app).await.unwrap();
 }
 
 /// One web API request.
@@ -275,4 +376,19 @@ impl Reply {
     pub fn code(&self) -> &str {
         self.json["error"]["code"].as_str().unwrap_or_default()
     }
+}
+
+/// Polls `check` every 10 ms until it holds, failing after five seconds.
+pub async fn eventually<F, Fut>(mut check: F)
+where
+    F: FnMut() -> Fut,
+    Fut: Future<Output = bool>,
+{
+    for _ in 0..500 {
+        if check().await {
+            return;
+        }
+        tokio::time::sleep(Duration::from_millis(10)).await;
+    }
+    panic!("condition not reached in time");
 }

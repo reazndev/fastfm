@@ -129,3 +129,19 @@ async fn the_apis_keep_priority_over_the_ui() {
     let post = Request::post("/keys").body(Body::empty()).unwrap();
     assert_eq!(send(&app, post).await.status, 405);
 }
+
+#[tokio::test]
+async fn ui_pages_carry_security_headers_and_the_api_does_not() {
+    let (app, _dir) = app().await;
+    let page = get(&app, "/").await;
+    let policy = page.header("content-security-policy");
+    assert!(
+        policy.starts_with("default-src 'self'; script-src 'self'"),
+        "{policy}"
+    );
+    assert!(policy.ends_with("frame-ancestors 'none'"), "{policy}");
+    assert_eq!(page.header("x-content-type-options"), "nosniff");
+    assert_eq!(page.header("referrer-policy"), "no-referrer");
+    let api = get(&app, "/2.0/?method=user.getInfo&user=syntiiix").await;
+    assert!(!api.headers.contains_key("content-security-policy"));
+}

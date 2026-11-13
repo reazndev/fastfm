@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <lfm status="ok"><results for="Juice WRLD"><opensearch:Query role="request" searchTerms="Juice WRLD" startPage="2"></opensearch:Query>
-<opensearch:totalResults>7434</opensearch:totalResults>
+<opensearch:totalResults>7436</opensearch:totalResults>
 <opensearch:startIndex>5</opensearch:startIndex>
 <opensearch:itemsPerPage>5</opensearch:itemsPerPage>
 <artistmatches><artist><name>Juıce WRŁÐ</name>
@@ -14,7 +14,7 @@
 <image size="extralarge"></image>
 </artist>
 <artist><name>Juice WRLD &amp; Marshmello</name>
-<listeners>16998</listeners>
+<listeners>16999</listeners>
 <mbid></mbid>
 <url>https://www.last.fm/music/Juice+WRLD+&amp;+Marshmello</url>
 <streamable>0</streamable>
@@ -24,7 +24,7 @@
 <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
 </artist>
 <artist><name>Future, Juice WRLD</name>
-<listeners>12637</listeners>
+<listeners>12639</listeners>
 <mbid></mbid>
 <url>https://www.last.fm/music/Future,+Juice+WRLD</url>
 <streamable>0</streamable>
@@ -34,7 +34,7 @@
 <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png</image>
 </artist>
 <artist><name>Juice Wrld, Seezyn</name>
-<listeners>9223</listeners>
+<listeners>9227</listeners>
 <mbid></mbid>
 <url>https://www.last.fm/music/Juice+Wrld,+Seezyn</url>
 <streamable>0</streamable>
@@ -44,7 +44,7 @@
 <image size="extralarge"></image>
 </artist>
 <artist><name>Juice WRLD &amp; Halsey</name>
-<listeners>12527</listeners>
+<listeners>12529</listeners>
 <mbid></mbid>
 <url>https://www.last.fm/music/Juice+WRLD+&amp;+Halsey</url>
 <streamable>0</streamable>

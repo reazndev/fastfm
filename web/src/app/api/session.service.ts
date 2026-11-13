@@ -2,7 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { ApiClient } from './api-client';
 import { ApiError } from './api-error';
-import { Account } from './models';
+import { Account, SignupInfo } from './models';
 
 interface AccountBody {
   account: Account;
@@ -37,8 +37,15 @@ export class SessionService {
     return this.current() ?? null;
   }
 
-  async signup(username: string, password: string): Promise<Account> {
-    return this.start(this.api.post<AccountBody>('/signup', { username, password }));
+  /** What the sign-up form will do; needs no login. */
+  signupInfo(): Promise<SignupInfo> {
+    return this.api.get<SignupInfo>('/signup-mode');
+  }
+
+  /** `setupToken` is needed only for the first account, when the server sets one. */
+  async signup(username: string, password: string, setupToken?: string): Promise<Account> {
+    const body = setupToken ? { username, password, setupToken } : { username, password };
+    return this.start(this.api.post<AccountBody>('/signup', body));
   }
 
   async login(username: string, password: string): Promise<Account> {

@@ -1,4 +1,5 @@
-//! Sign-up modes, approval, admin actions, API keys, cookies, CSRF and the login rate limit.
+//! Sign-up modes, the setup token, approval, admin actions, API keys, cookies, CSRF and the
+//! login rate limit.
 #![allow(clippy::unwrap_used, clippy::indexing_slicing, reason = "tests")]
 
 mod support;
@@ -365,4 +366,130 @@ async fn last_fm_clients_are_sent_to_the_approval_route() {
     assert_eq!(reply.status, 303);
     let location = reply.headers.get("location").unwrap().to_str().unwrap();
     assert_eq!(location, "/authorize?api_key=k&token=t");
+}
+
+#[tokio::test]
+async fn the_sign_up_mode_is_public() {
+    let h = Harness::new().await;
+    let fresh = h.call("GET", "/app/api/signup-mode").send().await;
+    assert_eq!(
+        fresh.json,
+        json!({ "mode": "approval", "hasAccounts": false, "setupTokenRequired": false })
+    );
+    let admin = h.signup("alice").await;
+    h.call("PUT", "/app/api/admin/settings")
+        .cookie(&admin)
+        .json(json!({ "signupMode": "closed" }))
+        .send()
+        .await;
+    let later = h.call("GET", "/app/api/signup-mode").send().await;
+    assert_eq!(
+        (
+            later.json["mode"].as_str(),
+            later.json["hasAccounts"].as_bool()
+        ),
+        (Some("closed"), Some(true))
+    );
+}
+
+#[tokio::test]
+async fn the_first_sign_up_needs_the_setup_token_when_one_is_set() {
+    let h = Harness::with_setup_token("s3cret-setup").await;
+    let mode = h.call("GET", "/app/api/signup-mode").send().await;
+    assert_eq!(mode.json["setupTokenRequired"], true);
+    let signup = |token: Option<&str>| {
+        h.call("POST", "/app/api/signup")
+            .json(json!({ "username": "alice", "password": PASSWORD, "setupToken": token }))
+            .send()
+    };
+    let without = signup(None).await;
+    assert_eq!(
+        (without.status, without.code()),
+        (403, "setup_token_invalid")
+    );
+    let wrong = signup(Some("s3cret-setuq")).await;
+    assert_eq!(wrong.code(), "setup_token_invalid");
+    let right = signup(Some("s3cret-setup")).await;
+    assert_eq!(right.status, 201, "{}", right.json);
+    assert_eq!(right.json["account"]["role"], "admin");
+    let mode = h.call("GET", "/app/api/signup-mode").send().await;
+    assert_eq!(mode.json["setupTokenRequired"], false);
+    let second = h
+        .call("POST", "/app/api/signup")
+        .json(json!({ "username": "bob", "password": PASSWORD }))
+        .send()
+        .await;
+    assert_eq!(second.status, 201, "later sign-ups need no token");
+}
+
+#[tokio::test]
+async fn sessions_are_stored_as_hashes() {
+    let h = Harness::new().await;
+    let cookie = h.signup("alice").await;
+    let raw = cookie.split_once('=').unwrap().1;
+    assert!(h.store.session(raw, 0).await.unwrap().is_none());
+    let me = h.call("GET", "/app/api/me").cookie(&cookie).send().await;
+    assert_eq!(me.status, 200);
+}
+
+#[tokio::test]
+async fn expired_sessions_are_swept() {
+    let h = Harness::new().await;
+    let cookie = h.signup("alice").await;
+    let id = account_id(&h, &cookie).await;
+    let expired = lfm_store::WebSession {
+        id: "old".into(),
+        account: id,
+        created_at: 0,
+        expires_at: 1,
+    };
+    h.store.create_session(expired).await.unwrap();
+    assert!(h.store.session("old", 0).await.unwrap().is_some());
+    h.web.sweep().await;
+    assert!(h.store.session("old", 0).await.unwrap().is_none());
+    let me = h.call("GET", "/app/api/me").cookie(&cookie).send().await;
+    assert_eq!(me.status, 200, "a live session stays");
+}
+
+#[tokio::test]
+async fn an_approved_token_cannot_be_taken_over_by_another_account() {
+    let h = Harness::new().await;
+    let alice = h.signup("alice").await;
+    h.call("PUT", "/app/api/admin/settings")
+        .cookie(&alice)
+        .json(json!({ "signupMode": "open" }))
+        .send()
+        .await;
+    let bob = h.signup("bob").await;
+    let (api_key, _) = key(&h, &alice, "read_write").await;
+    let token = lfm_store::AuthToken {
+        token: "t".repeat(32),
+        api_key,
+        account: None,
+        expires_at: i64::MAX,
+    };
+    h.store.create_auth_token(token.clone(), 0).await.unwrap();
+    let (alice, bob) = (account_id(&h, &alice).await, account_id(&h, &bob).await);
+    h.store
+        .authorize_auth_token(&token.token, alice, 1)
+        .await
+        .unwrap();
+    // The store refuses even a racing approval that passed the handler's check.
+    let raced = h.store.authorize_auth_token(&token.token, bob, 1).await;
+    assert!(
+        matches!(raced, Err(lfm_store::StoreError::NotFound)),
+        "{raced:?}"
+    );
+    let found = h
+        .store
+        .find_auth_token(&token.token)
+        .await
+        .unwrap()
+        .unwrap();
+    assert_eq!(found.account, Some(alice));
+}
+
+async fn account_id(h: &Harness, cookie: &str) -> lfm_store::AccountId {
+    let me = h.call("GET", "/app/api/me").cookie(cookie).send().await;
+    lfm_store::AccountId(me.json["account"]["id"].as_i64().unwrap())
 }

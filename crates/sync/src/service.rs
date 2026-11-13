@@ -10,6 +10,7 @@ use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
 use tracing::{info, warn};
 
+use crate::budget::Budgets;
 use crate::config::SyncConfig;
 use crate::context::Context;
 use crate::enrich::{self, EnrichReport};
@@ -17,7 +18,7 @@ use crate::error::Result;
 use crate::import::{self, IMPORT, ImportProgress, ImportState};
 use crate::now_playing::NowPlaying;
 use crate::reconcile::{self, ReconcileReport};
-use crate::tasks;
+use crate::tasks::{self, Signal};
 use crate::upstream::Upstream;
 
 /// Runs imports, live sync, reconciliation, and the period timer for the whole process.
@@ -38,17 +39,20 @@ pub struct SyncService {
 struct Follow {
     stop: CancellationToken,
     task: JoinHandle<()>,
+    signal: Arc<Signal>,
 }
 
 impl SyncService {
     /// A service over `store` that calls Last.fm through `client`.
     #[must_use]
     pub fn new(store: Store, client: Arc<Client>, config: SyncConfig) -> Self {
+        let budgets = Budgets::new(config.pool_budget, config.key_budget);
         let ctx = Context {
             store,
-            upstream: Upstream::new(client),
+            upstream: Upstream::new(client, budgets),
             config,
             now_playing: NowPlaying::default(),
+            private: Arc::default(),
         };
         Self {
             ctx,
@@ -119,13 +123,51 @@ impl SyncService {
             return Ok(user);
         }
         let stop = self.shutdown.child_token();
-        let (ctx, token) = (self.ctx.clone(), stop.clone());
+        let signal = Arc::new(Signal::default());
+        let (ctx, token, wake) = (self.ctx.clone(), stop.clone(), Arc::clone(&signal));
         let task = self
             .tracker
-            .spawn(async move { tasks::follow(&ctx, user, &token).await });
-        followed.insert(user, Follow { stop, task });
+            .spawn(async move { tasks::follow(&ctx, user, &wake, &token).await });
+        followed.insert(user, Follow { stop, task, signal });
         info!(user = user.0, "following");
         Ok(user)
+    }
+
+    /// Asks for an early poll of a followed user whose last poll is older than
+    /// `nudge_after`, for when their data is read. Returns whether a poll was asked for.
+    #[must_use]
+    pub fn nudge(&self, user: UserId) -> bool {
+        self.with_signal(user, |signal| {
+            let stale = signal.stale(self.ctx.config.nudge_after);
+            if stale {
+                signal.wake();
+            }
+            stale
+        })
+    }
+
+    /// Tries a followed user's import or poll again now, after the owner made a private
+    /// profile public. Returns whether the user is followed.
+    pub fn retry(&self, user: UserId) -> bool {
+        self.with_signal(user, |signal| {
+            self.ctx.set_private(user, false);
+            signal.wake();
+            true
+        })
+    }
+
+    /// Whether Last.fm last refused the user's history because the profile hides it.
+    #[must_use]
+    pub fn is_private(&self, user: UserId) -> bool {
+        self.ctx.is_private(user)
+    }
+
+    fn with_signal(&self, user: UserId, act: impl FnOnce(&Signal) -> bool) -> bool {
+        let followed = self.followed.lock().unwrap_or_else(PoisonError::into_inner);
+        followed
+            .get(&user)
+            .filter(|f| !f.task.is_finished())
+            .is_some_and(|f| act(&f.signal))
     }
 
     /// Stops following a user and waits for their task to end.
@@ -141,12 +183,22 @@ impl SyncService {
             let _ = follow.task.await;
         }
         self.ctx.now_playing.set(user, None, 0);
+        self.ctx.set_private(user, false);
     }
 
     /// Imports `name`'s history in the caller's task, or continues an unfinished import with
     /// the same cutoff. With `until`, only scrobbles before that Unix time are imported.
     pub async fn import(&self, name: &str, until: Option<i64>) -> Result<ImportProgress> {
         import::start(&self.ctx, name, until, &self.shutdown).await
+    }
+
+    /// Runs [`SyncService::import`] with the cutoff `until` in the background, tracked like
+    /// the other jobs so a shutdown stops it and the next start resumes it to its end. The
+    /// user is not followed afterwards.
+    pub fn spawn_import(&self, name: &str, until: i64) -> JoinHandle<Result<ImportProgress>> {
+        let (ctx, stop, name) = (self.ctx.clone(), self.shutdown.clone(), name.to_owned());
+        self.tracker
+            .spawn(async move { import::start(&ctx, &name, Some(until), &stop).await })
     }
 
     /// Where the user's newest import stands.

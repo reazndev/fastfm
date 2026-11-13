@@ -21,7 +21,7 @@ Against any server:
 
 ```sh
 LFM_CONFORMANCE_API_KEY=<key> cargo run -p lfm-conformance -- run \
-  --base-url http://127.0.0.1:8080/2.0/ [--only <id prefix>]... [--format xml|json] \
+  --base-url http://127.0.0.1:3055/2.0/ [--only <id prefix>]... [--format xml|json] \
   [--report <path>] [--ignore <path>] [--expect <file>] [--write-expect <file>] \
   [--concurrency 8] [--rps <n>]
 ```
@@ -90,3 +90,25 @@ Everything else in `user.*` was byte-identical, including recent tracks, period 
 `user.getInfo`, because the account had not scrobbled since recording. Other catalogue
 counters (`track.getInfo`, `album.getInfo`, `geo.*`, `tag.*`) did not move in this sample, but
 are the same kind of value and may need rules once they do.
+
+The harness fetches every catalogue method from Last.fm while it runs (`data/conformance.db`
+holds no cached answers), so catalogue cases compare a live answer with one recorded earlier.
+
+## Ignore rules by cause (2026-11-13)
+
+About 110 cases pass only with ignores. The rules in `ignore.toml` fall into four groups:
+
+| Group | Rules | Goes away with a fresh recording and import? |
+|---|---|---|
+| Live counters: listeners, play counts, reach, taggings and totals in `artist.getInfo`, `album.getInfo`, `track.getInfo`, `tag.*`, `chart.*`, `geo.*`, `artist.getTopAlbums`, `artist.getTopTracks`, the search methods, and the play count of a user this instance does not mirror | 30 | No. They move within hours, and the run asks Last.fm live. Some are stale right after a re-recording and come back within a day. |
+| `auth.getToken` token | 1 | No: a new random token on every call. |
+| MBIDs that flap between two values from call to call | 2 | No: Last.fm answers either value. |
+| Album count 6,198 against 6,187 | 2 | No: 11 albums Last.fm files under an album artist that no scrobble shows. |
+| Catalogue values changed between recording and the import behind `data/conformance.db` (one cover, five MBIDs, two durations) | 8 | Yes: a recording and an import made the same day would agree. |
+
+The cases that still fail are lists whose order changes on Last.fm between two calls seconds
+apart: `chart.getTopArtists` and `chart.getTopTracks` (hourly charts; the JSON and XML of one
+recording already disagree), `geo.getTopArtists` (the default and lowercase variants, recorded
+seconds apart, disagree), and the `artist.search` and `track.search` results with close
+listener counts. No rule can cover them without ignoring every name in the list, and a
+re-recording goes stale within the hour, so they stay as failures.

@@ -157,11 +157,19 @@ impl Store {
         .await
     }
 
-    /// Links or unlinks a Last.fm username.
+    /// Links or unlinks a Last.fm username. Fails with `NameTaken` when another account links
+    /// the same user.
     pub async fn link_lastfm(&self, id: AccountId, lastfm_user: Option<String>) -> Result<()> {
         self.write(move |tx| {
             let sql = "UPDATE accounts SET lastfm_user = ?2 WHERE id = ?1";
-            changed(tx.prepare_cached(sql)?.execute(params![id, lastfm_user])?)
+            match tx.prepare_cached(sql)?.execute(params![id, lastfm_user]) {
+                Err(rusqlite::Error::SqliteFailure(e, _))
+                    if e.code == rusqlite::ErrorCode::ConstraintViolation =>
+                {
+                    Err(StoreError::NameTaken)
+                }
+                rows => changed(rows?),
+            }
         })
         .await
     }

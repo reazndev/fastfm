@@ -3,6 +3,7 @@
 pub(crate) mod account;
 pub(crate) mod admin;
 pub(crate) mod app_auth;
+pub(crate) mod demo;
 pub(crate) mod keys;
 pub(crate) mod lastfm;
 pub(crate) mod lastfm_auth;
@@ -18,6 +19,7 @@ use crate::state::AppState;
 pub(crate) fn routes() -> Router<AppState> {
     Router::new()
         .route("/signup", post(account::signup))
+        .route("/signup-mode", get(account::signup_mode))
         .route("/login", post(account::login))
         .route("/logout", post(account::logout))
         .route("/me", get(account::me))
@@ -37,12 +39,17 @@ pub(crate) fn routes() -> Router<AppState> {
             "/lastfm",
             get(lastfm::status).put(lastfm::link).delete(lastfm::unlink),
         )
+        .route("/lastfm/import/retry", post(lastfm::retry))
         .route(
             "/lastfm/key",
             put(lastfm::set_own_key).delete(lastfm::clear_own_key),
         )
         .route("/lastfm/auth/start", get(lastfm_auth::start))
         .route("/lastfm/auth/callback", get(lastfm_auth::callback))
+        .route("/demo/prepare", post(demo::prepare))
+        .route("/demo/import", get(demo::progress).post(demo::import))
+        .route("/demo/run", post(demo::run))
+        .route("/demo/race", post(demo::race))
         .route("/auth/request", get(app_auth::request))
         .route("/auth/approve", post(app_auth::approve))
         .layer(middleware::from_fn(require_csrf_header))

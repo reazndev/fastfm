@@ -60,8 +60,13 @@ impl Output {
         }
     }
 
-    /// Reads `format` and `callback`. A callback only applies to JSON, and only when it is a
-    /// plain JavaScript identifier path, so it cannot inject script.
+    /// Reads `format` and `callback`. A callback only applies to JSON.
+    ///
+    /// Last.fm wraps the body in whatever callback name it is given (`bad name!(…);`), so the
+    /// mirror does too. That lets a caller choose the first bytes of the body, which is why the
+    /// HTTP layer sends JSONP with `X-Content-Type-Options: nosniff` (see [`Output::is_jsonp`]):
+    /// a browser then never reads it as anything but script, and a page that loads it as
+    /// script already chose the URL.
     ///
     /// # Errors
     /// Error 5 for an unknown format.
@@ -70,9 +75,14 @@ impl Output {
         let callback = params
             .optional("callback")
             .filter(|_| format == Format::Json)
-            .filter(|cb| is_safe_callback(cb))
             .map(str::to_owned);
         Ok(Self { format, callback })
+    }
+
+    /// Whether the body is JSON wrapped in a callback.
+    #[must_use]
+    pub fn is_jsonp(&self) -> bool {
+        self.callback.is_some()
     }
 
     /// The format.
@@ -145,11 +155,4 @@ impl Output {
             None => body(out),
         }
     }
-}
-
-fn is_safe_callback(callback: &str) -> bool {
-    callback.len() <= 128
-        && callback
-            .bytes()
-            .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'_' | b'$' | b'.'))
 }

@@ -34,7 +34,22 @@
       @let s = settings.value();
       <app-signup-mode [mode]="s.signupMode" (picked)="setMode($event)" />
       <app-error-notice [error]="modeError()" />
-      <h2>Last.fm key pool</h2>
+      <h2>Last.fm keys</h2>
+      <label class="check">
+        <input
+          #ownKey
+          type="checkbox"
+          [checked]="s.requireOwnKey"
+          (change)="setRequireOwnKey(ownKey.checked)"
+        />
+        <span>
+          Require users to bring their own Last.fm API key
+          <span class="muted small">
+            Accounts must save a key before linking a profile, so imports and sync do not use the
+            server's keys.
+          </span>
+        </span>
+      </label>
       <p class="muted">
         {{ s.lastfmKeyPool.keys }} {{ s.lastfmKeyPool.keys === 1 ? 'key' : 'keys' }} for imports and
         sync.

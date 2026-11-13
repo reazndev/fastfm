@@ -13,6 +13,14 @@
       @case ('done') {
         <p>Done. {{ count(job.imported) }} scrobbles imported.</p>
       }
+      @case ('private') {
+        <p role="alert">{{ job.error }}</p>
+        <div>
+          <button type="button" class="button" [disabled]="retrying()" (click)="retried.emit()">
+            {{ retrying() ? 'Retrying…' : 'Retry import' }}
+          </button>
+        </div>
+      }
       @case ('failed') {
         <p>Stopped after {{ count(job.imported) }} scrobbles.</p>
         @if (job.error; as error) {
@@ -58,13 +66,15 @@
 
 <section class="section" aria-labelledby="writes-heading">
   <h2 id="writes-heading">Scrobbles and loves from apps</h2>
-  @if (s.writes.forwarding) {
+  @if (!s.authorized) {
+    <p>
+      Apps can scrobble here once you
+      <a routerLink="/settings">connect Last.fm</a>, which proves this profile is yours.
+    </p>
+  } @else if (s.writes.forwarding) {
     <p>Saved here and sent on to Last.fm.</p>
   } @else {
-    <p>
-      Saved on this server only.
-      <a routerLink="/settings">Connect Last.fm</a> to send them on.
-    </p>
+    <p>Saved on this server only, because it has no Last.fm shared secret.</p>
   }
   @if (backlog().length > 0) {
     <dl>

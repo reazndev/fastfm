@@ -1,10 +1,15 @@
 //! Last.fm web auth: the user approves this instance on last.fm, which proves they own the
 //! linked profile and gives the session key that forwarded writes need.
 //!
-//! `GET /lastfm/auth/start` returns Last.fm's approval URL. Last.fm sends the browser back to
-//! the UI route `/lastfm/callback?token=…`, and the UI calls `GET /lastfm/auth/callback` with
-//! that token and the CSRF header. The cookie is `SameSite=Strict`, so it does not travel on
-//! Last.fm's redirect itself, only on the UI's own request.
+//! `GET /lastfm/auth/start` returns Last.fm's approval URL, with a random `state` bound to the
+//! session in the callback URL. Last.fm sends the browser back to the UI route
+//! `/lastfm/callback?state=…&token=…`, and the UI calls `GET /lastfm/auth/callback` with both
+//! and the CSRF header. The cookie is `SameSite=Strict`, so it does not travel on Last.fm's
+//! redirect itself, only on the UI's own request. A missing, foreign, expired or reused state
+//! is refused, so a callback link someone else crafted cannot link their profile here.
+//!
+//! Last.fm confirming the user also proves ownership, so the link takes the name over from
+//! another account that only claimed it.
 
 use axum::Json;
 use axum::extract::{Query, State};
@@ -14,8 +19,8 @@ use serde::{Deserialize, Serialize};
 use crate::error::WebError;
 use crate::link::{self, Linked};
 use crate::routes::lastfm::{LinkStatus, link_status, relink};
-use crate::session::{CsrfChecked, Member, Secure};
-use crate::state::AppState;
+use crate::session::{CsrfChecked, Member, Secure, stored_session};
+use crate::state::{AppState, unix_now};
 
 /// Where Last.fm's approval page sends the user back to, under the public URL.
 pub const CALLBACK_ROUTE: &str = "/lastfm/callback";
@@ -33,9 +38,11 @@ pub(crate) async fn start(
     Secure(secure): Secure,
     headers: HeaderMap,
 ) -> Result<Json<StartBody>, WebError> {
-    let app = Linked::open(&state.vault, &account)?
+    let app = Linked::open(&state.vault, &account)
         .app(&state.config)
         .ok_or_else(not_configured)?;
+    let session = stored_session(&headers).ok_or_else(WebError::not_logged_in)?;
+    let flow = state.auth_states.start(&session, unix_now())?;
     let base = if let Some(url) = &state.config.public_url {
         url.clone()
     } else {
@@ -46,7 +53,7 @@ pub(crate) async fn start(
         let scheme = if secure { "https" } else { "http" };
         format!("{scheme}://{host}")
     };
-    let callback = format!("{base}{CALLBACK_ROUTE}");
+    let callback = format!("{base}{CALLBACK_ROUTE}?state={flow}");
     let url = format!(
         "https://www.last.fm/api/auth/?api_key={}&cb={}",
         encode(app.api_key.expose()),
@@ -55,9 +62,11 @@ pub(crate) async fn start(
     Ok(Json(StartBody { url }))
 }
 
-/// `?token=…` from Last.fm.
+/// `?state=…&token=…`: our state from the start, and Last.fm's token.
 #[derive(Debug, Deserialize)]
 pub(crate) struct CallbackQuery {
+    #[serde(default)]
+    state: String,
     token: String,
 }
 
@@ -67,9 +76,20 @@ pub(crate) async fn callback(
     State(state): State<AppState>,
     Member(account): Member,
     _: CsrfChecked,
+    headers: HeaderMap,
     Query(query): Query<CallbackQuery>,
 ) -> Result<Json<LinkStatus>, WebError> {
-    let app = Linked::open(&state.vault, &account)?
+    let web_session = stored_session(&headers).ok_or_else(WebError::not_logged_in)?;
+    if !state
+        .auth_states
+        .finish(&query.state, &web_session, unix_now())
+    {
+        return Err(WebError::invalid(
+            "invalid_state",
+            "This Last.fm link did not start here, or it expired. Connect Last.fm again.",
+        ));
+    }
+    let app = Linked::open(&state.vault, &account)
         .app(&state.config)
         .ok_or_else(not_configured)?;
     let session = state
@@ -77,6 +97,7 @@ pub(crate) async fn callback(
         .get_session(&query.token, &app)
         .await
         .map_err(|e| WebError::lastfm(&e))?;
+    link::release_unconfirmed(&state, account.id, &session.name).await?;
     let account = relink(&state, account, &session.name).await?;
     link::update(&state.store, &state.vault, &account, |l| {
         l.session_key = Some(session.key);

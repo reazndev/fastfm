@@ -10,24 +10,28 @@ use lfm_upstream::{
     RecentTracks, RecentTracksQuery, TopAlbum, TopArtist, TopPage, TopTrack, User,
 };
 
+use crate::budget::Budgets;
 use crate::convert::param;
 use crate::error::Result;
 
-/// The shared client, the users' own keys, and a count of the requests sync has made.
+/// The shared client, the users' own keys, the request budgets, and a count of the requests
+/// sync has made.
 #[derive(Debug, Clone)]
 pub(crate) struct Upstream {
     client: Arc<Client>,
     requests: Arc<AtomicU64>,
     /// Own Last.fm keys by folded user name; users without one share the pool.
     keys: Arc<RwLock<HashMap<String, ApiKey>>>,
+    budgets: Arc<Budgets>,
 }
 
 impl Upstream {
-    pub(crate) fn new(client: Arc<Client>) -> Self {
+    pub(crate) fn new(client: Arc<Client>, budgets: Budgets) -> Self {
         Self {
             client,
             requests: Arc::default(),
             keys: Arc::default(),
+            budgets: Arc::new(budgets),
         }
     }
 
@@ -40,14 +44,17 @@ impl Upstream {
         };
     }
 
-    /// Options for a call made on `user`'s behalf: their own key, if they have one.
-    fn options(&self, user: &str, priority: Priority) -> CallOptions {
+    /// Counts a call made on `user`'s behalf, waits for its key's budget, and returns its
+    /// options: their own key, if they have one.
+    async fn options(&self, user: &str, priority: Priority) -> CallOptions {
+        self.requests.fetch_add(1, Ordering::Relaxed);
         let key = self
             .keys
             .read()
             .unwrap_or_else(PoisonError::into_inner)
             .get(&fold(user))
             .cloned();
+        self.budgets.of(key.as_ref()).take(priority).await;
         let options = CallOptions::new(priority);
         match key {
             Some(key) => options.api_key(key),
@@ -66,8 +73,7 @@ impl Upstream {
         query: &RecentTracksQuery,
         priority: Priority,
     ) -> Result<RecentTracks> {
-        self.count();
-        let options = self.options(user, priority);
+        let options = self.options(user, priority).await;
         Ok(self.client.recent_tracks(query, &options).await?)
     }
 
@@ -86,11 +92,8 @@ impl Upstream {
     }
 
     pub(crate) async fn user_info(&self, user: &str, priority: Priority) -> Result<User> {
-        self.count();
-        Ok(self
-            .client
-            .user_info(user, &self.options(user, priority))
-            .await?)
+        let options = self.options(user, priority).await;
+        Ok(self.client.user_info(user, &options).await?)
     }
 
     pub(crate) async fn loved(
@@ -99,11 +102,8 @@ impl Upstream {
         page: PageRequest,
         priority: Priority,
     ) -> Result<LovedTracks> {
-        self.count();
-        Ok(self
-            .client
-            .loved_tracks(user, page, &self.options(user, priority))
-            .await?)
+        let options = self.options(user, priority).await;
+        Ok(self.client.loved_tracks(user, page, &options).await?)
     }
 
     pub(crate) async fn chart_list(
@@ -111,17 +111,13 @@ impl Upstream {
         user: &str,
         priority: Priority,
     ) -> Result<Vec<ChartRange>> {
-        self.count();
-        Ok(self
-            .client
-            .weekly_chart_list(user, &self.options(user, priority))
-            .await?)
+        let options = self.options(user, priority).await;
+        Ok(self.client.weekly_chart_list(user, &options).await?)
     }
 
     /// One page of the user's all-time top artists, `LIST_LIMIT` per page.
     pub(crate) async fn top_artists(&self, user: &str, page: u32) -> Result<TopPage<TopArtist>> {
-        self.count();
-        let options = self.options(user, Priority::Import);
+        let options = self.options(user, Priority::Prewarm).await;
         Ok(self
             .client
             .top_artists(user, list_page(page), &options)
@@ -130,8 +126,7 @@ impl Upstream {
 
     /// One page of the user's all-time top albums, `LIST_LIMIT` per page.
     pub(crate) async fn top_albums(&self, user: &str, page: u32) -> Result<TopPage<TopAlbum>> {
-        self.count();
-        let options = self.options(user, Priority::Import);
+        let options = self.options(user, Priority::Prewarm).await;
         Ok(self
             .client
             .top_albums(user, list_page(page), &options)
@@ -140,8 +135,7 @@ impl Upstream {
 
     /// One page of the user's all-time top tracks, `LIST_LIMIT` per page.
     pub(crate) async fn top_tracks(&self, user: &str, page: u32) -> Result<TopPage<TopTrack>> {
-        self.count();
-        let options = self.options(user, Priority::Import);
+        let options = self.options(user, Priority::Prewarm).await;
         Ok(self
             .client
             .top_tracks(user, list_page(page), &options)
@@ -154,13 +148,8 @@ impl Upstream {
         user: &str,
         artist: &str,
     ) -> Result<Option<ArtistRef>> {
-        self.count();
-        let options = self.options(user, Priority::Import);
+        let options = self.options(user, Priority::Prewarm).await;
         Ok(self.client.artist_correction(artist, &options).await?)
-    }
-
-    fn count(&self) {
-        self.requests.fetch_add(1, Ordering::Relaxed);
     }
 }
 

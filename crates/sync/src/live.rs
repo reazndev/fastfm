@@ -15,8 +15,17 @@ use crate::convert::{self, param, uts};
 use crate::error::{Result, SyncError};
 use crate::upstream::recent_query;
 
-/// Polls once. Returns whether a track is playing.
-pub(crate) async fn poll(ctx: &Context, user: UserId, name: &str) -> Result<bool> {
+/// What one poll saw.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) struct Poll {
+    /// Whether a track is playing.
+    pub(crate) playing: bool,
+    /// The newest scrobble the poll returned, in Unix seconds.
+    pub(crate) newest: Option<i64>,
+}
+
+/// Polls once.
+pub(crate) async fn poll(ctx: &Context, user: UserId, name: &str) -> Result<Poll> {
     let cursor = ctx
         .store
         .user(user)
@@ -35,7 +44,10 @@ pub(crate) async fn poll(ctx: &Context, user: UserId, name: &str) -> Result<bool
         .filter(|s| uts(s.uts) >= cursor)
         .collect();
     let Some(newest) = fresh.iter().map(|s| uts(s.uts)).max() else {
-        return Ok(playing);
+        return Ok(Poll {
+            playing,
+            newest: None,
+        });
     };
     let range = TimeRange::new(cursor, newest + 1);
     if u64::try_from(fresh.len()).unwrap_or(u64::MAX) >= page.page.total {
@@ -50,5 +62,8 @@ pub(crate) async fn poll(ctx: &Context, user: UserId, name: &str) -> Result<bool
     if newest > cursor {
         ctx.store.set_sync_cursor(user, newest).await?;
     }
-    Ok(playing)
+    Ok(Poll {
+        playing,
+        newest: Some(newest),
+    })
 }

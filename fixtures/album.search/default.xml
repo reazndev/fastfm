@@ -73,16 +73,6 @@
 <streamable>0</streamable>
 <mbid></mbid>
 </album>
-<album><name>Petals to Thorns</name>
-<artist>d4vd and Laufey</artist>
-<url>https://www.last.fm/music/d4vd+and+Laufey/Petals+to+Thorns</url>
-<image size="small"></image>
-<image size="medium"></image>
-<image size="large"></image>
-<image size="extralarge"></image>
-<streamable>0</streamable>
-<mbid></mbid>
-</album>
 <album><name>petals to thorns (Sessions)</name>
 <artist>d4vd</artist>
 <url>https://www.last.fm/music/d4vd/petals+to+thorns+(Sessions)</url>
@@ -90,6 +80,16 @@
 <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/013f09328ad3d4d3cec2afe1414befa8.png</image>
 <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/013f09328ad3d4d3cec2afe1414befa8.png</image>
 <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/013f09328ad3d4d3cec2afe1414befa8.png</image>
+<streamable>0</streamable>
+<mbid></mbid>
+</album>
+<album><name>Petals to Thorns</name>
+<artist>d4vd and Laufey</artist>
+<url>https://www.last.fm/music/d4vd+and+Laufey/Petals+to+Thorns</url>
+<image size="small"></image>
+<image size="medium"></image>
+<image size="large"></image>
+<image size="extralarge"></image>
 <streamable>0</streamable>
 <mbid></mbid>
 </album>
@@ -214,16 +214,6 @@
 <mbid></mbid>
 </album>
 <album><name>Petals to Thorns</name>
-<artist>デヴィッド &amp; Laufey</artist>
-<url>https://www.last.fm/music/%E3%83%87%E3%83%B4%E3%82%A3%E3%83%83%E3%83%89+&amp;+Laufey/Petals+to+Thorns</url>
-<image size="small"></image>
-<image size="medium"></image>
-<image size="large"></image>
-<image size="extralarge"></image>
-<streamable>0</streamable>
-<mbid></mbid>
-</album>
-<album><name>Petals to Thorns</name>
 <artist>デイヴィッド &amp; Laufey</artist>
 <url>https://www.last.fm/music/%E3%83%87%E3%82%A4%E3%83%B4%E3%82%A3%E3%83%83%E3%83%89+&amp;+Laufey/Petals+to+Thorns</url>
 <image size="small"></image>
@@ -234,8 +224,8 @@
 <mbid></mbid>
 </album>
 <album><name>Petals to Thorns</name>
-<artist>d4vdและLaufey</artist>
-<url>https://www.last.fm/music/d4vd%E0%B9%81%E0%B8%A5%E0%B8%B0Laufey/Petals+to+Thorns</url>
+<artist>デヴィッド &amp; Laufey</artist>
+<url>https://www.last.fm/music/%E3%83%87%E3%83%B4%E3%82%A3%E3%83%83%E3%83%89+&amp;+Laufey/Petals+to+Thorns</url>
 <image size="small"></image>
 <image size="medium"></image>
 <image size="large"></image>
@@ -246,6 +236,16 @@
 <album><name>Petals to Thorns</name>
 <artist>d4vd i Laufey</artist>
 <url>https://www.last.fm/music/d4vd+i+Laufey/Petals+to+Thorns</url>
+<image size="small"></image>
+<image size="medium"></image>
+<image size="large"></image>
+<image size="extralarge"></image>
+<streamable>0</streamable>
+<mbid></mbid>
+</album>
+<album><name>Petals to Thorns</name>
+<artist>d4vdและLaufey</artist>
+<url>https://www.last.fm/music/d4vd%E0%B9%81%E0%B8%A5%E0%B8%B0Laufey/Petals+to+Thorns</url>
 <image size="small"></image>
 <image size="medium"></image>
 <image size="large"></image>
@@ -274,28 +274,18 @@
 <mbid></mbid>
 </album>
 <album><name>Petals to Thorns</name>
+<artist>デイヴィッド、Laufey</artist>
+<url>https://www.last.fm/music/%E3%83%87%E3%82%A4%E3%83%B4%E3%82%A3%E3%83%83%E3%83%89%E3%80%81Laufey/Petals+to+Thorns</url>
+<image size="small"></image>
+<image size="medium"></image>
+<image size="large"></image>
+<image size="extralarge"></image>
+<streamable>0</streamable>
+<mbid></mbid>
+</album>
+<album><name>Petals to Thorns</name>
 <artist>d4vd;Laufey</artist>
 <url>https://www.last.fm/music/d4vd;Laufey/Petals+to+Thorns</url>
-<image size="small"></image>
-<image size="medium"></image>
-<image size="large"></image>
-<image size="extralarge"></image>
-<streamable>0</streamable>
-<mbid></mbid>
-</album>
-<album><name>Petals to Thorns</name>
-<artist>d4vd; d4vd</artist>
-<url>https://www.last.fm/music/d4vd;+d4vd/Petals+to+Thorns</url>
-<image size="small"></image>
-<image size="medium"></image>
-<image size="large"></image>
-<image size="extralarge"></image>
-<streamable>0</streamable>
-<mbid></mbid>
-</album>
-<album><name>Petals to Thorns</name>
-<artist>Billie Eilish</artist>
-<url>https://www.last.fm/music/Billie+Eilish/Petals+to+Thorns</url>
 <image size="small"></image>
 <image size="medium"></image>
 <image size="large"></image>
@@ -314,8 +304,18 @@
 <mbid></mbid>
 </album>
 <album><name>Petals to Thorns</name>
-<artist>デイヴィッド、Laufey</artist>
-<url>https://www.last.fm/music/%E3%83%87%E3%82%A4%E3%83%B4%E3%82%A3%E3%83%83%E3%83%89%E3%80%81Laufey/Petals+to+Thorns</url>
+<artist>Billie Eilish</artist>
+<url>https://www.last.fm/music/Billie+Eilish/Petals+to+Thorns</url>
+<image size="small"></image>
+<image size="medium"></image>
+<image size="large"></image>
+<image size="extralarge"></image>
+<streamable>0</streamable>
+<mbid></mbid>
+</album>
+<album><name>Petals to Thorns</name>
+<artist>d4vd; d4vd</artist>
+<url>https://www.last.fm/music/d4vd;+d4vd/Petals+to+Thorns</url>
 <image size="small"></image>
 <image size="medium"></image>
 <image size="large"></image>
@@ -354,6 +354,16 @@
 <mbid></mbid>
 </album>
 <album><name>Petals to Thorns</name>
+<artist>d4vd và Laufey</artist>
+<url>https://www.last.fm/music/d4vd+v%C3%A0+Laufey/Petals+to+Thorns</url>
+<image size="small"></image>
+<image size="medium"></image>
+<image size="large"></image>
+<image size="extralarge"></image>
+<streamable>0</streamable>
+<mbid></mbid>
+</album>
+<album><name>Petals to Thorns</name>
 <artist>d4vd ve Laufey</artist>
 <url>https://www.last.fm/music/d4vd+ve+Laufey/Petals+to+Thorns</url>
 <image size="small"></image>
@@ -383,16 +393,6 @@
 <streamable>0</streamable>
 <mbid></mbid>
 </album>
-<album><name>Petals to Thorns</name>
-<artist>d4vd và Laufey</artist>
-<url>https://www.last.fm/music/d4vd+v%C3%A0+Laufey/Petals+to+Thorns</url>
-<image size="small"></image>
-<image size="medium"></image>
-<image size="large"></image>
-<image size="extralarge"></image>
-<streamable>0</streamable>
-<mbid></mbid>
-</album>
 <album><name>Petals and Thorns</name>
 <artist>Austin Giorgio</artist>
 <url>https://www.last.fm/music/Austin+Giorgio/Petals+and+Thorns</url>
@@ -400,16 +400,6 @@
 <image size="medium">https://lastfm-img.freetls.fastly.net/i/u/64s/4360e5afe9087642f6060f271798bd2c.png</image>
 <image size="large">https://lastfm-img.freetls.fastly.net/i/u/174s/4360e5afe9087642f6060f271798bd2c.png</image>
 <image size="extralarge">https://lastfm-img.freetls.fastly.net/i/u/300x300/4360e5afe9087642f6060f271798bd2c.png</image>
-<streamable>0</streamable>
-<mbid></mbid>
-</album>
-<album><name>Petals &amp; Thorns</name>
-<artist>jxvi.</artist>
-<url>https://www.last.fm/music/jxvi./Petals+&amp;+Thorns</url>
-<image size="small"></image>
-<image size="medium"></image>
-<image size="large"></image>
-<image size="extralarge"></image>
 <streamable>0</streamable>
 <mbid></mbid>
 </album>
@@ -426,6 +416,16 @@
 <album><name>Petals to Thorns</name>
 <artist>d4vd • From Smart Shuffle</artist>
 <url>https://www.last.fm/music/d4vd+%E2%80%A2+From+Smart+Shuffle/Petals+to+Thorns</url>
+<image size="small"></image>
+<image size="medium"></image>
+<image size="large"></image>
+<image size="extralarge"></image>
+<streamable>0</streamable>
+<mbid></mbid>
+</album>
+<album><name>Petals &amp; Thorns</name>
+<artist>jxvi.</artist>
+<url>https://www.last.fm/music/jxvi./Petals+&amp;+Thorns</url>
 <image size="small"></image>
 <image size="medium"></image>
 <image size="large"></image>
@@ -453,6 +453,16 @@
 <streamable>0</streamable>
 <mbid></mbid>
 </album>
+<album><name>Petals To Thorns (Live)</name>
+<artist>d4vd</artist>
+<url>https://www.last.fm/music/d4vd/Petals+To+Thorns+(Live)</url>
+<image size="small"></image>
+<image size="medium"></image>
+<image size="large"></image>
+<image size="extralarge"></image>
+<streamable>0</streamable>
+<mbid></mbid>
+</album>
 <album><name>﻿Petals to Thorns</name>
 <artist>﻿d4vd, Laufey</artist>
 <url>https://www.last.fm/music/%EF%BB%BFd4vd,+Laufey/%EF%BB%BFPetals+to+Thorns</url>
@@ -466,16 +476,6 @@
 <album><name>Petals to Thorns [EP]</name>
 <artist>d4vd</artist>
 <url>https://www.last.fm/music/d4vd/Petals+to+Thorns+%5BEP%5D</url>
-<image size="small"></image>
-<image size="medium"></image>
-<image size="large"></image>
-<image size="extralarge"></image>
-<streamable>0</streamable>
-<mbid></mbid>
-</album>
-<album><name>Petals To Thorns (Live)</name>
-<artist>d4vd</artist>
-<url>https://www.last.fm/music/d4vd/Petals+To+Thorns+(Live)</url>
 <image size="small"></image>
 <image size="medium"></image>
 <image size="large"></image>

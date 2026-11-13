@@ -16,6 +16,18 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/keys/keys').then((m) => m.KeysPage),
   },
   {
+    path: 'demo',
+    title: 'Speed comparison',
+    canActivate: [activeGuard],
+    loadComponent: () => import('./pages/demo/demo').then((m) => m.DemoPage),
+  },
+  {
+    path: 'demo/live',
+    title: 'Live race',
+    canActivate: [activeGuard],
+    loadComponent: () => import('./pages/race/race').then((m) => m.RacePage),
+  },
+  {
     path: 'settings',
     title: 'Settings',
     canActivate: [activeGuard],

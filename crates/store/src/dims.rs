@@ -2,7 +2,7 @@
 
 use std::collections::HashMap;
 
-use rusqlite::{Connection, OptionalExtension, Row, params};
+use rusqlite::{Connection, Row, params};
 
 use crate::error::Result;
 use crate::names::{fold, image_key, non_empty};
@@ -171,13 +171,11 @@ fn opt(value: Option<&String>) -> Option<&str> {
 }
 
 /// The artist columns of a track joined as `t` with its artist as `ar`: the spelling, MBID and
-/// URL Last.fm shows with the track. A spelling of its own comes with a URL of its own, which is
-/// the track URL's artist part.
+/// URL Last.fm shows with the track. `entity_at` replaces the URL with the track URL's artist
+/// part when there is one.
 macro_rules! track_artist_columns {
     () => {
-        "coalesce(t.artist_name, ar.name), coalesce(t.artist_mbid, ar.mbid), \
-         CASE WHEN t.artist_name IS NOT NULL AND instr(t.url, '/_/') > 0 \
-         THEN substr(t.url, 1, instr(t.url, '/_/') - 1) ELSE ar.url END"
+        "coalesce(t.artist_name, ar.name), coalesce(t.artist_mbid, ar.mbid), ar.url"
     };
 }
 pub(crate) use track_artist_columns;
@@ -208,15 +206,32 @@ pub(crate) fn entity_sql(kind: Kind) -> &'static str {
     }
 }
 
+/// The artist name and the name of one entity, as `entity_sql` shows them: what ties sort by.
+pub(crate) fn name_sql(kind: Kind) -> &'static str {
+    match kind {
+        Kind::Artist => "SELECT NULL, coalesce(lib_name, name) FROM artists WHERE id = ?1",
+        Kind::Album => {
+            "SELECT coalesce(ar.lib_name, ar.name), al.name \
+             FROM albums al JOIN artists ar ON ar.id = al.artist_id WHERE al.id = +?1"
+        }
+        Kind::Track => {
+            "SELECT coalesce(t.artist_name, ar.name), t.name \
+             FROM tracks t JOIN artists ar ON ar.id = t.artist_id WHERE t.id = +?1"
+        }
+    }
+}
+
 /// Reads an entity from nine columns starting at `at`, in the order of `entity_sql`.
 pub(crate) fn entity_at(row: &Row<'_>, at: usize) -> rusqlite::Result<Entity> {
+    let url: Option<String> = row.get(at + 3)?;
     let artist_name: Option<String> = row.get(at + 5)?;
     let artist = artist_name
         .map(|name| -> rusqlite::Result<Named> {
+            let row_url: Option<String> = row.get(at + 7)?;
             Ok(Named {
                 name,
                 mbid: row.get(at + 6)?,
-                url: row.get(at + 7)?,
+                url: url.as_deref().and_then(artist_url_of).or(row_url),
             })
         })
         .transpose()?;
@@ -224,15 +239,42 @@ pub(crate) fn entity_at(row: &Row<'_>, at: usize) -> rusqlite::Result<Entity> {
         id: row.get(at)?,
         name: row.get(at + 1)?,
         mbid: row.get(at + 2)?,
-        url: row.get(at + 3)?,
+        url,
         image: row.get(at + 4)?,
         artist,
         duration: row.get(at + 8)?,
     })
 }
 
-/// Loads one entity by id.
-pub(crate) fn load(conn: &Connection, kind: Kind, id: i64) -> Result<Option<Entity>> {
-    let mut stmt = conn.prepare_cached(entity_sql(kind))?;
-    Ok(stmt.query_row([id], |row| entity_at(row, 0)).optional()?)
+/// The artist URL Last.fm shows next to an album or track: the item URL's artist part, without
+/// `+noredirect`. Last.fm never takes it from the artist itself, whose URL can differ in
+/// spelling (about 7,800 items checked on 2026-11-13, no exception).
+fn artist_url_of(item_url: &str) -> Option<String> {
+    const MUSIC: &str = "/music/";
+    let (base, path) = item_url.split_once(MUSIC)?;
+    let path = path.strip_prefix("+noredirect/").unwrap_or(path);
+    let artist = path.split('/').next().filter(|artist| !artist.is_empty())?;
+    Some(format!("{base}{MUSIC}{artist}"))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::artist_url_of;
+
+    #[test]
+    fn artist_url_is_the_item_urls_artist_part() {
+        let cases = [
+            ("https://www.last.fm/music/tripleS/ASSEMBLE", "https://www.last.fm/music/tripleS"),
+            (
+                "https://www.last.fm/music/+noredirect/Jorge+Ben/_/%C3%89+S%C3%B3+Sambar",
+                "https://www.last.fm/music/Jorge+Ben",
+            ),
+            ("https://www.last.fm/music/Cher/_/Believe", "https://www.last.fm/music/Cher"),
+        ];
+        for (item, artist) in cases {
+            assert_eq!(artist_url_of(item).as_deref(), Some(artist), "{item}");
+        }
+        assert_eq!(artist_url_of(""), None);
+        assert_eq!(artist_url_of("https://www.last.fm/music/"), None);
+    }
 }

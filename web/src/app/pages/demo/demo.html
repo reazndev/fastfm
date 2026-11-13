@@ -1,0 +1,102 @@
+<div class="page">
+  <div class="stack">
+    <app-demo-tabs />
+    <h1>Speed comparison</h1>
+    <p class="muted">The same API calls, timed on Last.fm and on this mirror.</p>
+  </div>
+
+  <form class="ask" (ngSubmit)="compare()">
+    <label class="field grow">
+      Last.fm username
+      <input
+        name="username"
+        required
+        autocapitalize="off"
+        spellcheck="false"
+        [(ngModel)]="username"
+      />
+    </label>
+    <button
+      type="submit"
+      class="button"
+      [class.primary]="runner.phase() !== 'not_mirrored'"
+      [disabled]="runner.busy() || !username().trim()"
+    >
+      Run comparison
+    </button>
+  </form>
+
+  @let prepared = runner.prepared();
+  @switch (runner.phase()) {
+    @case ('preparing') {
+      <app-loading />
+    }
+    @case ('not_mirrored') {
+      <div class="notice stack">
+        <p>
+          {{ prepared?.username }} is not mirrored here yet. Import their
+          {{ count(prepared?.playcount ?? 0) }} scrobbles to compare.
+        </p>
+        @if (prepared?.import?.error; as error) {
+          <p class="small error">The last import stopped: {{ error }}</p>
+        }
+        <button type="button" class="button primary" (click)="runner.importAndCompare()">
+          Import and compare
+        </button>
+      </div>
+    }
+    @case ('importing') {
+      @let job = runner.progress();
+      <div class="stack">
+        <progress
+          [value]="job?.imported ?? 0"
+          [max]="job?.estimatedTotal || 1"
+          aria-label="Import progress"
+        ></progress>
+        <p role="status">
+          Importing {{ prepared?.username }}: {{ count(job?.imported ?? 0) }}
+          @if (job?.estimatedTotal; as total) {
+            of about {{ count(total) }}
+          }
+          scrobbles
+        </p>
+        <p class="small muted">The comparison starts when the import is done.</p>
+      </div>
+    }
+  }
+
+  <app-error-notice [error]="runner.error()" />
+
+  @if (runner.rows().length > 0) {
+    <section class="results" aria-labelledby="results-heading">
+      <div class="stack">
+        <h2 id="results-heading">{{ prepared?.username }}</h2>
+        <p class="legend small muted">
+          <span><i class="swatch lastfm"></i>Last.fm</span>
+          <span><i class="swatch first"></i>Mirror, first request</span>
+          <span><i class="swatch cached"></i>Mirror, cached</span>
+          <span>Log scale</span>
+        </p>
+      </div>
+      <div>
+        @for (row of runner.rows(); track row.scenario.id) {
+          <app-result-row
+            [row]="row"
+            [scale]="scale()"
+            [active]="runner.current() === row.scenario.id"
+          />
+        }
+        @if (total(); as row) {
+          <app-result-row class="total" [row]="row" [scale]="scale()" [total]="true" />
+        }
+      </div>
+      <p class="small muted">
+        Both sides are timed on this server, one request at a time, with one Last.fm API key.
+        Last.fm's time includes the network round trip from this server to Last.fm. The mirror's
+        time is a real HTTP request to this server's own API, so it leaves out the network between
+        your device and this server. "Mirror" is the first request after its response cache is
+        cleared; "cached" repeats it. Bodies can differ where Last.fm changed since the last sync.
+      </p>
+    </section>
+  }
+</div>

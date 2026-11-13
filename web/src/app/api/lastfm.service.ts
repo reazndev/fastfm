@@ -35,8 +35,13 @@ export class LastfmService {
     return url;
   }
 
-  /** Trades the token Last.fm sent back for a session key. */
-  finishAuth(token: string): Promise<LinkStatus> {
-    return this.api.get<LinkStatus>('/lastfm/auth/callback', { token });
+  /** Trades the token Last.fm sent back for a session key; `state` ties it to this session. */
+  finishAuth(state: string, token: string): Promise<LinkStatus> {
+    return this.api.get<LinkStatus>('/lastfm/auth/callback', { state, token });
+  }
+
+  /** Tries the import again, after a private profile was made public. */
+  retryImport(): Promise<LinkStatus> {
+    return this.api.post<LinkStatus>('/lastfm/import/retry');
   }
 }

@@ -82,6 +82,12 @@ pub trait Method: Send + Sync {
         None
     }
 
+    /// What Last.fm answers, in plain text and with status 200, instead of error 6 when this
+    /// [`Access::Session`] method arrives without `api_sig`. `None`, the default, keeps error 6.
+    fn unsigned_answer(&self) -> Option<&'static str> {
+        None
+    }
+
     /// Which backend's formatting the method copies, for its body and its errors.
     fn style(&self) -> Style {
         Style::Classic

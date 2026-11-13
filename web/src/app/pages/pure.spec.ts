@@ -1,12 +1,14 @@
 import { Account, LinkStatus } from '../api/models';
 import { byPendingFirst } from './admin/admin';
-import { importing } from './home/home';
+import { signupHint } from './auth/signup';
+import { importing, needsOwnKey } from './home/home';
 
 const writes = { forwarding: false, queued: 0, failed: 0, heldLocally: 0, lastError: null };
 const linked: LinkStatus = {
   username: 'syntiiix',
   authorized: false,
   ownKey: false,
+  credentials: { ownKeyRequired: false, error: null },
   import: null,
   sync: null,
   writes,
@@ -20,6 +22,27 @@ describe('home', () => {
     expect(importing({ ...linked, import: { ...job, status: 'running' } })).toBe(true);
     expect(importing({ ...linked, import: { ...job, status: 'done' } })).toBe(false);
     expect(importing({ ...linked, import: { ...job, status: 'failed' } })).toBe(false);
+    expect(importing({ ...linked, import: { ...job, status: 'private' } })).toBe(false);
+  });
+
+  it('asks for the own key first only when the server requires one', () => {
+    const unlinked = { ...linked, username: null };
+    const required = { ...unlinked, credentials: { ownKeyRequired: true, error: null } };
+    expect(needsOwnKey(unlinked)).toBe(false);
+    expect(needsOwnKey(required)).toBe(true);
+    expect(needsOwnKey({ ...required, ownKey: true })).toBe(false);
+    expect(needsOwnKey({ ...required, username: 'syntiiix' })).toBe(false);
+  });
+});
+
+describe('sign-up', () => {
+  it('says what happens to a new account', () => {
+    const info = { mode: 'approval', hasAccounts: true, setupTokenRequired: false } as const;
+    expect(signupHint({ ...info, hasAccounts: false })).toBe(
+      'The first account becomes the admin.',
+    );
+    expect(signupHint(info)).toBe('An admin approves new accounts before they can be used.');
+    expect(signupHint({ ...info, mode: 'open' })).toBeNull();
   });
 });
 

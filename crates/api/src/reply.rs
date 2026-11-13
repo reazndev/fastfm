@@ -5,6 +5,7 @@ use std::borrow::Cow;
 use bytes::Bytes;
 use lfm_core::{ApiError, Format, Output, Style};
 
+use crate::body::Body;
 use crate::method::Method;
 use crate::passthrough::Entry;
 
@@ -17,6 +18,10 @@ const REQUEST_HEADERS: (&str, &str) = (
     "Origin, X-Atmosphere-tracking-id, X-Atmosphere-Framework, X-Cache-Date, Content-Type, \
      X-Atmosphere-Transport, *",
 );
+
+/// Sent with every JSONP reply, whose first bytes the caller picks; see `Output::from_params`.
+/// Last.fm does not send it, but compares equal: only `access-control-*` headers are copied.
+const NOSNIFF: (&str, &str) = ("x-content-type-options", "nosniff");
 
 /// Where a reply came from, as the `X-Mirror-Source` header shows it.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -56,18 +61,18 @@ pub struct Reply {
     pub headers: Vec<(HeaderText, HeaderText)>,
     /// Where the reply came from.
     pub source: Source,
-    /// The body.
-    pub body: Bytes,
+    /// The body, with its entity tag and compressed copies.
+    pub body: Body,
 }
 
 impl Reply {
     /// Replays Last.fm's answer, wrapping JSON in the request's callback.
-    pub(crate) fn replay(entry: &Entry, body: Bytes, output: &Output, source: Source) -> Self {
-        let jsonp = output.format() == Format::Json && output.callback().is_some();
+    pub(crate) fn replay(entry: &Entry, body: Body, output: &Output, source: Source) -> Self {
+        let jsonp = output.is_jsonp();
         let (content_type, body) = if jsonp {
             (
                 output.content_type().into(),
-                Bytes::from(output.wrap_json(&body)),
+                Body::hashed(Bytes::from(output.wrap_json(&body))),
             )
         } else {
             (entry.content_type.clone().into(), body)
@@ -76,6 +81,7 @@ impl Reply {
             .headers
             .iter()
             .map(|(name, value)| (name.clone().into(), value.clone().into()))
+            .chain(jsonp.then_some((NOSNIFF.0.into(), NOSNIFF.1.into())))
             .collect();
         Self {
             status: entry.status,
@@ -108,18 +114,21 @@ impl Shape {
         }
     }
 
-    fn reply(self, output: &Output, status: u16, body: Bytes) -> Reply {
+    pub(crate) fn reply(self, output: &Output, status: u16, body: Body) -> Reply {
         let utf8 = self.utf8_json && output.format() == Format::Json && output.callback().is_none();
         let content_type = if utf8 {
             "application/json; charset=UTF-8"
         } else {
             output.content_type()
         };
-        let headers = if self.utf8_json {
-            vec![(REQUEST_HEADERS.0.into(), REQUEST_HEADERS.1.into())]
-        } else {
-            Vec::new()
-        };
+        let headers = [
+            self.utf8_json.then_some(REQUEST_HEADERS),
+            output.is_jsonp().then_some(NOSNIFF),
+        ]
+        .into_iter()
+        .flatten()
+        .map(|(name, value)| (name.into(), value.into()))
+        .collect();
         Reply {
             status,
             content_type: content_type.into(),
@@ -130,15 +139,18 @@ impl Shape {
     }
 }
 
-pub(crate) fn ok_reply(output: &Output, body: &Bytes, shape: Shape) -> Reply {
-    let body = match (output.format(), output.callback()) {
-        (Format::Json, Some(_)) => Bytes::from(output.wrap_json(body)),
-        _ => body.clone(),
-    };
-    shape.reply(output, 200, body)
+/// A plain-text reply, as Last.fm's old submissions protocol answers.
+pub(crate) fn text_reply(text: &'static str) -> Reply {
+    Reply {
+        status: 200,
+        content_type: "text/plain; charset=utf-8".into(),
+        headers: Vec::new(),
+        source: Source::Local,
+        body: Body::hashed(Bytes::from_static(text.as_bytes())),
+    }
 }
 
 pub(crate) fn error_reply(output: &Output, error: &ApiError, shape: Shape) -> Reply {
-    let body = Bytes::from(output.render_error_in(error, shape.style));
+    let body = Body::from(output.render_error_in(error, shape.style));
     shape.reply(output, error.http_status(), body)
 }

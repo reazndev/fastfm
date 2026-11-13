@@ -42,6 +42,8 @@ pub struct Data {
     pub corrections: HashMap<String, String>,
     /// Requested `extended` values of `user.getRecentTracks`.
     pub extended: Vec<String>,
+    /// Hide the recent tracks, as a private profile does (error 17).
+    pub private: bool,
 }
 
 /// A fake Last.fm whose data tests change while it runs.
@@ -87,6 +89,9 @@ impl Respond for Fake {
         let mut data = self.0.lock().unwrap();
         *data.calls.entry(method.clone()).or_default() += 1;
         let body = match method.as_str() {
+            "user.getRecentTracks" if data.private => {
+                json!({"error": 17, "message": "Login: User required to be logged in"})
+            }
             "user.getRecentTracks" if data.fail_after == Some(0) => {
                 json!({"error": 8, "message": "Operation failed"})
             }
@@ -224,6 +229,8 @@ impl Harness {
             .mount(&server)
             .await;
         let store = Store::open_in_memory().unwrap();
+        let unlimited = NonZeroU32::new(100_000).unwrap();
+        let config = config.request_budgets(unlimited, unlimited);
         let service = SyncService::new(store.clone(), Arc::new(client(&server)), config);
         Self {
             server,

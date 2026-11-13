@@ -16,7 +16,12 @@ const ALL: TimeRange = TimeRange {
 fn fast(page_limit: u32) -> SyncConfig {
     SyncConfig::default()
         .page_limit(page_limit)
-        .live_intervals(Duration::from_millis(10), Duration::from_millis(30))
+        .poll_intervals(
+            Duration::from_millis(10),
+            Duration::from_millis(30),
+            Duration::from_millis(30),
+        )
+        .idle_interval(Duration::from_millis(30))
         .periods_interval(Duration::from_millis(50))
 }
 
@@ -111,5 +116,74 @@ async fn follow_skips_the_import_when_one_finished() {
     h.service.follow(USER).await.unwrap();
     settle(&h).await;
     assert_eq!(h.fake.calls("user.getInfo"), planned, "no second import");
+    h.service.shutdown().await;
+}
+
+/// Fast polls while active, an hour otherwise, so only nudges and new activity poll.
+fn tiered() -> SyncConfig {
+    let hour = Duration::from_secs(3600);
+    SyncConfig::default()
+        .poll_intervals(Duration::from_millis(10), hour, hour)
+        .idle_interval(hour)
+        .poll_jitter(0)
+}
+
+#[tokio::test]
+async fn an_idle_user_is_polled_rarely_until_nudged() {
+    let h = Harness::with_config(tiered().nudge_after(Duration::ZERO)).await;
+    h.fake.add(&[(REGISTERED, "old")]);
+    let user = h.service.follow(USER).await.unwrap();
+    eventually(|| mirrors(&h)).await;
+    eventually(|| async { h.fake.calls("user.getRecentTracks") >= 3 }).await;
+    let polls = h.fake.calls("user.getRecentTracks");
+    tokio::time::sleep(Duration::from_millis(100)).await;
+    assert_eq!(h.fake.calls("user.getRecentTracks"), polls, "idle tier");
+
+    assert!(h.service.nudge(user));
+    eventually(|| async { h.fake.calls("user.getRecentTracks") > polls }).await;
+    h.service.shutdown().await;
+}
+
+#[tokio::test]
+async fn a_recent_poll_ignores_nudges() {
+    let h = Harness::with_config(tiered()).await;
+    h.fake.add(&[(REGISTERED, "old")]);
+    let user = h.service.follow(USER).await.unwrap();
+    eventually(|| mirrors(&h)).await;
+    eventually(|| async { h.fake.calls("user.getRecentTracks") >= 3 }).await;
+    tokio::time::sleep(Duration::from_millis(50)).await;
+    assert!(!h.service.nudge(user), "polled less than a minute ago");
+    assert!(!h.service.nudge(lfm_store::UserId(999)), "not followed");
+    h.service.shutdown().await;
+}
+
+#[tokio::test]
+async fn now_playing_moves_an_idle_user_to_the_fast_tier() {
+    let h = Harness::with_config(tiered().nudge_after(Duration::ZERO)).await;
+    h.fake.add(&[(REGISTERED, "old")]);
+    let user = h.service.follow(USER).await.unwrap();
+    eventually(|| async { h.fake.calls("user.getRecentTracks") >= 3 }).await;
+    h.fake.with(|d| d.now_playing = Some("Believe".into()));
+    assert!(h.service.nudge(user));
+    let polls = h.fake.calls("user.getRecentTracks");
+    eventually(|| async { h.fake.calls("user.getRecentTracks") >= polls + 5 }).await;
+    h.service.shutdown().await;
+}
+
+#[tokio::test]
+async fn a_profile_that_turns_private_is_reported_and_retried_on_request() {
+    let h = Harness::with_config(fast(1000)).await;
+    h.fake.add(&[(REGISTERED, "old")]);
+    let user = h.service.follow(USER).await.unwrap();
+    settle(&h).await;
+    h.fake.with(|d| d.private = true);
+    eventually(|| async { h.service.is_private(user) }).await;
+    let refused = h.fake.calls("user.getRecentTracks");
+    tokio::time::sleep(Duration::from_millis(100)).await;
+    assert_eq!(h.fake.calls("user.getRecentTracks"), refused, "waits a day");
+    h.fake.with(|d| d.private = false);
+    assert!(h.service.retry(user));
+    settle(&h).await;
+    assert!(!h.service.is_private(user));
     h.service.shutdown().await;
 }

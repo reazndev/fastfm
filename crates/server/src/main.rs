@@ -1,7 +1,6 @@
 //! `lfm-mirror`: serves the Last.fm API from a local copy.
 
 use anyhow::Context as _;
-use std::net::SocketAddr;
 
 use lfm_mirror::{App, Config, Jobs, app_router};
 use lfm_store::Store;
@@ -15,21 +14,28 @@ async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()))
         .init();
+    raise_open_files();
     let config = Config::from_env()?;
     tracing::info!(bind = %config.bind, db = %config.db.display(), "starting");
-    if config.now.is_some() || config.dev_key.is_some() {
-        tracing::warn!("LFM_NOW or LFM_DEV_API_KEY is set; these are for development only");
+    if config.now.is_some() {
+        tracing::warn!("LFM_NOW is set: the clock is frozen and sync is off (development only)");
+    }
+    if config.dev_key.is_some() {
+        tracing::warn!(
+            "LFM_DEV_API_KEY is set: a read-write development API key is active; unset it \
+             outside development"
+        );
     }
     if let Some(dir) = config.db.parent().filter(|dir| !dir.as_os_str().is_empty()) {
         std::fs::create_dir_all(dir).with_context(|| format!("creating {}", dir.display()))?;
     }
-    let store =
-        Store::open(&config.db).with_context(|| format!("opening {}", config.db.display()))?;
+    let store = Store::open_with(&config.db, config.db_readers, config.db_tuning)
+        .with_context(|| format!("opening {}", config.db.display()))?;
     let app = App::new(store, &config).await?;
     if app.passthrough.is_none() {
         tracing::warn!(
-            "LASTFM_API_KEYS is not set; catalogue methods answer error 3, and only accounts \
-             with their own Last.fm key can sync"
+            "LASTFM_API_KEYS is not set; catalogue methods need the caller's own Last.fm key \
+             (error 16 without one), and only accounts with their own Last.fm key can sync"
         );
     }
     if config.lastfm_app().is_none() {
@@ -45,11 +51,7 @@ async fn main() -> anyhow::Result<()> {
     let listener = tokio::net::TcpListener::bind(config.bind)
         .await
         .with_context(|| format!("binding {}", config.bind))?;
-    let service = app_router(&app).into_make_service_with_connect_info::<SocketAddr>();
-    axum::serve(listener, service)
-        .with_graceful_shutdown(shutdown_signal())
-        .await
-        .context("serving")?;
+    lfm_mirror::serve::serve(listener, app_router(&app), shutdown_signal()).await;
     maintenance.abort();
     if let Some(jobs) = jobs {
         jobs.shutdown().await;
@@ -57,6 +59,23 @@ async fn main() -> anyhow::Result<()> {
     tracing::info!("stopped");
     Ok(())
 }
+/// Lifts the soft limit on open files to the hard one: every client connection is a file, and
+/// the common soft limit of 1024 made accepts fail at a few thousand connections. A failed
+/// accept is retried after a pause by `axum::serve`, so hitting the limit never spins.
+fn raise_open_files() {
+    #[cfg(unix)]
+    {
+        use rustix::process::{Resource, getrlimit, setrlimit};
+        let mut limit = getrlimit(Resource::Nofile);
+        if limit.current < limit.maximum {
+            limit.current = limit.maximum;
+            if let Err(error) = setrlimit(Resource::Nofile, limit) {
+                tracing::warn!(%error, "cannot raise the open file limit");
+            }
+        }
+    }
+}
+
 async fn shutdown_signal() {
     let interrupt = async {
         if let Err(error) = tokio::signal::ctrl_c().await {

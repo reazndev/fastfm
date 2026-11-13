@@ -40,6 +40,12 @@ impl Method for Scrobble {
         Access::Session
     }
 
+    /// Without a signature Last.fm hands the request to its old submissions protocol, which
+    /// fails it in plain text: observed in the `error-unsigned` fixture, in both formats.
+    fn unsigned_answer(&self) -> Option<&'static str> {
+        Some("FAILED Incorrect protocol version (missing clientID/version/username)\n")
+    }
+
     async fn call(&self, ctx: &Context<'_>) -> Result<Response, ApiError> {
         let items = items(ctx.params)?;
         let account = session_account(ctx).await?;

@@ -69,3 +69,27 @@ select {
   border-radius: var(--radius);
   padding: var(--space-3) var(--space-4);
 }
+
+/* A one-line form: fields that grow, then the button on their baseline. */
+.ask {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+}
+
+/* A checkbox with its label and a hint below it. */
+.check {
+  display: flex;
+  gap: var(--space-3);
+  align-items: baseline;
+  cursor: pointer;
+}
+.check input {
+  min-height: 0;
+}
+.check > span {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}

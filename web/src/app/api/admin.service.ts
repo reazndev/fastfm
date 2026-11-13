@@ -31,4 +31,8 @@ export class AdminService {
   setSignupMode(signupMode: SignupMode): Promise<InstanceSettings> {
     return this.api.put<InstanceSettings>('/admin/settings', { signupMode });
   }
+
+  setRequireOwnKey(requireOwnKey: boolean): Promise<InstanceSettings> {
+    return this.api.put<InstanceSettings>('/admin/settings', { requireOwnKey });
+  }
 }

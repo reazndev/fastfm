@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 
 import { AccountAction, AdminService } from '../../api/admin.service';
-import { Account, SignupMode } from '../../api/models';
+import { Account, InstanceSettings, SignupMode } from '../../api/models';
 import { SessionService } from '../../api/session.service';
 import { ErrorNotice } from '../../shared/error-notice';
 import { Loading } from '../../shared/loading';
@@ -57,10 +57,18 @@ export class AdminPage {
     }
   }
 
-  protected async setMode(mode: SignupMode): Promise<void> {
+  protected setMode(mode: SignupMode): Promise<void> {
+    return this.saveSettings(() => this.admin.setSignupMode(mode));
+  }
+
+  protected setRequireOwnKey(required: boolean): Promise<void> {
+    return this.saveSettings(() => this.admin.setRequireOwnKey(required));
+  }
+
+  private async saveSettings(save: () => Promise<InstanceSettings>): Promise<void> {
     this.modeError.set(null);
     try {
-      this.settings.set(await this.admin.setSignupMode(mode));
+      this.settings.set(await save());
     } catch (error) {
       this.modeError.set(error);
       this.settings.reload();

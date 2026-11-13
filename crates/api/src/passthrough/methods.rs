@@ -21,10 +21,6 @@ const USER: Duration = Duration::from_secs(300);
 /// Last.fm error answers such as "artist not found", so a typo is not remembered for a week.
 pub(crate) const ERRORS: Duration = Duration::from_secs(300);
 
-/// Parameters that never reach Last.fm and never change the answer: our key, signature and
-/// session, the output format (cached apart) and the JSONP callback (applied when serving).
-const NOT_FORWARDED: [&str; 6] = ["api_key", "api_sig", "sk", "format", "callback", "method"];
-
 /// Entity names that Last.fm looks up ignoring case and does not echo back as given, so their
 /// case can be folded in the cache key. Observed in the `autocorrect-*` and `lowercase-country`
 /// fixtures, whose bodies equal the default variant's. Search terms, tags and user names are
@@ -40,59 +36,125 @@ pub struct Forwarded {
     pub ttl: Duration,
     /// Whether the [`FOLDED`] parameters are compared ignoring case.
     pub fold: bool,
+    /// The parameters Last.fm documents (or was seen to honour) for the method. Only these
+    /// are forwarded and keyed on, so made-up parameters can neither bust the cache nor turn
+    /// the mirror into a proxy for arbitrary requests.
+    pub params: &'static [&'static str],
 }
 
-const fn method(name: &'static str, ttl: Duration, fold: bool) -> Forwarded {
-    Forwarded { name, ttl, fold }
+const fn method(
+    name: &'static str,
+    ttl: Duration,
+    fold: bool,
+    params: &'static [&'static str],
+) -> Forwarded {
+    Forwarded {
+        name,
+        ttl,
+        fold,
+        params,
+    }
 }
+
+const ARTIST: &[&str] = &["artist", "mbid", "autocorrect"];
+const ARTIST_INFO: &[&str] = &["artist", "mbid", "autocorrect", "lang", "username", "user"];
+const ARTIST_TAGS: &[&str] = &["artist", "mbid", "autocorrect", "user"];
+const ARTIST_LIST: &[&str] = &["artist", "mbid", "autocorrect", "limit", "page"];
+const ARTIST_SEARCH: &[&str] = &["artist", "limit", "page"];
+const ALBUM: &[&str] = &["artist", "album", "mbid", "autocorrect"];
+const ALBUM_INFO: &[&str] = &[
+    "artist",
+    "album",
+    "mbid",
+    "autocorrect",
+    "lang",
+    "username",
+    "user",
+];
+const ALBUM_TAGS: &[&str] = &["artist", "album", "mbid", "autocorrect", "user"];
+const ALBUM_SEARCH: &[&str] = &["album", "limit", "page"];
+const TRACK: &[&str] = &["artist", "track", "mbid", "autocorrect"];
+const TRACK_INFO: &[&str] = &[
+    "artist",
+    "track",
+    "mbid",
+    "autocorrect",
+    "lang",
+    "username",
+    "user",
+];
+const TRACK_TAGS: &[&str] = &["artist", "track", "mbid", "autocorrect", "user"];
+const TRACK_LIST: &[&str] = &["artist", "track", "mbid", "autocorrect", "limit"];
+const TRACK_SEARCH: &[&str] = &["track", "artist", "limit", "page"];
+const PAGED: &[&str] = &["limit", "page"];
+const GEO: &[&str] = &["country", "location", "limit", "page"];
+const TAG_PAGED: &[&str] = &["tag", "limit", "page"];
+const USER_PAGED: &[&str] = &["user", "limit", "page"];
+const USER_TOP: &[&str] = &["user", "period", "limit", "page"];
+const USER_CHART: &[&str] = &["user", "from", "to", "limit"];
 
 /// Every read method Last.fm documents. The local `user.*` and `library.*` methods are listed
 /// too: they are forwarded for users this instance does not mirror.
 static FORWARDED: &[Forwarded] = &[
-    method("album.getInfo", INFO, true),
-    method("album.getTags", HOUR, true),
-    method("album.getTopTags", LISTS, true),
-    method("album.search", SEARCH, false),
-    method("artist.getCorrection", LISTS, true),
-    method("artist.getInfo", INFO, true),
-    method("artist.getSimilar", LISTS, true),
-    method("artist.getTags", HOUR, true),
-    method("artist.getTopAlbums", LISTS, true),
-    method("artist.getTopTags", LISTS, true),
-    method("artist.getTopTracks", LISTS, true),
-    method("artist.search", SEARCH, false),
-    method("chart.getTopArtists", CHARTS, false),
-    method("chart.getTopTags", CHARTS, false),
-    method("chart.getTopTracks", CHARTS, false),
-    method("geo.getTopArtists", CHARTS, true),
-    method("geo.getTopTracks", CHARTS, true),
-    method("library.getArtists", USER, false),
-    method("tag.getInfo", INFO, false),
-    method("tag.getSimilar", LISTS, false),
-    method("tag.getTopAlbums", LISTS, false),
-    method("tag.getTopArtists", LISTS, false),
-    method("tag.getTopTags", LISTS, false),
-    method("tag.getTopTracks", LISTS, false),
-    method("tag.getWeeklyChartList", LISTS, false),
-    method("track.getCorrection", LISTS, true),
-    method("track.getInfo", INFO, true),
-    method("track.getSimilar", LISTS, true),
-    method("track.getTags", HOUR, true),
-    method("track.getTopTags", LISTS, true),
-    method("track.search", SEARCH, false),
-    method("user.getFriends", USER, false),
-    method("user.getInfo", USER, false),
-    method("user.getLovedTracks", USER, false),
-    method("user.getPersonalTags", USER, false),
-    method("user.getRecentTracks", USER, false),
-    method("user.getTopAlbums", USER, false),
-    method("user.getTopArtists", USER, false),
-    method("user.getTopTags", USER, false),
-    method("user.getTopTracks", USER, false),
-    method("user.getWeeklyAlbumChart", USER, false),
-    method("user.getWeeklyArtistChart", USER, false),
-    method("user.getWeeklyChartList", USER, false),
-    method("user.getWeeklyTrackChart", USER, false),
+    method("album.getInfo", INFO, true, ALBUM_INFO),
+    method("album.getTags", HOUR, true, ALBUM_TAGS),
+    method("album.getTopTags", LISTS, true, ALBUM),
+    method("album.search", SEARCH, false, ALBUM_SEARCH),
+    method("artist.getCorrection", LISTS, true, &["artist"]),
+    method("artist.getInfo", INFO, true, ARTIST_INFO),
+    method("artist.getSimilar", LISTS, true, ARTIST_LIST),
+    method("artist.getTags", HOUR, true, ARTIST_TAGS),
+    method("artist.getTopAlbums", LISTS, true, ARTIST_LIST),
+    method("artist.getTopTags", LISTS, true, ARTIST),
+    method("artist.getTopTracks", LISTS, true, ARTIST_LIST),
+    method("artist.search", SEARCH, false, ARTIST_SEARCH),
+    method("chart.getTopArtists", CHARTS, false, PAGED),
+    method("chart.getTopTags", CHARTS, false, PAGED),
+    method("chart.getTopTracks", CHARTS, false, PAGED),
+    method("geo.getTopArtists", CHARTS, true, GEO),
+    method("geo.getTopTracks", CHARTS, true, GEO),
+    method("library.getArtists", USER, false, USER_PAGED),
+    method("tag.getInfo", INFO, false, &["tag", "lang"]),
+    method("tag.getSimilar", LISTS, false, &["tag"]),
+    method("tag.getTopAlbums", LISTS, false, TAG_PAGED),
+    method("tag.getTopArtists", LISTS, false, TAG_PAGED),
+    method("tag.getTopTags", LISTS, false, PAGED),
+    method("tag.getTopTracks", LISTS, false, TAG_PAGED),
+    method("tag.getWeeklyChartList", LISTS, false, &["tag"]),
+    method("track.getCorrection", LISTS, true, &["artist", "track"]),
+    method("track.getInfo", INFO, true, TRACK_INFO),
+    method("track.getSimilar", LISTS, true, TRACK_LIST),
+    method("track.getTags", HOUR, true, TRACK_TAGS),
+    method("track.getTopTags", LISTS, true, TRACK),
+    method("track.search", SEARCH, false, TRACK_SEARCH),
+    method(
+        "user.getFriends",
+        USER,
+        false,
+        &["user", "recenttracks", "limit", "page"],
+    ),
+    method("user.getInfo", USER, false, &["user"]),
+    method("user.getLovedTracks", USER, false, USER_PAGED),
+    method(
+        "user.getPersonalTags",
+        USER,
+        false,
+        &["user", "tag", "taggingtype", "limit", "page"],
+    ),
+    method(
+        "user.getRecentTracks",
+        USER,
+        false,
+        &["user", "limit", "page", "from", "to", "extended"],
+    ),
+    method("user.getTopAlbums", USER, false, USER_TOP),
+    method("user.getTopArtists", USER, false, USER_TOP),
+    method("user.getTopTags", USER, false, &["user", "limit"]),
+    method("user.getTopTracks", USER, false, USER_TOP),
+    method("user.getWeeklyAlbumChart", USER, false, USER_CHART),
+    method("user.getWeeklyArtistChart", USER, false, USER_CHART),
+    method("user.getWeeklyChartList", USER, false, &["user"]),
+    method("user.getWeeklyTrackChart", USER, false, USER_CHART),
 ];
 
 /// The forwarded method with this name, ignoring ASCII case like Last.fm.
@@ -111,6 +173,8 @@ pub struct Forward {
     pub(crate) params: Vec<(String, String)>,
     pub(crate) format: Format,
     pub(crate) key: String,
+    /// The Last.fm key to call with; `None` uses the client's pool.
+    pub(crate) api_key: Option<lfm_upstream::ApiKey>,
 }
 
 impl Forward {
@@ -120,7 +184,7 @@ impl Forward {
         let params: Vec<(String, String)> = params
             .effective()
             .into_iter()
-            .filter(|(name, _)| !NOT_FORWARDED.contains(name))
+            .filter(|(name, _)| method.params.contains(name))
             .map(|(name, value)| (name.to_owned(), value.to_owned()))
             .collect();
         let key = cache_key(method, &params);
@@ -129,6 +193,7 @@ impl Forward {
             params,
             format,
             key,
+            api_key: None,
         }
     }
 
@@ -201,6 +266,19 @@ mod tests {
             key("artist.getInfo", &Params::new().with("artist", "Cher")),
             "artist.getinfo?artist=cher"
         );
+    }
+
+    #[test]
+    fn undocumented_parameters_are_neither_sent_nor_keyed() {
+        let plain = Params::new().with("artist", "Cher");
+        let padded = plain.clone().with("_n", "123").with("api_sig", "x");
+        assert_eq!(
+            key("artist.getInfo", &padded),
+            key("artist.getInfo", &plain)
+        );
+        let method = forwarded("artist.getInfo").unwrap();
+        let sent = Forward::new(method, &padded, Format::Json).params;
+        assert_eq!(sent, [("artist".to_owned(), "Cher".to_owned())]);
     }
 
     #[test]

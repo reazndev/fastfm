@@ -9,11 +9,17 @@
 use unicode_normalization::UnicodeNormalization;
 use unicode_normalization::char::is_combining_mark;
 
-use crate::types::Entity;
-
 /// A key that sorts names the way Last.fm sorts ties.
 #[must_use]
 pub fn collation_key(name: &str) -> Vec<u32> {
+    // Case folding and NFKD leave ASCII as lowercase ASCII, and no ASCII character is
+    // ignorable or a combining mark; skipping them is most of the cost for most names.
+    if name.is_ascii() {
+        return name
+            .bytes()
+            .map(|byte| weight(char::from(byte.to_ascii_lowercase())))
+            .collect();
+    }
     caseless::default_case_fold_str(name)
         .nfkd()
         .filter(|c| !is_combining_mark(*c) && !is_ignorable(*c))
@@ -45,13 +51,11 @@ fn base_letters(c: char) -> impl Iterator<Item = char> {
 }
 
 /// The tie key of an entity: its artist's name first for albums and tracks, then its own name.
-pub(crate) fn entity_key(entity: &Entity) -> (Vec<u32>, Vec<u32>) {
-    let artist = entity
-        .artist
-        .as_ref()
-        .map(|artist| collation_key(&artist.name))
-        .unwrap_or_default();
-    (artist, collation_key(&entity.name))
+pub(crate) fn tie_key(artist: Option<&str>, name: &str) -> (Vec<u32>, Vec<u32>) {
+    (
+        artist.map(collation_key).unwrap_or_default(),
+        collation_key(name),
+    )
 }
 
 /// ASCII punctuation, then ASCII symbols, each in the order the Unicode collation table gives.
@@ -77,6 +81,12 @@ const UNLISTED: u32 = 12;
 
 /// The group in the high bits, then a position within the group.
 fn weight(c: char) -> u32 {
+    // The common case first: neither ASCII list holds a letter or a digit.
+    match c {
+        'a'..='z' => return (LATIN << 21) | (u32::from(c) << 1),
+        '0'..='9' => return (DIGIT << 21) | u32::from(c),
+        _ => {}
+    }
     if let Some(letter) = small_capital(c) {
         return weight(letter) | 1;
     }
@@ -122,9 +132,28 @@ fn weight(c: char) -> u32 {
     let position = match group {
         SYMBOL => code + 0x80,
         LATIN => code << 1,
+        KANA => kana_sound(code),
         _ => code,
     };
     (group << 21) | position
+}
+
+/// Kana sort by sound: katakana with the hiragana of the same sound, and small kana right
+/// after their full-size letter (`ア`, `カ`, `グ`, `チ`, `や` on ploxty's library). Voicing marks are combining
+/// characters after NFKD and already dropped.
+fn kana_sound(code: u32) -> u32 {
+    let hiragana = match code {
+        0x30A1..=0x30F6 => code - 0x60,
+        other => other,
+    };
+    let full = match hiragana {
+        0x3041 | 0x3043 | 0x3045 | 0x3047 | 0x3049 | 0x3063 | 0x3083 | 0x3085 | 0x3087
+        | 0x308E => Some(hiragana + 1),
+        0x3095 => Some(0x304B),
+        0x3096 => Some(0x3051),
+        _ => None,
+    };
+    full.map_or(hiragana << 1, |full| (full << 1) | 1)
 }
 
 /// Emoji added in Unicode 11 or later. Observed: `🥵` (Unicode 11) sorts after every name,
@@ -224,8 +253,13 @@ mod tests {
             "ZZZJuice999",
             "Σtella",
             "데이먼스 이어 Damons year",
+            "アイデンティティ／IDENTITY (Cover)",
             "あたらよ",
+            "カミサマ・ネコサマ",
+            "グラサンねこ",
             "コーコーヤ",
+            "チュパカぶる？",
+            "やくしまるえつこ Yakushimaru Etsuko",
             "不優雅（biuya）",
             "久石譲",
             "🥵😂REAKTION",

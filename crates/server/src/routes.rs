@@ -1,5 +1,6 @@
-//! HTTP routes: the Last.fm API at `/2.0` and `/2.0/`, `/healthz`, the web API at `/app/api`,
-//! the `/api/auth` approval redirect, and the web UI for every other path.
+//! HTTP routes: the Last.fm API at `/2.0` and `/2.0/`, the history export at `/2.0/export`,
+//! `/healthz`, the web API at `/app/api`, the `/api/auth` approval redirect, and the web UI for
+//! every other path.
 
 use std::sync::Arc;
 
@@ -10,7 +11,7 @@ use axum::http::{HeaderMap, HeaderName, HeaderValue, Method, StatusCode, header}
 use axum::response::{IntoResponse, Response};
 use axum::routing::get;
 use bytes::Bytes;
-use lfm_api::Dispatcher;
+use lfm_api::{Dispatcher, Encoding, NDJSON, Reply};
 use lfm_core::Params;
 
 use crate::{App, ui};
@@ -25,12 +26,13 @@ const CORS: [(&str, &str); 3] = [
 /// Where a reply came from: `local`, `cache`, `stale` or `upstream`.
 const SOURCE: &str = "x-mirror-source";
 
-/// The Last.fm API and `/healthz`.
+/// The Last.fm API, the export and `/healthz`.
 pub fn router(dispatcher: Arc<Dispatcher>) -> Router {
     let api = get(api).post(api).options(preflight);
     Router::new()
         .route("/2.0", api.clone())
         .route("/2.0/", api)
+        .route("/2.0/export", get(export).options(preflight))
         .route("/healthz", get(healthz))
         .with_state(dispatcher)
 }
@@ -61,10 +63,33 @@ async fn api(
         status = reply.status,
         "api request"
     );
-    let status = StatusCode::from_u16(reply.status).unwrap_or(StatusCode::INTERNAL_SERVER_ERROR);
-    let mut response = (status, Body::from(reply.body)).into_response();
+    respond(&reply, &headers)
+}
+
+/// Turns a reply into HTTP. Beyond what Last.fm sends, a success carries an `ETag`; a client
+/// that sends `Accept-Encoding` gets the best coding it accepts and `Vary`, and one whose
+/// `If-None-Match` names the body gets a 304 without it. A request with neither header gets
+/// Last.fm's headers and bytes.
+fn respond(reply: &Reply, request: &HeaderMap) -> Response {
+    let accept = text(request, header::ACCEPT_ENCODING);
+    let wanted = accept.map_or(Encoding::Identity, Encoding::negotiate);
+    let (bytes, encoding) = reply.body.encoded(wanted);
+    let not_modified = reply.status == 200
+        && text(request, header::IF_NONE_MATCH).is_some_and(|tags| reply.body.matches(tags));
+    let mut response = if not_modified {
+        StatusCode::NOT_MODIFIED.into_response()
+    } else {
+        let status =
+            StatusCode::from_u16(reply.status).unwrap_or(StatusCode::INTERNAL_SERVER_ERROR);
+        let mut response = (status, Body::from(bytes)).into_response();
+        set(response.headers_mut(), "content-type", &reply.content_type);
+        if let Some(coding) = encoding.header() {
+            let headers = response.headers_mut();
+            headers.insert(header::CONTENT_ENCODING, HeaderValue::from_static(coding));
+        }
+        response
+    };
     let headers = response.headers_mut();
-    set(headers, "content-type", &reply.content_type);
     let replayed = reply
         .headers
         .iter()
@@ -75,8 +100,41 @@ async fn api(
     for (name, value) in &reply.headers {
         set(headers, name, value);
     }
+    if reply.status == 200 {
+        set(headers, "etag", &reply.body.etag(encoding));
+    }
+    if accept.is_some() {
+        headers.insert(header::VARY, HeaderValue::from_static("accept-encoding"));
+    }
     headers.insert(SOURCE, HeaderValue::from_static(reply.source.as_str()));
     response
+}
+
+/// Streams a user's history as NDJSON, one store page at a time. A store failure midway
+/// aborts the response, so a client never takes a cut-off export for a complete one.
+async fn export(State(dispatcher): State<Arc<Dispatcher>>, RawQuery(query): RawQuery) -> Response {
+    let params = Params::new().with_urlencoded(query.unwrap_or_default().as_bytes());
+    let export = match dispatcher.export(&params).await {
+        Ok(export) => export,
+        Err(reply) => return respond(&reply, &HeaderMap::new()),
+    };
+    let chunks = futures_util::stream::unfold(export, |mut export| async move {
+        let chunk = export.next_chunk().await?;
+        let chunk = chunk.map_err(|error| {
+            tracing::error!(%error, "export failed");
+            std::io::Error::other(error)
+        });
+        Some((chunk, export))
+    });
+    let mut response = Body::from_stream(chunks).into_response();
+    let headers = response.headers_mut();
+    headers.insert(header::CONTENT_TYPE, HeaderValue::from_static(NDJSON));
+    add_cors(headers);
+    response
+}
+
+fn text(headers: &HeaderMap, name: header::HeaderName) -> Option<&str> {
+    headers.get(name).and_then(|value| value.to_str().ok())
 }
 
 /// Sets a header from text, skipping one that is not valid HTTP, which only a broken upstream

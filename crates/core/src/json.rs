@@ -18,6 +18,16 @@ pub fn render(response: &Response, out: &mut Vec<u8>) {
     writer.out.push(b'}');
 }
 
+/// Appends `node` as a bare JSON value, without the `{"name": …}` envelope and with `/` left
+/// unescaped: one line of an NDJSON export.
+pub fn render_value(node: &Node, out: &mut Vec<u8>) {
+    Writer {
+        out,
+        escape_slashes: false,
+    }
+    .node(node);
+}
+
 /// Appends an error response to `out`. The classic backend puts `message` before `error`; the
 /// modern one puts `error` first and adds an empty `links` list.
 pub fn render_error(error: &ApiError, style: Style, out: &mut Vec<u8>) {
@@ -45,7 +55,12 @@ pub fn render_error(error: &ApiError, style: Style, out: &mut Vec<u8>) {
 }
 
 enum Entry<'a> {
-    Group { name: &'a str, array: bool },
+    /// Children named `name`; `first` is the index of the first one.
+    Group {
+        name: &'a str,
+        array: bool,
+        first: usize,
+    },
     AttrObject,
     Attr(&'a str, &'a Text),
     Text,
@@ -59,6 +74,17 @@ impl Entry<'_> {
             Self::Text => "#text",
         }
     }
+}
+
+/// Whether a JSON string must escape `byte`: controls, `"`, `\\`, and `/` where Last.fm writes
+/// `\\/`.
+fn needs_escape(byte: u8, slash: bool) -> bool {
+    byte < 0x20 || byte == b'"' || byte == b'\\' || (slash && byte == b'/')
+}
+
+/// Name equality, checking the pointer first: names are mostly the same string literals.
+fn same(a: &str, b: &str) -> bool {
+    a.len() == b.len() && (std::ptr::eq(a.as_ptr(), b.as_ptr()) || a == b)
 }
 
 struct Writer<'a> {
@@ -76,6 +102,18 @@ impl Writer<'_> {
                 Some(text) => self.text(text),
                 None => self.out.extend_from_slice(b"\"\""),
             }
+        } else if node.json_order.is_none() {
+            // A leaf with attributes and no declared order, such as an image: attributes,
+            // then the text.
+            self.out.push(b'{');
+            for (name, value) in &node.attrs {
+                self.key(name);
+                self.text(value);
+                self.out.push(b',');
+            }
+            self.key("#text");
+            self.leaf_text(node);
+            self.out.push(b'}');
         } else {
             let mut entries: Vec<Entry<'_>> = node
                 .attrs
@@ -96,20 +134,29 @@ impl Writer<'_> {
             }
             self.key(entry.key());
             match entry {
-                Entry::Group { name, array } => self.group(node, name, *array),
+                Entry::Group { name, array, first } => self.group(node, name, *array, *first),
                 Entry::AttrObject => self.attr_object(node),
                 Entry::Attr(_, value) => self.text(value),
-                Entry::Text => match &node.text {
-                    Some(text) => self.text(text),
-                    None => self.out.extend_from_slice(b"\"\""),
-                },
+                Entry::Text => self.leaf_text(node),
             }
         }
         self.out.push(b'}');
     }
 
-    fn group(&mut self, node: &Node, name: &str, array: bool) {
-        let mut members = node.children.iter().filter(|child| child.name == name);
+    fn leaf_text(&mut self, node: &Node) {
+        match &node.text {
+            Some(text) => self.text(text),
+            None => self.out.extend_from_slice(b"\"\""),
+        }
+    }
+
+    fn group(&mut self, node: &Node, name: &str, array: bool, first: usize) {
+        let mut members = node
+            .children
+            .get(first..)
+            .unwrap_or_default()
+            .iter()
+            .filter(|child| same(&child.name, name));
         if !array {
             if let Some(only) = members.next() {
                 self.node(only);
@@ -158,63 +205,73 @@ impl Writer<'_> {
     }
 
     fn string(&mut self, s: &str) {
+        let slash = self.escape_slashes;
+        let bytes = s.as_bytes();
+        self.out.reserve(bytes.len() + 2);
         self.out.push(b'"');
         let mut start = 0;
-        for (i, byte) in s.bytes().enumerate() {
-            let escaped: &[u8] = match byte {
-                b'"' => b"\\\"",
-                b'\\' => b"\\\\",
-                b'/' if self.escape_slashes => b"\\/",
-                b'\n' => b"\\n",
-                b'\r' => b"\\r",
-                b'\t' => b"\\t",
-                0x08 => b"\\b",
-                0x0c => b"\\f",
-                0..0x20 => {
-                    self.out
-                        .extend_from_slice(s.as_bytes().get(start..i).unwrap_or_default());
-                    self.out
-                        .extend_from_slice(format!("\\u{byte:04x}").as_bytes());
-                    start = i + 1;
-                    continue;
-                }
-                _ => continue,
-            };
-            self.out
-                .extend_from_slice(s.as_bytes().get(start..i).unwrap_or_default());
-            self.out.extend_from_slice(escaped);
-            start = i + 1;
+        for (i, &byte) in bytes.iter().enumerate() {
+            if needs_escape(byte, slash) {
+                self.out
+                    .extend_from_slice(bytes.get(start..i).unwrap_or_default());
+                self.escape(byte);
+                start = i + 1;
+            }
         }
         self.out
-            .extend_from_slice(s.as_bytes().get(start..).unwrap_or_default());
+            .extend_from_slice(bytes.get(start..).unwrap_or_default());
         self.out.push(b'"');
+    }
+
+    fn escape(&mut self, byte: u8) {
+        let escaped: &[u8] = match byte {
+            b'"' => b"\\\"",
+            b'\\' => b"\\\\",
+            b'/' => b"\\/",
+            b'\n' => b"\\n",
+            b'\r' => b"\\r",
+            b'\t' => b"\\t",
+            0x08 => b"\\b",
+            0x0c => b"\\f",
+            _ => {
+                self.out
+                    .extend_from_slice(format!("\\u{byte:04x}").as_bytes());
+                return;
+            }
+        };
+        self.out.extend_from_slice(escaped);
     }
 }
 
 /// Child groups in order of first appearance, then `"@attr"` when there are attributes.
 fn object_entries(node: &Node) -> Vec<Entry<'_>> {
-    let mut entries: Vec<Entry<'_>> = Vec::new();
-    for child in &node.children {
-        let seen = entries.iter().any(|e| e.key() == child.name);
-        if !seen {
-            let repeats = node
-                .children
-                .iter()
-                .filter(|c| c.name == child.name)
-                .nth(1)
-                .is_some();
-            let declared = node.arrays.contains(&child.name);
-            entries.push(Entry::Group {
+    let mut entries: Vec<Entry<'_>> = Vec::with_capacity(node.children.len().min(16) + 1);
+    for (index, child) in node.children.iter().enumerate() {
+        // Repeated children are usually adjacent, so the last group is checked first.
+        let group = entries
+            .iter_mut()
+            .rev()
+            .find(|entry| same(entry.key(), &child.name));
+        match group {
+            Some(Entry::Group { array, .. }) => *array = true,
+            _ => entries.push(Entry::Group {
                 name: &child.name,
-                array: repeats || declared,
-            });
+                array: false,
+                first: index,
+            }),
+        }
+    }
+    for entry in &mut entries {
+        if let Entry::Group { name, array, .. } = entry {
+            *array |= node.arrays.iter().any(|declared| same(declared, name));
         }
     }
     for declared in &node.arrays {
-        if !entries.iter().any(|e| e.key() == declared) {
+        if !entries.iter().any(|e| same(e.key(), declared)) {
             entries.push(Entry::Group {
                 name: declared,
                 array: true,
+                first: node.children.len(),
             });
         }
     }
@@ -226,10 +283,10 @@ fn object_entries(node: &Node) -> Vec<Entry<'_>> {
 
 fn order<'a>(node: &Node, mut entries: Vec<Entry<'a>>) -> Vec<Entry<'a>> {
     if let Some(order) = node.json_order {
-        entries.sort_by_key(|entry| {
+        entries.sort_by_cached_key(|entry| {
             order
                 .iter()
-                .position(|key| *key == entry.key())
+                .position(|key| same(key, entry.key()))
                 .unwrap_or(usize::MAX)
         });
     }

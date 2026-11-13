@@ -9,16 +9,13 @@ use lfm_store::Store;
 use lfm_sync::SyncService;
 use lfm_upstream::Client;
 
+use crate::attempts::Attempts;
+use crate::auth_states::AuthStates;
 use crate::config::WebConfig;
 use crate::crypto::Vault;
+use crate::demo::Demo;
+use crate::error::WebError;
 use crate::password::Passwords;
-use crate::throttle::Throttle;
-
-/// Failed logins allowed per IP, and per username, within [`LOGIN_WINDOW`].
-const LOGINS_PER_IP: u32 = 30;
-const LOGINS_PER_NAME: u32 = 10;
-/// The rate-limit window in seconds.
-const LOGIN_WINDOW: i64 = 900;
 
 /// The handlers' shared state. Cheap to clone.
 #[derive(Debug, Clone)]
@@ -33,10 +30,12 @@ pub(crate) struct Inner {
     pub(crate) vault: Vault,
     pub(crate) passwords: Passwords,
     pub(crate) config: WebConfig,
-    /// Failed logins and sign-ups per client IP.
-    pub(crate) ip_attempts: Throttle,
-    /// Failed logins per username, the web form and `auth.getMobileSession` together.
-    pub(crate) name_attempts: Throttle,
+    /// The speed comparison, when configured.
+    demo: Option<Demo>,
+    /// Limits on password guessing, the web form and `auth.getMobileSession` together.
+    pub(crate) attempts: Attempts,
+    /// Started Last.fm web auth flows.
+    pub(crate) auth_states: AuthStates,
 }
 
 impl AppState {
@@ -49,9 +48,21 @@ impl AppState {
             vault: parts.vault,
             passwords: parts.passwords,
             config: parts.config,
-            ip_attempts: Throttle::new(LOGINS_PER_IP, LOGIN_WINDOW),
-            name_attempts: Throttle::new(LOGINS_PER_NAME, LOGIN_WINDOW),
+            demo: parts.demo,
+            attempts: Attempts::new(),
+            auth_states: AuthStates::default(),
         }))
+    }
+
+    /// The speed comparison, or an error when this instance has none.
+    pub(crate) fn demo(&self) -> Result<&Demo, WebError> {
+        self.demo.as_ref().ok_or_else(|| {
+            WebError::new(
+                axum::http::StatusCode::SERVICE_UNAVAILABLE,
+                "demo_unavailable",
+                "The speed comparison needs a Last.fm API key on this server.",
+            )
+        })
     }
 
     /// Reloads the dispatcher's key map, so a new, revoked or disabled key takes effect now
@@ -73,6 +84,7 @@ pub(crate) struct Parts {
     pub(crate) vault: Vault,
     pub(crate) passwords: Passwords,
     pub(crate) config: WebConfig,
+    pub(crate) demo: Option<Demo>,
 }
 
 impl Deref for AppState {

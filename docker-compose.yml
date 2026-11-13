@@ -4,13 +4,16 @@ services:
     build: .
     image: lfm-mirror
     restart: unless-stopped
+    # Reachable from this machine only, for a reverse proxy in front. To serve other machines
+    # directly, publish "3055:3055" instead.
     ports:
-      - "8080:8080"
+      - "127.0.0.1:3055:3055"
     volumes:
       - lfm-data:/data
     environment:
-      # Last.fm API keys for imports and live sync, comma separated.
-      LASTFM_API_KEYS: ${LASTFM_API_KEYS:?set LASTFM_API_KEYS}
+      # Last.fm API keys for imports, live sync and the catalogue cache, comma separated.
+      # Optional: without them every account must enter its own Last.fm key.
+      LASTFM_API_KEYS: ${LASTFM_API_KEYS:-}
       # Shared secret of the first key: lets users connect Last.fm and forward scrobbles.
       LASTFM_API_SECRET: ${LASTFM_API_SECRET:-}
       # Where browsers reach the server; needed behind a reverse proxy for the Last.fm callback.
