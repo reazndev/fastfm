@@ -89,7 +89,9 @@ one upstream call. Everything after that is local.
   embedded in the binary with `rust-embed`. Screens: sign up and log in, Last.fm link and import
   status, API keys, app authorisation, admin (users, approvals, settings), and a speed
   comparison with Last.fm (`/demo`).
-- **Docker** image with one volume at `/data`. Config through environment variables.
+- **Docker** image with one volume at `/data`. Config through environment variables. After CI
+  passes on `main`, the `Image` workflow publishes it as `ghcr.io/reazndev/fastfm`, tagged
+  `latest` and with the short commit SHA.
 
 Rust compiles slowly, so the workspace is split into crates (`core`, `store`, `upstream`,
 `sync`, `api`, `web`, `server`, plus the `conformance` harness and the fixture `recorder`) to
