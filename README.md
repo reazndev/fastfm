@@ -37,6 +37,9 @@ docker run -d --name fastfm -p 3055:3055 -v fastfm-data:/data \
   ghcr.io/reazndev/fastfm
 ```
 
+Or with Compose: copy [.env.example](.env.example) to `.env`, fill it in, and run
+`docker compose up -d`.
+
 1. Open <http://localhost:3055/> and sign up. The first account becomes the admin.
 2. Enter your Last.fm username on the home page. The import runs in the background.
 3. Create a key under **API keys**, then point your app at `http://HOST:3055/2.0/`.

@@ -1,0 +1,24 @@
+# Copy .env.example to .env next to this file and fill it in; never commit .env.
+# `docker compose up -d` pulls the published image; add `--build` to build this checkout.
+services:
+  fastfm:
+    image: ghcr.io/reazndev/fastfm:latest
+    build: .
+    restart: unless-stopped
+    # Reachable from this machine only, for a reverse proxy in front. To serve other machines
+    # directly, publish "3055:3055" instead.
+    ports:
+      - "127.0.0.1:3055:3055"
+    volumes:
+      - lfm-data:/data
+    environment:
+      LASTFM_API_KEYS: ${LASTFM_API_KEYS:-}
+      LASTFM_API_SECRET: ${LASTFM_API_SECRET:-}
+      LFM_SETUP_TOKEN: ${LFM_SETUP_TOKEN:-}
+      LFM_PUBLIC_URL: ${LFM_PUBLIC_URL:-}
+      LFM_TRUST_PROXY: ${LFM_TRUST_PROXY:-false}
+      LFM_SECURE_COOKIES: ${LFM_SECURE_COOKIES:-auto}
+      RUST_LOG: ${RUST_LOG:-info}
+
+volumes:
+  lfm-data:

@@ -93,7 +93,7 @@ and serves waiting clients before sync, import and pre-warm.
 ## Data directory
 
 Everything lives in `LFM_DATA_DIR` (`/data` in the Docker image, a volume in
-[docker-compose.yml](../docker-compose.yml)).
+[compose.yaml](../compose.yaml)).
 
 | File | Contents |
 |---|---|
