@@ -12,7 +12,7 @@ name = "lfm-record"
 path = "src/main.rs"
 
 [dependencies]
-lfm-upstream = { path = "../upstream" }
+lfm-upstream = { path = "../upstream", version = "0.1.0" }
 serde_json = { version = "1.0.154", features = ["preserve_order"] }
 thiserror = "2.0.21"
 tokio = { version = "1.47.1", features = ["fs", "macros", "rt-multi-thread", "time"] }
