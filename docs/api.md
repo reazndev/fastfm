@@ -171,3 +171,31 @@ missing `sk` or `api_sig` (6), bad signature (13), then the session key (9).
 | 29 | Last.fm rate limit exceeded and nothing cached | 429 |
 
 Errors returned by Last.fm for pass-through methods are replayed as Last.fm sent them.
+
+## Limits and known differences
+
+- Catalogue answers can be as old as their cache lifetime (1 hour for charts, up to 30 days for
+  similar artists and top lists). See this page for each method.
+- `user.getFriends`, `user.getTopTags` and `user.getPersonalTags` are not computed locally. They
+  are forwarded to Last.fm and cached for 5 minutes.
+- Tag writes (`addTags`, `removeTag`) and other methods not listed on this page answer error 3.
+- Album counts can differ slightly from Last.fm. Last.fm files some scrobbles under an album
+  artist that no API response shows; in the test account 11 of 6,198 albums get no plays
+  locally. Every listed album and play count still matches.
+- Some Last.fm values change between two identical calls: global counters, a few MusicBrainz ids
+  that flip between two values, and the order of hourly charts and search results. The mirror
+  cannot match these exactly. [conformance/ignore.toml](../conformance/ignore.toml) lists each one
+  with its reason.
+- A scrobble edited on Last.fm without changing the count of its time slice is not detected.
+- Scrobbles older than 14 days or more than a day in the future are ignored, as on Last.fm.
+- Some response details have no recorded Last.fm example yet: a successful scrobble, the session
+  response, and the now-playing item. They follow Last.fm's documentation.
+
+[fixtures/NOTES.md](../fixtures/NOTES.md) records what Last.fm actually does, including where it
+contradicts its own documentation.
+
+### Last.fm API terms
+
+Last.fm's API terms limit how API data may be stored and used. A personal mirror of your own
+listening history is the intended use. If you run a public instance for other people, you are
+responsible for staying within Last.fm's terms.

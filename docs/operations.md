@@ -1,8 +1,94 @@
 # Operations
 
 How to run lfm-mirror for real: what it stores, how to back it up and upgrade it, how to put it
-behind HTTPS, and what it costs in disk, memory and Last.fm requests. The configuration table is
-in the [README](../README.md#configuration).
+behind HTTPS, and what it costs in disk, memory and Last.fm requests.
+
+## Configuration
+
+Settings come from environment variables. The server also reads a `.env` file in its working
+directory for any variable the environment does not set.
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `LFM_BIND` | `0.0.0.0:3055` | Address and port to listen on. |
+| `LFM_DATA_DIR` | `/data` | Directory for the database and `secrets.key`. |
+| `LFM_DB` | `lfm.db` in the data directory | Path of the SQLite database. |
+| `LASTFM_API_KEYS` | none | Last.fm API keys, comma separated: the instance key pool for imports, sync, the catalogue cache and the speed page. Without keys, only accounts with their own key can sync, and a catalogue request not yet cached uses the own key of the account behind the calling API key (error 16 when it has none). |
+| `LASTFM_API_SECRET` | none | Shared secret of the first key in `LASTFM_API_KEYS`. Needed for Last.fm web auth and forwarded writes of accounts without their own key. |
+| `LFM_PUBLIC_URL` | none | Where browsers reach the instance, such as `https://fm.example.org`. Used for the Last.fm web auth callback; without it the request's `Host` header is used. |
+| `LFM_TRUST_PROXY` | `false` | Trust `X-Forwarded-For` and `X-Forwarded-Proto` from a reverse proxy. The login rate limit then uses the rightmost `X-Forwarded-For` entry, the one the proxy added. Leave off when clients connect directly. |
+| `LFM_SETUP_TOKEN` | none | When set, the first sign-up must give this token to become the admin. The sign-up screen asks for it while no account exists. |
+| `LFM_SECURE_COOKIES` | `auto` | `auto`, `always` or `never`. `auto` sets `Secure` on the login cookie when `LFM_PUBLIC_URL` is HTTPS, or else when the request came over HTTPS. |
+| `LFM_CACHE_MB` | `128` | Memory for rendered responses and their compressed copies, in MiB. `0` turns the response cache off. |
+| `LFM_DB_READERS` | one per CPU | SQLite read connections, each on its own thread. |
+| `LFM_DB_CACHE_MB` | `8` | SQLite page cache per connection, in MiB. |
+| `LFM_DB_MMAP_MB` | `0` | SQLite memory map per connection, in MiB. |
+| `LFM_PREWARM_RANKS` | `2000` | How many of a user's top artists, albums and tracks get `getInfo` fetched ahead of time. |
+| `LFM_PREWARM_INTERVAL_MS` | `1000` | Pause after each pre-warm call. |
+| `LFM_DEMO_MAX_SCROBBLES` | `2000000` | Largest history the speed page will import for a user who is not mirrored. |
+| `RUST_LOG` | `info` | Log filter, in `tracing` syntax. |
+| `LFM_FOLLOW` | none | Development: Last.fm users to import and keep in sync besides linked ones. |
+| `LFM_NOW` | none | Development and tests: freeze the clock at this Unix time. Turns sync off. |
+| `LFM_DEV_API_KEY`, `LFM_DEV_API_SECRET` | none | Development and tests: register one read-write API key in memory. The secret defaults to the key. |
+
+## Accounts and access
+
+**Sign-up modes.** The admin picks one under **Admin**: `approval` (the default; new accounts
+wait for an admin), `open`, or `closed`. A pending account can log in but cannot link Last.fm or
+create API keys. Admins can approve, reject, disable and re-enable accounts and change roles.
+
+**API keys.** Each account creates its own keys on the **API keys** page: 32 hex characters with
+a 32-character shared secret, the same format Last.fm uses. A key is read-only or read and
+write. Any valid key can read any user this instance mirrors, as on Last.fm. Revoking a key ends
+every session issued to it.
+
+**Your own Last.fm key.** Under **Settings** an account can enter its own Last.fm API key and
+shared secret. Its import, live sync and forwarded writes then use that key instead of the
+instance pool, and on an instance without a pool so do catalogue requests made with the
+account's API keys. The secret is encrypted at rest with `secrets.key`.
+
+**Private profiles.** Last.fm refuses to list the scrobbles of a private profile (error 17). The
+import then fails with a message and is retried once a day, in case the profile becomes public.
+
+## What runs where
+
+```
+ Last.fm client --> /2.0/ --> dispatcher (lfm-api)
+                                 |
+                                 +-- user.*, library.* ----> response cache --> SQLite (lfm-store)
+                                 |
+                                 +-- catalogue reads ------> read-through cache --+
+                                 |                           (SQLite + memory)    |
+                                 +-- track.* writes -------> local write + outbox -+
+                                                                                  |
+ browser -------> /app/api (lfm-web): accounts, API keys, Last.fm link            |
+                                                                                  v
+ lfm-sync: import, live sync, reconcile, enrichment --> lfm-upstream --> Last.fm
+ pre-warm: getInfo for each user's top entities ------>   (rate limit,
+                                                           key pool)
+ lfm-sync writes scrobbles, loved tracks and the library map into SQLite.
+```
+
+- **Import** copies a whole history with `user.getRecentTracks` at 1,000 scrobbles per page,
+  walking eight time ranges in parallel. It saves its place after every window, so a restart
+  resumes. Then it reads the profile, loved tracks and the weekly chart list.
+- **Enrichment** reads the user's all-time top lists to learn which artist, album and track
+  Last.fm counts each scrobble under (corrected artist names, albums filed under their album
+  artist). Local top lists and charts count the same way. It runs after the import and daily.
+- **Live sync** polls each linked user for new scrobbles and the now-playing track: every 10
+  seconds while something plays, backing off to 60 seconds when idle.
+- **Reconcile** compares scrobble counts per time slice with Last.fm once a day and replaces the
+  slices that differ, which catches scrobbles deleted on Last.fm.
+- **Local methods** read SQLite through rollup tables (1, 8 and 64-day buckets), and the
+  rendered bytes are cached per user until the next new scrobble.
+- **Catalogue cache** stores Last.fm's answer byte for byte. An expired answer is served at once
+  and refreshed in the background. **Pre-warm** fetches `getInfo` for each user's most-played
+  entities after the import.
+- **Write-through** stores a scrobble or love locally, answers the client, and forwards it to
+  Last.fm. A failed forward goes to an outbox and is retried with backoff.
+
+Every call to Last.fm goes through `lfm-upstream`, which limits each key to 4 requests per second
+and serves waiting clients before sync, import and pre-warm.
 
 ## Data directory
 
